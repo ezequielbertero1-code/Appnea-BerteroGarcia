@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.berterogarcia.appnea
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

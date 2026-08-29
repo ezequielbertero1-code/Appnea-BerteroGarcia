@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.berterogarcia.appnea
 
 import org.junit.Test
 
