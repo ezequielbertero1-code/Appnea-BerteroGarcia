@@ -11,14 +11,23 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.berterogarcia.appnea.AppDestinations
-import com.berterogarcia.appnea.Greeting
 import com.berterogarcia.appnea.MyApplication
 import com.berterogarcia.appnea.ui.cronometro.CronometroScreen
+import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
+import com.berterogarcia.appnea.ui.cuenta.CuentaViewModel
 import com.berterogarcia.appnea.ui.historial.HistorialScreen
 import com.berterogarcia.appnea.ui.historial.HistorialViewModel
+import com.berterogarcia.appnea.ui.login.LoginScreen
+import com.berterogarcia.appnea.ui.login.LoginViewModel
 import com.berterogarcia.appnea.ui.nuevainmersion.NuevaInmersionScreen
 import com.berterogarcia.appnea.ui.nuevainmersion.NuevaInmersionViewModel
+import com.berterogarcia.appnea.ui.registro.RegistroScreen
+import com.berterogarcia.appnea.ui.registro.RegistroViewModel
 
+//Estas son pantallas que no aparecen en la barra de la app.
+
+const val RUTA_REGISTRO = "registro"
+const val RUTA_LOGIN = "login"
 private const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
 
 @Composable
@@ -30,19 +39,65 @@ fun AppNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = AppDestinations.INICIO.name,
+        startDestination = RUTA_LOGIN,
         modifier = modifier,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None },
         popEnterTransition = { EnterTransition.None },
         popExitTransition = { ExitTransition.None }
     ) {
-        composable(AppDestinations.INICIO.name) {
-            Greeting(name = "Hola")
+
+        //================================LOGIN==========================================
+        composable(RUTA_LOGIN) {
+            val viewModel: LoginViewModel = viewModel(
+                factory = LoginViewModel.Factory(app.usuarioRepository, app.sessionManager)
+            )
+            LoginScreen(
+                viewModel = viewModel,
+                onLoginExitoso = {
+                    navController.navigate(AppDestinations.HISTORIAL.name) {
+                        popUpTo(RUTA_LOGIN) { inclusive = true } // Esto hace que una vez iniciado sesion no pueda volver al login
+                    }
+                },
+                onRegistroClick = { navController.navigate(RUTA_REGISTRO) }
+            )
         }
+
+        //===========================CUENTA-USUARIO============================================
+        composable(AppDestinations.CUENTA.name) {
+            val viewModel: CuentaViewModel = viewModel(
+                factory = CuentaViewModel.Factory(app.sessionManager)
+            )
+            CuentaScreen(
+                viewModel = viewModel,
+                onCerrarSesion = {
+                    navController.navigate(RUTA_LOGIN) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        //================================INICIO================================================
+        composable(AppDestinations.INICIO.name) {
+            Text("Pantalla de inicio") // placeholder, aca iria la primera pagina que ve el usuario.
+        }
+        composable(RUTA_REGISTRO) {
+            val viewModel: RegistroViewModel = viewModel(
+                factory = RegistroViewModel.Factory(app.usuarioRepository)
+            )
+            RegistroScreen(
+                viewModel = viewModel,
+                onRegistroExitoso = { navController.popBackStack() } // vuelve al login para que inicie sesión
+            )
+        }
+
+        //==============================CRONOMETRO=============================================
         composable(AppDestinations.CRONOMETRO.name) {
             CronometroScreen()
         }
+
+        //===============================HISTORIAL=============================================
         composable(AppDestinations.HISTORIAL.name) {
             val viewModel: HistorialViewModel = viewModel(
                 factory = HistorialViewModel.Factory(app.inmersionRepository)
@@ -53,9 +108,8 @@ fun AppNavHost(
                 name = "Eze" // NOMBRE DEL USUARIO
             )
         }
-        composable(AppDestinations.CUENTA.name) {
-            Text("Pantalla de cuenta")
-        }
+
+        //==============================NUEVA-INMERSION=========================================
         composable(RUTA_NUEVA_INMERSION) {
             val viewModel: NuevaInmersionViewModel = viewModel(
                 factory = NuevaInmersionViewModel.Factory(app.inmersionRepository)

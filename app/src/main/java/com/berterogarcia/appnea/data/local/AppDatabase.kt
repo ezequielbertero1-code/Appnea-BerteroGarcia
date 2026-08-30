@@ -6,11 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [InmersionEntity::class], version = 1, exportSchema = false)
+@Database(entities = [InmersionEntity::class, UsuarioEntity::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun inmersionDao(): InmersionDao
-
+    abstract fun usuarioDao(): UsuarioDao
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
 
@@ -32,7 +32,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "app_database"
                 )
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration(true)
                     .build()
                     .also { INSTANCE = it }
             }
