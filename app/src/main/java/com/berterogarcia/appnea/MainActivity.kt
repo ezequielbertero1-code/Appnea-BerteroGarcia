@@ -85,7 +85,7 @@ enum class AppDestinations(
 ) {
     INICIO("Inicio", R.drawable.ic_inicio),
     CRONOMETRO("Cronometro", R.drawable.ic_cronometro),
-    HISTORIAL("Historial", R.drawable.ic_cronometro), // cambiar icono
+    APNEA("Apnea", R.drawable.ic_apnea), // cambiar icono
     CUENTA("Cuenta", R.drawable.ic_cuenta),
 }
 

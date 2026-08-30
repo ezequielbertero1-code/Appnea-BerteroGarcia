@@ -24,8 +24,8 @@ import com.berterogarcia.appnea.ui.nuevainmersion.NuevaInmersionViewModel
 import com.berterogarcia.appnea.ui.registro.RegistroScreen
 import com.berterogarcia.appnea.ui.registro.RegistroViewModel
 
-//Estas son pantallas que no aparecen en la barra de la app.
 
+//Estas son pantallas que no aparecen en la barra de la app.
 const val RUTA_REGISTRO = "registro"
 const val RUTA_LOGIN = "login"
 private const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
@@ -55,7 +55,7 @@ fun AppNavHost(
             LoginScreen(
                 viewModel = viewModel,
                 onLoginExitoso = {
-                    navController.navigate(AppDestinations.HISTORIAL.name) {
+                    navController.navigate(AppDestinations.APNEA.name) {
                         popUpTo(RUTA_LOGIN) { inclusive = true } // Esto hace que una vez iniciado sesion no pueda volver al login
                     }
                 },
@@ -97,8 +97,8 @@ fun AppNavHost(
             CronometroScreen()
         }
 
-        //===============================HISTORIAL=============================================
-        composable(AppDestinations.HISTORIAL.name) {
+        //===============================APNEA=============================================
+        composable(AppDestinations.APNEA.name) {
             val viewModel: HistorialViewModel = viewModel(
                 factory = HistorialViewModel.Factory(app.inmersionRepository)
             )
