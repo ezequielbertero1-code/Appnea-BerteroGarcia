@@ -8,25 +8,68 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.berterogarcia.appnea.R
 
 @Composable
 fun CronometroScreen(
     modifier: Modifier = Modifier,
-    viewModel: CronometroViewModel = viewModel()
+    cronometroViewModel: CronometroViewModel = viewModel(),
+    entrenamientoViewModel: EntrenamientoApneaViewModel
+) {
+    var pestaniaSeleccionada by rememberSaveable { mutableIntStateOf(0) }
+    val titulos = listOf("Libre", "Entrenamiento")
+
+    Column(modifier = modifier.fillMaxSize()) {
+        TabRow(selectedTabIndex = pestaniaSeleccionada) {
+            titulos.forEachIndexed { index, titulo ->
+                Tab(
+                    selected = pestaniaSeleccionada == index,
+                    onClick = { pestaniaSeleccionada = index },
+                    text = { Text(titulo) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(
+                                if (index == 0) R.drawable.ic_cronometro else R.drawable.ic_entrenamiento
+                            ),
+                            contentDescription = titulo
+                        )
+                    }
+                )
+            }
+        }
+        when (pestaniaSeleccionada) {
+            0 -> CronometroLibre(modifier = Modifier.fillMaxSize(), viewModel = cronometroViewModel)
+            1 -> EntrenamientoApneaScreen(modifier = Modifier.fillMaxSize(), viewModel = entrenamientoViewModel)
+        }
+    }
+}
+
+@Composable
+private fun CronometroLibre(
+    modifier: Modifier = Modifier,
+    viewModel: CronometroViewModel
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

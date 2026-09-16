@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.MyApplication
 import com.berterogarcia.appnea.ui.cronometro.CronometroScreen
+import com.berterogarcia.appnea.ui.cronometro.EntrenamientoApneaViewModel
 import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
 import com.berterogarcia.appnea.ui.cuenta.CuentaViewModel
 import com.berterogarcia.appnea.ui.historial.HistorialScreen
@@ -94,7 +95,14 @@ fun AppNavHost(
 
         //==============================CRONOMETRO=============================================
         composable(AppDestinations.CRONOMETRO.name) {
-            CronometroScreen()
+            val entrenamientoViewModel: EntrenamientoApneaViewModel = viewModel(
+                factory = EntrenamientoApneaViewModel.Factory(
+                    app.tablaPersonalizadaRepository,
+                    app.sesionApneaRepository,
+                    app.sonidoManager
+                )
+            )
+            CronometroScreen(entrenamientoViewModel = entrenamientoViewModel)
         }
 
         //===============================APNEA=============================================

@@ -38,4 +38,17 @@ class Converters {
 
     @TypeConverter
     fun toDuration(value: Long): Duration = value.seconds
+
+    // List<Fase> <-> "TIPO:segundos;TIPO:segundos;..." (para las tablas de apnea guardadas)
+    @TypeConverter
+    fun fromFases(value: List<Fase>): String =
+        value.joinToString(";") { "${it.tipo.name}:${it.duracionSegundos}" }
+
+    @TypeConverter
+    fun toFases(value: String): List<Fase> =
+        if (value.isBlank()) emptyList()
+        else value.split(";").map { parte ->
+            val (tipo, segundos) = parte.split(":")
+            Fase(TipoFase.valueOf(tipo), segundos.toInt())
+        }
 }
