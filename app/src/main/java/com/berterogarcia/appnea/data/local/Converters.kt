@@ -51,4 +51,21 @@ class Converters {
             val (tipo, segundos) = parte.split(":")
             Fase(TipoFase.valueOf(tipo), segundos.toInt())
         }
+
+    // List<CapturaPesca> <-> "especie,cantidad,peso;especie,cantidad,peso;..." (peso vacío si no se cargó)
+    @TypeConverter
+    fun fromCapturas(value: List<CapturaPesca>): String =
+        value.joinToString(";") { "${it.especie}\u0001${it.cantidad}\u0001${it.pesoKg ?: ""}" }
+
+    @TypeConverter
+    fun toCapturas(value: String): List<CapturaPesca> =
+        if (value.isBlank()) emptyList()
+        else value.split(";").map { parte ->
+            val partes = parte.split("\u0001")
+            CapturaPesca(
+                especie = partes[0],
+                cantidad = partes[1].toInt(),
+                pesoKg = partes.getOrNull(2)?.takeIf { it.isNotBlank() }?.toDouble()
+            )
+        }
 }

@@ -87,6 +87,8 @@ enum class AppDestinations(
     CRONOMETRO("Cronometro", R.drawable.ic_cronometro),
     APNEA("Apnea", R.drawable.ic_apnea), // cambiar icono
     INFORMACION("Información", R.drawable.ic_informate),
+    PESCA("Pesca", R.drawable.ic_pesca),
+    CLIMA("Clima", R.drawable.ic_clima),
     CUENTA("Cuenta", R.drawable.ic_cuenta),
 }
 

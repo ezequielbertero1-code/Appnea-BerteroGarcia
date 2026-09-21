@@ -18,6 +18,12 @@ import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
 import com.berterogarcia.appnea.ui.cuenta.CuentaViewModel
 import com.berterogarcia.appnea.ui.historial.HistorialScreen
 import com.berterogarcia.appnea.ui.informacion.InformacionScreen
+import com.berterogarcia.appnea.ui.clima.ClimaScreen
+import com.berterogarcia.appnea.ui.clima.ClimaViewModel
+import com.berterogarcia.appnea.ui.pesca.NuevaSalidaPescaScreen
+import com.berterogarcia.appnea.ui.pesca.NuevaSalidaPescaViewModel
+import com.berterogarcia.appnea.ui.pesca.PescaSubmarinaScreen
+import com.berterogarcia.appnea.ui.pesca.PescaSubmarinaViewModel
 import com.berterogarcia.appnea.ui.historial.HistorialViewModel
 import com.berterogarcia.appnea.ui.login.LoginScreen
 import com.berterogarcia.appnea.ui.login.LoginViewModel
@@ -31,6 +37,7 @@ import com.berterogarcia.appnea.ui.registro.RegistroViewModel
 const val RUTA_REGISTRO = "registro"
 const val RUTA_LOGIN = "login"
 private const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
+private const val RUTA_NUEVA_SALIDA_PESCA = "nueva_salida_pesca"
 
 @Composable
 fun AppNavHost(
@@ -109,6 +116,34 @@ fun AppNavHost(
         //=============================INFORMACION==========================================
         composable(AppDestinations.INFORMACION.name) {
             InformacionScreen()
+        }
+
+        //=============================PESCA SUBMARINA======================================
+        composable(AppDestinations.PESCA.name) {
+            val viewModel: PescaSubmarinaViewModel = viewModel(
+                factory = PescaSubmarinaViewModel.Factory(app.salidaPescaRepository)
+            )
+            PescaSubmarinaScreen(
+                viewModel = viewModel,
+                onAgregarClick = { navController.navigate(RUTA_NUEVA_SALIDA_PESCA) }
+            )
+        }
+        composable(RUTA_NUEVA_SALIDA_PESCA) {
+            val viewModel: NuevaSalidaPescaViewModel = viewModel(
+                factory = NuevaSalidaPescaViewModel.Factory(app.salidaPescaRepository, app.applicationContext)
+            )
+            NuevaSalidaPescaScreen(
+                viewModel = viewModel,
+                onGuardado = { navController.popBackStack() }
+            )
+        }
+
+        //================================CLIMA==============================================
+        composable(AppDestinations.CLIMA.name) {
+            val viewModel: ClimaViewModel = viewModel(
+                factory = ClimaViewModel.Factory(app.applicationContext)
+            )
+            ClimaScreen(viewModel = viewModel)
         }
 
         //===============================APNEA=============================================

@@ -12,9 +12,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         InmersionEntity::class,
         UsuarioEntity::class,
         TablaPersonalizadaEntity::class,
-        SesionApneaEntity::class
+        SesionApneaEntity::class,
+        SalidaPescaEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -23,6 +24,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDao
     abstract fun tablaPersonalizadaDao(): TablaPersonalizadaDao
     abstract fun sesionApneaDao(): SesionApneaDao
+    abstract fun salidaPescaDao(): SalidaPescaDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
