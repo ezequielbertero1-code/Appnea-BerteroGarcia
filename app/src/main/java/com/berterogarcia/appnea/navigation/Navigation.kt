@@ -17,6 +17,7 @@ import com.berterogarcia.appnea.ui.cronometro.EntrenamientoApneaViewModel
 import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
 import com.berterogarcia.appnea.ui.cuenta.CuentaViewModel
 import com.berterogarcia.appnea.ui.historial.HistorialScreen
+import com.berterogarcia.appnea.ui.informacion.InformacionScreen
 import com.berterogarcia.appnea.ui.historial.HistorialViewModel
 import com.berterogarcia.appnea.ui.login.LoginScreen
 import com.berterogarcia.appnea.ui.login.LoginViewModel
@@ -103,6 +104,11 @@ fun AppNavHost(
                 )
             )
             CronometroScreen(entrenamientoViewModel = entrenamientoViewModel)
+        }
+
+        //=============================INFORMACION==========================================
+        composable(AppDestinations.INFORMACION.name) {
+            InformacionScreen()
         }
 
         //===============================APNEA=============================================
