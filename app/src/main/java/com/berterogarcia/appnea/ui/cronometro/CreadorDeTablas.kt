@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -22,11 +22,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.data.local.Fase
 import com.berterogarcia.appnea.data.local.TablaApnea
 import com.berterogarcia.appnea.data.local.TipoFase
 import com.berterogarcia.appnea.data.local.formatearDuracion
+import com.berterogarcia.appnea.ui.components.CampoTexto
 
 @Composable
 fun CreadorDeTablas(
@@ -47,10 +49,10 @@ fun CreadorDeTablas(
 
         if (expandido) {
             Column(modifier = Modifier.padding(8.dp)) {
-                OutlinedTextField(
-                    value = nombre,
-                    onValueChange = { nombre = it },
-                    label = { Text("Nombre de la tabla") },
+                CampoTexto(
+                    valor = nombre,
+                    onValorChange = { nombre = it },
+                    etiqueta = "Nombre de la tabla",
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -79,17 +81,19 @@ fun CreadorDeTablas(
 
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        value = minutosTexto,
-                        onValueChange = { minutosTexto = it.filter { c -> c.isDigit() } },
-                        label = { Text("Min") },
+                    CampoTexto(
+                        valor = minutosTexto,
+                        onValorChange = { minutosTexto = it.filter { c -> c.isDigit() } },
+                        etiqueta = "Min",
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.width(80.dp)
                     )
                     Spacer(Modifier.width(8.dp))
-                    OutlinedTextField(
-                        value = segundosTexto,
-                        onValueChange = { segundosTexto = it.filter { c -> c.isDigit() } },
-                        label = { Text("Seg") },
+                    CampoTexto(
+                        valor = segundosTexto,
+                        onValorChange = { segundosTexto = it.filter { c -> c.isDigit() } },
+                        etiqueta = "Seg",
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.width(80.dp)
                     )
                     Spacer(Modifier.width(8.dp))

@@ -1,6 +1,5 @@
 package com.berterogarcia.appnea.ui.cronometro
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,13 +21,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,9 +36,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.SesionApneaEntity
 import com.berterogarcia.appnea.data.local.TablaApnea
-import com.berterogarcia.appnea.data.local.TablaPersonalizadaEntity
 import com.berterogarcia.appnea.data.local.TipoFase
 import com.berterogarcia.appnea.data.local.formatearDuracion
+import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.CheckboxGroup
 
 @Composable
@@ -135,9 +134,15 @@ private fun TablaOpcionCard(
             .padding(vertical = 4.dp)
             .clickable { onClick() },
         colors = if (seleccionada) {
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            CardDefaults.cardColors(
+                containerColor = Color(0xFF245E82),
+                contentColor = Color.White
+            )
         } else {
-            CardDefaults.cardColors()
+            CardDefaults.cardColors(
+                containerColor = Color(0xFF03141F),
+                contentColor = Color.White
+            )
         }
     ) {
         Row(
@@ -232,10 +237,10 @@ private fun GuardandoContenido(
             )
 
             Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
-                value = uiState.sensaciones,
-                onValueChange = viewModel::onSensacionesChange,
-                label = { Text("¿Cómo te sentiste?") },
+            CampoTexto(
+                valor = uiState.sensaciones,
+                onValorChange = viewModel::onSensacionesChange,
+                etiqueta = "¿Cómo te sentiste?",
                 minLines = 3,
                 modifier = Modifier.fillMaxWidth()
             )

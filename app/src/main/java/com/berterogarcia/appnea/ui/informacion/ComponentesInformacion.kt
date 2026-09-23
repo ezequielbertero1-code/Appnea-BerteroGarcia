@@ -36,7 +36,11 @@ fun TarjetaInfo(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp)
+            .padding(bottom = 12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF03141F),
+            contentColor = Color.White
+        )
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text(
@@ -138,7 +142,11 @@ fun ImagenIlustrativa(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp)
+            .padding(bottom = 12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF03141F),
+            contentColor = Color.White
+        )
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
             Image(

@@ -2,37 +2,37 @@ package com.berterogarcia.appnea.ui.informacion
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import com.berterogarcia.appnea.R
+import kotlinx.coroutines.launch
 
-/**
- * Pantalla de Información: contenido básico de referencia sobre Apnea/Freediving y
- * Buceo autónomo (Scuba Open Water), con imágenes ilustrativas y prevención de
- * accidentes intercalada en cada tema.
- *
- * Es contenido estático (no depende de un ViewModel ni de la base de datos).
- */
 @Composable
 fun InformacionScreen(modifier: Modifier = Modifier) {
-    var pestaniaSeleccionada by rememberSaveable { mutableIntStateOf(0) }
     val titulos = listOf("Apnea", "Buceo")
+    val pagerState = rememberPagerState(initialPage = 0) { titulos.size }
+    val scope = rememberCoroutineScope()
 
     Column(modifier = modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = pestaniaSeleccionada) {
+        SecondaryTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = Color.Transparent
+        ) {
             titulos.forEachIndexed { index, titulo ->
                 Tab(
-                    selected = pestaniaSeleccionada == index,
-                    onClick = { pestaniaSeleccionada = index },
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        scope.launch { pagerState.animateScrollToPage(index) }
+                    },
                     text = { Text(titulo) },
                     icon = {
                         Icon(
@@ -45,9 +45,14 @@ fun InformacionScreen(modifier: Modifier = Modifier) {
                 )
             }
         }
-        when (pestaniaSeleccionada) {
-            0 -> ContenidoApnea(modifier = Modifier.fillMaxSize())
-            1 -> ContenidoBuceo(modifier = Modifier.fillMaxSize())
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            when (page) {
+                0 -> ContenidoApnea(modifier = Modifier.fillMaxSize())
+                1 -> ContenidoBuceo(modifier = Modifier.fillMaxSize())
+            }
         }
     }
 }

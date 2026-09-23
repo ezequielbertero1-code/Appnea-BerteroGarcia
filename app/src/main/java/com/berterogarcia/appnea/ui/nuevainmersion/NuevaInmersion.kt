@@ -8,7 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +20,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.CheckboxGroup
 import com.berterogarcia.appnea.ui.components.DatePickerField
 import com.berterogarcia.appnea.ui.components.TimePickerField
@@ -79,49 +79,43 @@ fun NuevaInmersionScreen(
             modifier = Modifier.fillMaxWidth()
         )
         // LUGAR
-        OutlinedTextField(
-            value = uiState.lugar,
-            onValueChange = viewModel::onLugarChange,
-            label = { Text("Lugar") },
-            isError = uiState.errores.containsKey(Campo.LUGAR),
-            supportingText = {
-                uiState.errores[Campo.LUGAR]?.let { Text(it) }
-            },
+        CampoTexto(
+            valor = uiState.lugar,
+            onValorChange = viewModel::onLugarChange,
+            etiqueta = "Lugar",
+            esError = uiState.errores.containsKey(Campo.LUGAR),
+            mensajeError = uiState.errores[Campo.LUGAR] ?: "",
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // PROFUNDIDAD MAXIMA
-        OutlinedTextField(
-            value = uiState.profundidadMetros,
-            onValueChange = viewModel::onProfundidadChange,
-            label = { Text("Profundidad máxima (m)") },
-            isError = uiState.errores.containsKey(Campo.PROFUNDIDAD),
-            supportingText = {
-                uiState.errores[Campo.PROFUNDIDAD]?.let { Text(it) }
-            },
+        CampoTexto(
+            valor = uiState.profundidadMetros,
+            onValorChange = viewModel::onProfundidadChange,
+            etiqueta = "Profundidad máxima (m)",
+            esError = uiState.errores.containsKey(Campo.PROFUNDIDAD),
+            mensajeError = uiState.errores[Campo.PROFUNDIDAD] ?: "",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // PARADA DE SEGURIDAD
-        OutlinedTextField(
-            value = uiState.paradaSeguridadMin,
-            onValueChange = viewModel::onParadaChange,
-            label = { Text("Parada de seguridad (min)") },
-            isError = uiState.errores.containsKey(Campo.PARADA),
-            supportingText = {
-                uiState.errores[Campo.PARADA]?.let { Text(it)}
-            },
+        CampoTexto(
+            valor = uiState.paradaSeguridadMin,
+            onValorChange = viewModel::onParadaChange,
+            etiqueta = "Parada de seguridad (min)",
+            esError = uiState.errores.containsKey(Campo.PARADA),
+            mensajeError = uiState.errores[Campo.PARADA] ?: "",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // TIEMPO DE FONDO
-        OutlinedTextField(
-            value = uiState.tiempoFondo,
-            onValueChange = viewModel::onTiempoFondoChange,
-            label = { Text("Tiempo de fondo (mm:ss)") },
+        CampoTexto(
+            valor = uiState.tiempoFondo,
+            onValorChange = viewModel::onTiempoFondoChange,
+            etiqueta = "Tiempo de fondo (mm:ss)",
             visualTransformation = tiempoFondoVisualTransformation,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            isError = uiState.errores.containsKey(Campo.TIEMPO_FONDO),
-            supportingText = { uiState.errores[Campo.TIEMPO_FONDO]?.let { Text(it) } },
+            esError = uiState.errores.containsKey(Campo.TIEMPO_FONDO),
+            mensajeError = uiState.errores[Campo.TIEMPO_FONDO] ?: "",
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // HORA DE ENTRADA
@@ -150,23 +144,23 @@ fun NuevaInmersionScreen(
             onCambio = viewModel::onAguaToggle
         )
         // LASTRE
-        OutlinedTextField(
-            value = uiState.lastreKg,
-            onValueChange = viewModel::onLastreChange,
-            label = { Text("Lastre (kg)") },
+        CampoTexto(
+            valor = uiState.lastreKg,
+            onValorChange = viewModel::onLastreChange,
+            etiqueta = "Lastre (kg)",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            isError = uiState.errores.containsKey(Campo.LASTRE),
-            supportingText = { uiState.errores[Campo.LASTRE]?.let { Text(it) } },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            esError = uiState.errores.containsKey(Campo.LASTRE),
+            mensajeError = uiState.errores[Campo.LASTRE] ?: "",
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // PROTECCION
-        OutlinedTextField(
-            value = uiState.proteccionMm,
-            onValueChange = viewModel::onProteccionMmChange,
-            label = { Text("Protección (mm)") },
+        CampoTexto(
+            valor = uiState.proteccionMm,
+            onValorChange = viewModel::onProteccionMmChange,
+            etiqueta = "Protección (mm)",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            isError = uiState.errores.containsKey(Campo.PROTECCION),
-            supportingText = { uiState.errores[Campo.PROTECCION]?.let { Text(it) } },
+            esError = uiState.errores.containsKey(Campo.PROTECCION),
+            mensajeError = uiState.errores[Campo.PROTECCION] ?: "",
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // EQUIPAMIENTO
@@ -177,56 +171,50 @@ fun NuevaInmersionScreen(
             onCambio = viewModel::onEquipamientoToggle
         )
         // TEMPERATURA DEL AIRE
-        OutlinedTextField(
-            value = uiState.temperaturaAireC,
-            onValueChange = viewModel::onTempAireChange,
-            isError = uiState.errores.containsKey(Campo.TEMP_AIRE),
-            supportingText = {
-                uiState.errores[Campo.TEMP_AIRE]?.let { Text(it) }
-            },
+        CampoTexto(
+            valor = uiState.temperaturaAireC,
+            onValorChange = viewModel::onTempAireChange,
+            etiqueta = "Temperatura del aire (°C)",
+            esError = uiState.errores.containsKey(Campo.TEMP_AIRE),
+            mensajeError = uiState.errores[Campo.TEMP_AIRE] ?: "",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            label = { Text("Temperatura del aire (°C)") },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // TEMPERATURA DEL AGUA
-        OutlinedTextField(
-            value = uiState.temperaturaAguaC,
-            onValueChange = viewModel::onTempAguaChange,
-            isError = uiState.errores.containsKey(Campo.TEMP_AGUA),
-            supportingText = {
-                uiState.errores[Campo.TEMP_AGUA]?.let { Text(it) }
-            },
+        CampoTexto(
+            valor = uiState.temperaturaAguaC,
+            onValorChange = viewModel::onTempAguaChange,
+            etiqueta = "Temperatura del agua (°C)",
+            esError = uiState.errores.containsKey(Campo.TEMP_AGUA),
+            mensajeError = uiState.errores[Campo.TEMP_AGUA] ?: "",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            label = { Text("Temperatura del agua (°C)") },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // VISIBILIDAD
-        OutlinedTextField(
-            value = uiState.visibilidadMetros,
-            onValueChange = viewModel::onVisibilidadChange,
-            isError = uiState.errores.containsKey(Campo.VISIBILIDAD),
-            supportingText = {
-                uiState.errores[Campo.VISIBILIDAD]?.let { Text(it) }
-            },
+        CampoTexto(
+            valor = uiState.visibilidadMetros,
+            onValorChange = viewModel::onVisibilidadChange,
+            etiqueta = "Visibilidad (m)",
+            esError = uiState.errores.containsKey(Campo.VISIBILIDAD),
+            mensajeError = uiState.errores[Campo.VISIBILIDAD] ?: "",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            label = { Text("Visibilidad (m)") },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // ACTIVIDAD
-        OutlinedTextField(
-            value = uiState.actividad,
-            onValueChange = viewModel::onActividadChange,
-            label = { Text("Actividad") },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            minLines = 3
+        CampoTexto(
+            valor = uiState.actividad,
+            onValorChange = viewModel::onActividadChange,
+            etiqueta = "Actividad",
+            minLines = 3,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // COMENTARIOS
-        OutlinedTextField(
-            value = uiState.comentarios,
-            onValueChange = viewModel::onComentariosChange,
-            label = { Text("Comentarios") },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            minLines = 3
+        CampoTexto(
+            valor = uiState.comentarios,
+            onValorChange = viewModel::onComentariosChange,
+            etiqueta = "Comentarios",
+            minLines = 3,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
         // GUARDAR
         Button(

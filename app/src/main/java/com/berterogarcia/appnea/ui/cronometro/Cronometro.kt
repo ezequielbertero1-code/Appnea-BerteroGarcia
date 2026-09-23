@@ -7,25 +7,26 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berterogarcia.appnea.R
+import kotlinx.coroutines.launch
 
 @Composable
 fun CronometroScreen(
@@ -33,20 +34,26 @@ fun CronometroScreen(
     cronometroViewModel: CronometroViewModel = viewModel(),
     entrenamientoViewModel: EntrenamientoApneaViewModel
 ) {
-    var pestaniaSeleccionada by rememberSaveable { mutableIntStateOf(0) }
-    val titulos = listOf("Libre", "Entrenamiento")
+    val titulos = listOf("Entrenamiento", "Libre")
+    val pagerState = rememberPagerState(initialPage = 0) { titulos.size }
+    val scope = rememberCoroutineScope()
 
     Column(modifier = modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = pestaniaSeleccionada) {
+        SecondaryTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = Color.Transparent
+        ) {
             titulos.forEachIndexed { index, titulo ->
                 Tab(
-                    selected = pestaniaSeleccionada == index,
-                    onClick = { pestaniaSeleccionada = index },
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        scope.launch { pagerState.animateScrollToPage(index) }
+                    },
                     text = { Text(titulo) },
                     icon = {
                         Icon(
                             painter = painterResource(
-                                if (index == 0) R.drawable.ic_cronometro else R.drawable.ic_entrenamiento
+                                if (index == 0) R.drawable.ic_entrenamiento else R.drawable.ic_cronometro
                             ),
                             contentDescription = titulo
                         )
@@ -54,9 +61,14 @@ fun CronometroScreen(
                 )
             }
         }
-        when (pestaniaSeleccionada) {
-            0 -> CronometroLibre(modifier = Modifier.fillMaxSize(), viewModel = cronometroViewModel)
-            1 -> EntrenamientoApneaScreen(modifier = Modifier.fillMaxSize(), viewModel = entrenamientoViewModel)
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            when (page) {
+                0 -> EntrenamientoApneaScreen(modifier = Modifier.fillMaxSize(), viewModel = entrenamientoViewModel)
+                1 -> CronometroLibre(modifier = Modifier.fillMaxSize(), viewModel = cronometroViewModel)
+            }
         }
     }
 }

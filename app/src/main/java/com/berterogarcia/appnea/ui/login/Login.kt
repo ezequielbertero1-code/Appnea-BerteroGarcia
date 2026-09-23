@@ -3,6 +3,7 @@ package com.berterogarcia.appnea.ui.login
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -17,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,10 +45,11 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistr
         Text(
             text = stringResource(R.string.login_greeting),
             fontSize = 42.sp,
+            color = Color.White,
             modifier = Modifier.padding(vertical = 10.dp)
         )
-        CampoTexto(valor = usuario, onValorChange = { usuario = it }, etiqueta = stringResource(R.string.login_username))
-        CampoTexto(valor = password, onValorChange = { password = it }, etiqueta = stringResource(R.string.login_password), esPassword = true)
+        CampoTexto(valor = usuario, onValorChange = { usuario = it }, etiqueta = stringResource(R.string.login_username), modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+        CampoTexto(valor = password, onValorChange = { password = it }, etiqueta = stringResource(R.string.login_password), modifier = Modifier.fillMaxWidth().padding(top = 8.dp), esPassword = true)
         Button(onClick = { viewModel.login(usuario, password) }) {
             Text(stringResource(R.string.login_button))
         }

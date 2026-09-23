@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.theme
 
+/* esto es para el gradiente del fondo */
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -8,7 +9,13 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+
+val fondoApp = Brush.verticalGradient(
+    colors = listOf(Color(0xFF103B53), Color(0xFF03141F))
+)
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,

@@ -7,6 +7,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -17,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +66,29 @@ fun TimePickerField(
                 Icon(Icons.Default.Info, contentDescription = "Elegir hora")
             }
         },
-        modifier = modifier
+        modifier = modifier,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = Color.White.copy(alpha = 0.10f),
+            unfocusedContainerColor = Color.White.copy(alpha = 0.06f),
+            disabledContainerColor = Color.White.copy(alpha = 0.06f),
+            focusedBorderColor = Color(0xFF16F7FB),
+            unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
+            focusedLabelColor = Color(0xFF16F7FB),
+            unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White,
+            disabledTextColor = Color.White,
+            cursorColor = Color(0xFF16F7FB),
+            focusedTrailingIconColor = Color(0xFF16F7FB),
+            unfocusedTrailingIconColor = Color.White.copy(alpha = 0.7f),
+            errorContainerColor = Color.White.copy(alpha = 0.10f),
+            errorBorderColor = Color(0xFFFF6B6B),
+            errorLabelColor = Color(0xFFFF6B6B),
+            errorTextColor = Color.White,
+            errorSupportingTextColor = Color(0xFFFF6B6B),
+            errorCursorColor = Color(0xFFFF6B6B),
+            errorTrailingIconColor = Color(0xFFFF6B6B)
+        )
     )
 
     if (mostrarDialogo) {
