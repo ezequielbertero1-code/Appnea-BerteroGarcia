@@ -46,12 +46,6 @@ fun PescaSubmarinaScreen(
     val salidas by viewModel.salidas.collectAsStateWithLifecycle()
 
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
-        Text(
-            text = "Pesca submarina 🎣",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
         Button(onClick = onAgregarClick, modifier = Modifier.fillMaxWidth()) {
             Text("Cargar nueva salida")
         }

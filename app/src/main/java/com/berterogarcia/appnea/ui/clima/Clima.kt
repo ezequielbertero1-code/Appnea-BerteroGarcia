@@ -8,13 +8,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -40,8 +37,12 @@ import com.berterogarcia.appnea.data.remote.descripcionClima
 import com.berterogarcia.appnea.data.remote.direccionCardinal
 import kotlin.math.roundToInt
 
+/**
+ * Sección de clima y estado del mar. Ya no es una pantalla propia: se muestra dentro
+ * de la pantalla de Inicio, por eso no tiene scroll propio (el scroll lo maneja Inicio).
+ */
 @Composable
-fun ClimaScreen(
+fun ClimaSeccion(
     modifier: Modifier = Modifier,
     viewModel: ClimaViewModel
 ) {
@@ -53,12 +54,7 @@ fun ClimaScreen(
         if (concedido) viewModel.usarMiUbicacion()
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = "📍 ${uiState.ubicacion.nombre ?: "Ubicación seleccionada"}",
             style = MaterialTheme.typography.titleMedium,
@@ -151,7 +147,7 @@ fun ClimaScreen(
                                 color = Color(0xFFE65100)
                             )
                             Text(
-                                "Evaluá siempre las condiciones reales en el lugar antes de entrar al agua, y no salgas a pescar solo.",
+                                "Evaluá siempre las condiciones reales en el lugar antes de entrar al agua, y nunca te metas al agua solo/a.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color(0xFF5D4037)
                             )

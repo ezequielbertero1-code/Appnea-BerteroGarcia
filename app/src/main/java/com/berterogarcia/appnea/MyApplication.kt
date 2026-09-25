@@ -2,6 +2,7 @@ package com.berterogarcia.appnea
 
 import android.app.Application
 import com.berterogarcia.appnea.data.local.AppDatabase
+import com.berterogarcia.appnea.data.local.SeedDatos
 import com.berterogarcia.appnea.data.local.SessionManager
 import com.berterogarcia.appnea.data.local.SonidoManager
 import com.berterogarcia.appnea.data.repository.InmersionRepository
@@ -9,6 +10,10 @@ import com.berterogarcia.appnea.data.repository.SalidaPescaRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.data.repository.TablaPersonalizadaRepository
 import com.berterogarcia.appnea.data.repository.UsuarioRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class MyApplication : Application() {
 
@@ -20,4 +25,14 @@ class MyApplication : Application() {
     val tablaPersonalizadaRepository by lazy { TablaPersonalizadaRepository(database.tablaPersonalizadaDao()) }
     val sesionApneaRepository by lazy { SesionApneaRepository(database.sesionApneaDao()) }
     val salidaPescaRepository by lazy { SalidaPescaRepository(database.salidaPescaDao()) }
+
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun onCreate() {
+        super.onCreate()
+        // Carga datos de ejemplo para el usuario de prueba "Franco" (solo la primera vez).
+        appScope.launch {
+            runCatching { SeedDatos.sembrarSiHaceFalta(this@MyApplication, database) }
+        }
+    }
 }

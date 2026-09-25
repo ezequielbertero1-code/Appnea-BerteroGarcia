@@ -34,7 +34,7 @@ fun CronometroScreen(
     cronometroViewModel: CronometroViewModel = viewModel(),
     entrenamientoViewModel: EntrenamientoApneaViewModel
 ) {
-    val titulos = listOf("Entrenamiento", "Libre")
+    val titulos = listOf("Tablas", "Libre")
     val pagerState = rememberPagerState(initialPage = 0) { titulos.size }
     val scope = rememberCoroutineScope()
 

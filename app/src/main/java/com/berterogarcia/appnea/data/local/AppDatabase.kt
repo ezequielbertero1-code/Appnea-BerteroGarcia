@@ -32,13 +32,15 @@ abstract class AppDatabase : RoomDatabase() {
         // Usuario de prueba: se crea solo la primera vez que se genera la base
         // (instalación nueva o cuando se borra por un cambio de versión/esquema).
         // Login: Franco / Mamalesa21
-        private val SEED_CALLBACK = object : RoomDatabase.Callback() {
+        // Además reinicia la marca de SeedDatos para que se vuelvan a cargar los datos de ejemplo.
+        private fun seedCallback(appContext: Context) = object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
                 db.execSQL(
                     "INSERT INTO usuarios (nombreUsuario, password) VALUES (?, ?)",
-                    arrayOf("Franco", hashearPassword("Mamalesa21"))
+                    arrayOf(SeedDatos.USUARIO_PRUEBA, hashearPassword(SeedDatos.PASSWORD_PRUEBA))
                 )
+                SeedDatos.reiniciarMarca(appContext)
             }
         }
 
@@ -51,7 +53,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "app_database"
                 )
                     .fallbackToDestructiveMigration(true)
-                    .addCallback(SEED_CALLBACK)
+                    .addCallback(seedCallback(context.applicationContext))
                     .build()
                     .also { INSTANCE = it }
             }

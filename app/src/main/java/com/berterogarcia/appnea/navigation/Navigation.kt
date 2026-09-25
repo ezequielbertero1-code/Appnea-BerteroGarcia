@@ -2,36 +2,34 @@ package com.berterogarcia.appnea.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.MyApplication
-import com.berterogarcia.appnea.ui.clima.ClimaScreen
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.cronometro.CronometroScreen
 import com.berterogarcia.appnea.ui.cronometro.EntrenamientoApneaViewModel
 import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
 import com.berterogarcia.appnea.ui.cuenta.CuentaViewModel
-import com.berterogarcia.appnea.ui.historial.HistorialScreen
 import com.berterogarcia.appnea.ui.historial.HistorialViewModel
 import com.berterogarcia.appnea.ui.informacion.InformacionScreen
+import com.berterogarcia.appnea.ui.inicio.InicioScreen
+import com.berterogarcia.appnea.ui.inmersion.InmersionScreen
 import com.berterogarcia.appnea.ui.login.LoginScreen
 import com.berterogarcia.appnea.ui.login.LoginViewModel
 import com.berterogarcia.appnea.ui.nuevainmersion.NuevaInmersionScreen
 import com.berterogarcia.appnea.ui.nuevainmersion.NuevaInmersionViewModel
 import com.berterogarcia.appnea.ui.pesca.NuevaSalidaPescaScreen
 import com.berterogarcia.appnea.ui.pesca.NuevaSalidaPescaViewModel
-import com.berterogarcia.appnea.ui.pesca.PescaSubmarinaScreen
 import com.berterogarcia.appnea.ui.pesca.PescaSubmarinaViewModel
 import com.berterogarcia.appnea.ui.registro.RegistroScreen
 import com.berterogarcia.appnea.ui.registro.RegistroViewModel
-
 
 //Estas son pantallas que no aparecen en la barra de la app.
 const val RUTA_REGISTRO = "registro"
@@ -64,32 +62,12 @@ fun AppNavHost(
             LoginScreen(
                 viewModel = viewModel,
                 onLoginExitoso = {
-                    navController.navigate(AppDestinations.APNEA.name) {
+                    navController.navigate(AppDestinations.INICIO.name) {
                         popUpTo(RUTA_LOGIN) { inclusive = true } // Esto hace que una vez iniciado sesion no pueda volver al login
                     }
                 },
                 onRegistroClick = { navController.navigate(RUTA_REGISTRO) }
             )
-        }
-
-        //===========================CUENTA-USUARIO============================================
-        composable(AppDestinations.CUENTA.name) {
-            val viewModel: CuentaViewModel = viewModel(
-                factory = CuentaViewModel.Factory(app.sessionManager)
-            )
-            CuentaScreen(
-                viewModel = viewModel,
-                onCerrarSesion = {
-                    navController.navigate(RUTA_LOGIN) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        //================================INICIO================================================
-        composable(AppDestinations.INICIO.name) {
-            Text("Pantalla de inicio") // placeholder, aca iria la primera pagina que ve el usuario.
         }
         composable(RUTA_REGISTRO) {
             val viewModel: RegistroViewModel = viewModel(
@@ -101,8 +79,28 @@ fun AppNavHost(
             )
         }
 
-        //==============================CRONOMETRO=============================================
-        composable(AppDestinations.CRONOMETRO.name) {
+        //================================INICIO================================================
+        // Clima del día + explicación de cada ambiente de la app.
+        composable(AppDestinations.INICIO.name) {
+            val climaViewModel: ClimaViewModel = viewModel(
+                factory = ClimaViewModel.Factory(app.applicationContext)
+            )
+            InicioScreen(
+                nombreUsuario = app.sessionManager.obtenerUsuario(),
+                climaViewModel = climaViewModel,
+                onIrA = { destino ->
+                    // Misma navegación que la barra inferior
+                    navController.navigate(destino.name) {
+                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+
+        //==============================ENTRENAMIENTO (antes Cronometro)=========================
+        composable(AppDestinations.ENTRENAMIENTO.name) {
             val entrenamientoViewModel: EntrenamientoApneaViewModel = viewModel(
                 factory = EntrenamientoApneaViewModel.Factory(
                     app.tablaPersonalizadaRepository,
@@ -113,19 +111,28 @@ fun AppNavHost(
             CronometroScreen(entrenamientoViewModel = entrenamientoViewModel)
         }
 
-        //=============================INFORMACION==========================================
-        composable(AppDestinations.INFORMACION.name) {
-            InformacionScreen()
-        }
-
-        //=============================PESCA SUBMARINA======================================
-        composable(AppDestinations.PESCA.name) {
-            val viewModel: PescaSubmarinaViewModel = viewModel(
+        //==============================INMERSION (buceo, apnea y pesca submarina)===============
+        composable(AppDestinations.INMERSION.name) {
+            val historialViewModel: HistorialViewModel = viewModel(
+                factory = HistorialViewModel.Factory(app.inmersionRepository)
+            )
+            val pescaViewModel: PescaSubmarinaViewModel = viewModel(
                 factory = PescaSubmarinaViewModel.Factory(app.salidaPescaRepository)
             )
-            PescaSubmarinaScreen(
+            InmersionScreen(
+                historialViewModel = historialViewModel,
+                pescaViewModel = pescaViewModel,
+                onAgregarInmersion = { navController.navigate(RUTA_NUEVA_INMERSION) },
+                onAgregarSalidaPesca = { navController.navigate(RUTA_NUEVA_SALIDA_PESCA) }
+            )
+        }
+        composable(RUTA_NUEVA_INMERSION) {
+            val viewModel: NuevaInmersionViewModel = viewModel(
+                factory = NuevaInmersionViewModel.Factory(app.inmersionRepository)
+            )
+            NuevaInmersionScreen(
                 viewModel = viewModel,
-                onAgregarClick = { navController.navigate(RUTA_NUEVA_SALIDA_PESCA) }
+                onGuardado = { navController.popBackStack() }
             )
         }
         composable(RUTA_NUEVA_SALIDA_PESCA) {
@@ -138,34 +145,28 @@ fun AppNavHost(
             )
         }
 
-        //================================CLIMA==============================================
-        composable(AppDestinations.CLIMA.name) {
-            val viewModel: ClimaViewModel = viewModel(
-                factory = ClimaViewModel.Factory(app.applicationContext)
-            )
-            ClimaScreen(viewModel = viewModel)
+        //=============================APRENDER (antes Informacion)==========================
+        composable(AppDestinations.APRENDER.name) {
+            InformacionScreen()
         }
 
-        //===============================APNEA=============================================
-        composable(AppDestinations.APNEA.name) {
-            val viewModel: HistorialViewModel = viewModel(
-                factory = HistorialViewModel.Factory(app.inmersionRepository)
+        //===========================CUENTA-USUARIO============================================
+        composable(AppDestinations.CUENTA.name) {
+            val viewModel: CuentaViewModel = viewModel(
+                factory = CuentaViewModel.Factory(
+                    app.sessionManager,
+                    app.inmersionRepository,
+                    app.sesionApneaRepository,
+                    app.salidaPescaRepository
+                )
             )
-            HistorialScreen(
+            CuentaScreen(
                 viewModel = viewModel,
-                onAgregarClick = { navController.navigate(RUTA_NUEVA_INMERSION) },
-                name = "Eze" // NOMBRE DEL USUARIO
-            )
-        }
-
-        //==============================NUEVA-INMERSION=========================================
-        composable(RUTA_NUEVA_INMERSION) {
-            val viewModel: NuevaInmersionViewModel = viewModel(
-                factory = NuevaInmersionViewModel.Factory(app.inmersionRepository)
-            )
-            NuevaInmersionScreen(
-                viewModel = viewModel,
-                onGuardado = { navController.popBackStack() }
+                onCerrarSesion = {
+                    navController.navigate(RUTA_LOGIN) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                }
             )
         }
     }
