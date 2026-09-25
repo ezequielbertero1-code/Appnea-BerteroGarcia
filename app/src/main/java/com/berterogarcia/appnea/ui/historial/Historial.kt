@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.ui.condiciones.ResumenCondicionesRegistro
 
 @Composable
 fun HistorialScreen(
@@ -62,6 +63,7 @@ private fun InmersionCard(inmersion: InmersionEntity) {
             }
             Text("Profundidad: ${inmersion.profundidadMetros} m")
             Text("Fondo: ${inmersion.tiempoFondo}")
+            inmersion.condiciones?.let { ResumenCondicionesRegistro(it) }
         }
     }
 }

@@ -1,10 +1,14 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewmodel.initializer
+import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
+import com.berterogarcia.appnea.data.local.UbicacionHelper
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,11 +51,13 @@ data class NuevaInmersionUiState(
     val actividad: String = "",
     val comentarios: String = "",
     val guardadoOk: Boolean = false,
+    val guardando: Boolean = false,
     val errores: Map<Campo, String> = emptyMap(),
 )
 
 class NuevaInmersionViewModel(
-    private val repository: InmersionRepository
+    private val repository: InmersionRepository,
+    private val appContext: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -94,10 +100,20 @@ class NuevaInmersionViewModel(
             _uiState.update { it.copy(errores = errores) }
             return
         }
+        if (s.guardando) return
+        _uiState.update { it.copy(guardando = true, errores = emptyMap()) }
         viewModelScope.launch {
+            val fecha = LocalDate.parse(s.fecha, FORMATO_FECHA)
+            val horaEntrada = LocalTime.parse(s.horaEntrada)
+            // Condiciones del momento de la inmersión: ubicación del teléfono si hay permiso,
+            // si no Comodoro Rivadavia. Si no hay internet se guarda solo luna/actividad.
+            val ubicacion = UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
+            val condiciones = runCatching {
+                CondicionesRepository.registroPara(ubicacion.latitud, ubicacion.longitud, fecha.atTime(horaEntrada))
+            }.getOrNull()
             repository.guardar(
                 InmersionEntity(
-                    fecha = LocalDate.parse(s.fecha, FORMATO_FECHA),
+                    fecha = fecha,
                     lugar = s.lugar,
                     profundidadMetros = s.profundidadMetros.toFloat(), // ya validado, no hace falta toFloatOrNull
                     paradaSeguridadMin = s.paradaSeguridadMin.toFloatOrNull() ?: 0f,
@@ -112,10 +128,11 @@ class NuevaInmersionViewModel(
                     temperaturaAguaC = s.temperaturaAguaC.toFloatOrNull() ?: 0f,
                     visibilidadMetros = s.visibilidadMetros.toFloatOrNull() ?: 0f,
                     actividad = s.actividad,
-                    comentarios = s.comentarios
+                    comentarios = s.comentarios,
+                    condiciones = condiciones
                 )
             )
-            _uiState.update { it.copy(guardadoOk = true) }
+            _uiState.update { it.copy(guardadoOk = true, guardando = false) }
         }
     }
 
@@ -168,8 +185,8 @@ class NuevaInmersionViewModel(
     }
 
     companion object {
-        fun Factory(repository: InmersionRepository) = viewModelFactory {
-            initializer { NuevaInmersionViewModel(repository) }
+        fun Factory(repository: InmersionRepository, appContext: Context) = viewModelFactory {
+            initializer { NuevaInmersionViewModel(repository, appContext) }
         }
     }
 }

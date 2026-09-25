@@ -8,11 +8,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
@@ -219,9 +221,16 @@ fun NuevaInmersionScreen(
         // GUARDAR
         Button(
             onClick = viewModel::guardar,
+            enabled = !uiState.guardando,
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
         ) {
-            Text("Guardar inmersión")
+            Text(if (uiState.guardando) "Guardando y obteniendo condiciones…" else "Guardar inmersión")
         }
+        Text(
+            "Al guardar se registran solas las condiciones del momento de entrada: clima, olas, marea y luna.",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.8f),
+            modifier = Modifier.padding(top = 6.dp)
+        )
     }
 }
