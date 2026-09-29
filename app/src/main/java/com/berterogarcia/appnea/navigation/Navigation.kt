@@ -8,8 +8,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.MyApplication
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
@@ -17,6 +19,8 @@ import com.berterogarcia.appnea.ui.cronometro.CronometroScreen
 import com.berterogarcia.appnea.ui.cronometro.EntrenamientoApneaViewModel
 import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
 import com.berterogarcia.appnea.ui.cuenta.CuentaViewModel
+import com.berterogarcia.appnea.ui.detalleinmersion.DetalleInmersionScreen
+import com.berterogarcia.appnea.ui.detalleinmersion.DetalleInmersionViewModel
 import com.berterogarcia.appnea.ui.historial.HistorialViewModel
 import com.berterogarcia.appnea.ui.informacion.InformacionScreen
 import com.berterogarcia.appnea.ui.inicio.InicioScreen
@@ -34,8 +38,9 @@ import com.berterogarcia.appnea.ui.registro.RegistroViewModel
 //Estas son pantallas que no aparecen en la barra de la app.
 const val RUTA_REGISTRO = "registro"
 const val RUTA_LOGIN = "login"
-private const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
-private const val RUTA_NUEVA_SALIDA_PESCA = "nueva_salida_pesca"
+const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
+const val RUTA_DETALLE_INMERSION = "detalle_inmersion/{id}"
+const val RUTA_NUEVA_SALIDA_PESCA = "nueva_salida_pesca"
 
 @Composable
 fun AppNavHost(
@@ -123,7 +128,8 @@ fun AppNavHost(
                 historialViewModel = historialViewModel,
                 pescaViewModel = pescaViewModel,
                 onAgregarInmersion = { navController.navigate(RUTA_NUEVA_INMERSION) },
-                onAgregarSalidaPesca = { navController.navigate(RUTA_NUEVA_SALIDA_PESCA) }
+                onAgregarSalidaPesca = { navController.navigate(RUTA_NUEVA_SALIDA_PESCA) },
+                onVerDetalleInmersion = { id -> navController.navigate("detalle_inmersion/$id") }
             )
         }
         composable(RUTA_NUEVA_INMERSION) {
@@ -133,6 +139,19 @@ fun AppNavHost(
             NuevaInmersionScreen(
                 viewModel = viewModel,
                 onGuardado = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = RUTA_DETALLE_INMERSION,
+            arguments = listOf(navArgument("id") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getLong("id") ?: 0L
+            val viewModel: DetalleInmersionViewModel = viewModel(
+                factory = DetalleInmersionViewModel.Factory(app.inmersionRepository, id, app.applicationContext)
+            )
+            DetalleInmersionScreen(
+                viewModel = viewModel,
+                onEliminada = { navController.popBackStack() }
             )
         }
         composable(RUTA_NUEVA_SALIDA_PESCA) {

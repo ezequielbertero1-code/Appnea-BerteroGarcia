@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
@@ -32,9 +34,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.berterogarcia.appnea.navigation.AppNavHost
 import com.berterogarcia.appnea.navigation.RUTA_LOGIN
+import com.berterogarcia.appnea.navigation.RUTA_NUEVA_INMERSION
+import com.berterogarcia.appnea.navigation.RUTA_NUEVA_SALIDA_PESCA
 import com.berterogarcia.appnea.navigation.RUTA_REGISTRO
 import com.berterogarcia.appnea.ui.theme.MyApplicationTheme
 import com.berterogarcia.appnea.ui.theme.fondoApp
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,9 +78,12 @@ fun MyApplicationApp() {
     val currentRoute = backStackEntry?.destination?.route ?: RUTA_LOGIN
 
     val mostrarMenu = currentRoute != RUTA_LOGIN && currentRoute != RUTA_REGISTRO
+    val esFormulario = currentRoute == RUTA_NUEVA_INMERSION || currentRoute == RUTA_NUEVA_SALIDA_PESCA
 
     if (mostrarMenu) {
         NavigationSuiteScaffold(
+            layoutType = if (esFormulario) NavigationSuiteType.None
+                        else NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()),
             containerColor = Color.Transparent,
             navigationSuiteColors = NavigationSuiteDefaults.colors(
                 navigationBarContainerColor = Color.Transparent,
@@ -101,12 +110,18 @@ fun MyApplicationApp() {
             }
         ) {
             Scaffold(modifier = Modifier.fillMaxSize(), containerColor = Color.Transparent) { innerPadding ->
-                AppNavHost(navController = navController, modifier = Modifier.padding(innerPadding))
+                AppNavHost(
+                    navController = navController,
+                    modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding)
+                )
             }
         }
     } else {
         Scaffold(modifier = Modifier.fillMaxSize(), containerColor = Color.Transparent) { innerPadding ->
-            AppNavHost(navController = navController, modifier = Modifier.padding(innerPadding))
+            AppNavHost(
+                navController = navController,
+                modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding)
+            )
         }
     }
 }

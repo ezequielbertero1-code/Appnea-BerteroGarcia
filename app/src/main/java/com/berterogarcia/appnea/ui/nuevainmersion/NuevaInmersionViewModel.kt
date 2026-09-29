@@ -2,8 +2,8 @@ package com.berterogarcia.appnea.ui.nuevainmersion
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +19,14 @@ import kotlin.time.Duration.Companion.seconds
 
 enum class Campo { FECHA, LUGAR, PROFUNDIDAD, PARADA, TIEMPO_FONDO, HORA_ENTRADA, HORA_SALIDA, LASTRE, PROTECCION, TEMP_AIRE, TEMP_AGUA, VISIBILIDAD }
 
+enum class Etapa(val titulo: String, val campos: Set<Campo>) {
+    GENERAL("Datos generales", setOf(Campo.FECHA, Campo.LUGAR, Campo.HORA_ENTRADA, Campo.HORA_SALIDA)),
+    INMERSION("Inmersión", setOf(Campo.PROFUNDIDAD, Campo.TIEMPO_FONDO, Campo.PARADA)),
+    CONDICIONES("Condiciones", setOf(Campo.TEMP_AIRE, Campo.TEMP_AGUA, Campo.VISIBILIDAD)),
+    EQUIPO("Equipo", setOf(Campo.LASTRE, Campo.PROTECCION)),
+    NOTAS("Notas", emptySet())
+}
+
 private val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy", Locale.US)
 private val REGEX_TIEMPO_FONDO = Regex("^\\d{2}[0-5]\\d\$") // 4 dígitos, segundos 00-59
 
@@ -30,6 +38,7 @@ private fun parseTiempoFondo(v: String): Duration {
 }
 
 data class NuevaInmersionUiState(
+    val etapa: Etapa = Etapa.GENERAL,
     val fecha: String = "",
     val lugar: String = "",
     val profundidadMetros: String = "",
@@ -57,6 +66,26 @@ class NuevaInmersionViewModel(
     private val _uiState = MutableStateFlow(
         NuevaInmersionUiState(fecha = LocalDate.now().format(FORMATO_FECHA)))
     val uiState: StateFlow<NuevaInmersionUiState> = _uiState
+
+    fun siguiente() {
+        val s = _uiState.value
+        val erroresEtapa = validar(s).filterKeys { it in s.etapa.campos }
+        if (erroresEtapa.isNotEmpty()) {
+            _uiState.update { it.copy(errores = it.errores - s.etapa.campos + erroresEtapa) }
+            return
+        }
+        val sig = Etapa.entries.getOrNull(s.etapa.ordinal + 1) ?: return
+        _uiState.update { it.copy(etapa = sig, errores = it.errores - s.etapa.campos) }
+    }
+
+    fun anterior() {
+        val ant = Etapa.entries.getOrNull(_uiState.value.etapa.ordinal - 1) ?: return
+        _uiState.update { it.copy(etapa = ant) }
+    }
+
+    fun irA(etapa: Etapa) {
+        if (etapa.ordinal < _uiState.value.etapa.ordinal) _uiState.update { it.copy(etapa = etapa) }
+    }
 
     fun onFechaChange(v: String) = _uiState.update { it.copy(fecha = v) }
     fun onLugarChange(v: String) = _uiState.update { it.copy(lugar = v) }
@@ -91,7 +120,8 @@ class NuevaInmersionViewModel(
         val s = _uiState.value
         val errores = validar(s)
         if (errores.isNotEmpty()) {
-            _uiState.update { it.copy(errores = errores) }
+            val primera = Etapa.entries.first { e -> errores.keys.any { it in e.campos } }
+            _uiState.update { it.copy(errores = errores, etapa = primera) }
             return
         }
         viewModelScope.launch {
@@ -117,13 +147,6 @@ class NuevaInmersionViewModel(
             )
             _uiState.update { it.copy(guardadoOk = true) }
         }
-    }
-
-    private fun parseTiempoFondo(v: String): Duration {
-        val partes = v.split(":").mapNotNull { it.toIntOrNull() }
-        val minutos = partes.getOrElse(0) { 0 }
-        val segundos = partes.getOrElse(1) { 0 }
-        return (minutos * 60 + segundos).seconds
     }
 
     private fun validar(s: NuevaInmersionUiState): Map<Campo, String> {
@@ -159,8 +182,8 @@ class NuevaInmersionViewModel(
             else if (temperaturaAire > 40f) errores[Campo.TEMP_AIRE] = "Temperatura máxima 40°C."
 
         val temperaturaAgua = s.temperaturaAguaC.toFloatOrNull()
-        if (temperaturaAgua == null || temperaturaAgua < 0f) errores[Campo.TEMP_AGUA] = "Temperatura mínima -10°C."
-            else if (temperaturaAgua > 40f) errores[Campo.TEMP_AGUA] = "Temperatura máxima 10°C."
+        if (temperaturaAgua == null || temperaturaAgua < -10f) errores[Campo.TEMP_AGUA] = "Temperatura mínima -10°C."
+            else if (temperaturaAgua > 10f) errores[Campo.TEMP_AGUA] = "Temperatura máxima 10°C."
 
         val visibilidad = s.visibilidadMetros.toFloatOrNull()
         if (visibilidad == null || visibilidad < 0f) errores[Campo.VISIBILIDAD] = "Visibilidad minima 0m."

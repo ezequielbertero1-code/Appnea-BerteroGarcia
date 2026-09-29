@@ -30,6 +30,7 @@ fun InmersionScreen(
     pescaViewModel: PescaSubmarinaViewModel,
     onAgregarInmersion: () -> Unit,
     onAgregarSalidaPesca: () -> Unit,
+    onVerDetalleInmersion: (Long) -> Unit,     // NUEVO
     modifier: Modifier = Modifier
 ) {
     val titulos = listOf("Buceo y apnea", "Pesca submarina")
@@ -66,7 +67,8 @@ fun InmersionScreen(
                 0 -> HistorialScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = historialViewModel,
-                    onAgregarClick = onAgregarInmersion
+                    onAgregarClick = onAgregarInmersion,
+                    onVerDetalle = onVerDetalleInmersion   // NUEVO
                 )
                 1 -> PescaSubmarinaScreen(
                     modifier = Modifier.fillMaxSize(),

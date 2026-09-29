@@ -32,6 +32,7 @@ fun CampoTexto(
         isError = esError,
         supportingText = { if (esError) Text(mensajeError) },
         keyboardOptions = keyboardOptions,
+        singleLine = minLines == 1,
         minLines = minLines,
         modifier = modifier,
         colors = OutlinedTextFieldDefaults.colors(
