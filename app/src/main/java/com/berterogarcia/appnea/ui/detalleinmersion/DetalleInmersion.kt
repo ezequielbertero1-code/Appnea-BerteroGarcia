@@ -3,10 +3,17 @@ package com.berterogarcia.appnea.ui.detalleinmersion
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +33,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,6 +58,13 @@ import com.berterogarcia.appnea.data.perfil.PerfilSimulado
 import com.berterogarcia.appnea.data.perfil.PuntoPerfil
 import com.berterogarcia.appnea.data.remote.descripcionClima
 import com.berterogarcia.appnea.data.remote.emojiClima
+import com.berterogarcia.appnea.ui.components.Chips
+import com.berterogarcia.appnea.ui.components.DatoChico
+import com.berterogarcia.appnea.ui.components.FilaMosaicos
+import com.berterogarcia.appnea.ui.components.Mosaico
+import com.berterogarcia.appnea.ui.components.TarjetaAviso
+import com.berterogarcia.appnea.ui.components.TarjetaHero
+import com.berterogarcia.appnea.ui.condiciones.Acento
 import com.berterogarcia.appnea.ui.condiciones.FilaDato
 import com.berterogarcia.appnea.ui.condiciones.PecesActividad
 import com.berterogarcia.appnea.ui.condiciones.Semaforo
@@ -57,11 +73,14 @@ import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
 import com.berterogarcia.appnea.ui.condiciones.colorAptitud
 import com.berterogarcia.appnea.ui.condiciones.colorNivel
 import com.berterogarcia.appnea.ui.condiciones.direccion
+import com.berterogarcia.appnea.ui.condiciones.duracion
 import com.berterogarcia.appnea.ui.condiciones.num
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
+import java.time.Duration as JDuration   // alias: la entidad usa kotlin.time.Duration
 
 private val FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+private val HH_MM = DateTimeFormatter.ofPattern("HH:mm")
 private val TITULOS = listOf("General", "Gráfico", "Equipo", "Condiciones")
 private val ICONOS = listOf(R.drawable.ic_info, R.drawable.ic_reloj, R.drawable.ic_apnea, R.drawable.ic_clima)
 
@@ -78,6 +97,7 @@ fun DetalleInmersionScreen(
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = 0) { TITULOS.size }
 
+    // Abre el selector de Android para elegir dónde guardar el archivo
     val exportarLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/octet-stream")
     ) { uri ->
@@ -109,7 +129,7 @@ fun DetalleInmersionScreen(
                     Icon(
                         painterResource(R.drawable.ic_borrar),
                         contentDescription = "Eliminar inmersión",
-                        tint = Color(0xFFFF6B6B)
+                        tint = Color(0xFFFF6B6B)   // el mismo rojo de error de Reutilizables.kt
                     )
                 }
             }
@@ -151,6 +171,7 @@ fun DetalleInmersionScreen(
             }
         }
 
+        // ---- Exportar, fijo abajo ----
         Button(
             onClick = { exportarLauncher.launch("inmersion_${i.id}_${i.fecha}.uddf") },
             modifier = Modifier.fillMaxWidth().padding(16.dp)
@@ -184,125 +205,175 @@ fun DetalleInmersionScreen(
 
 @Composable
 private fun PestanaGeneral(i: InmersionEntity) {
-    TarjetaFilas("Datos generales", listOf(
-        "Fecha" to i.fecha.format(FORMATO_FECHA),
-        "Hora de entrada" to i.horaEntrada.toString(),
-        "Hora de salida" to i.horaSalida.toString()
-    ))
-    TarjetaFilas("Inmersión", listOf(
-        "Profundidad máxima" to "${i.profundidadMetros.limpio()} m",
-        "Tiempo de fondo" to formatearDuracion(i.tiempoFondo.inWholeSeconds.toInt()),
-        "Parada de seguridad" to "${i.paradaSeguridadMin.limpio()} min"
-    ))
-    TarjetaCondicion("Notas y comentarios") {
-        BloqueTexto("Notas (actividad)", i.actividad)
-        BloqueTexto("Comentarios", i.comentarios)
+    val apnea = PerfilSimulado.esApnea(i)
+    val fondo = formatearDuracion(i.tiempoFondo.inWholeSeconds.toInt())
+
+    TarjetaHero(
+        emoji = if (apnea) "🫧" else "🤿",
+        valor = "${i.profundidadMetros.limpio()} m",
+        subtitulo = "Profundidad máxima",
+        modifier = Modifier.padding(bottom = 12.dp),
+        derecha = {
+            Text(if (apnea) "Apnea" else "Buceo", color = Acento, fontWeight = FontWeight.Bold)
+            Text("⏱️ $fondo", style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
+        },
+        abajo = {
+            Spacer(Modifier.height(12.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                DatoChico("🕘 Entrada", i.horaEntrada.format(HH_MM))
+                DatoChico("🕙 Salida", i.horaSalida.format(HH_MM))
+                DatoChico("⌛ En el agua", duracion(minutosEnAgua(i)))
+            }
+        }
+    )
+
+    FilaMosaicos {
+        Mosaico("Tiempo de fondo", fondo, "mm:ss")
+        Mosaico(
+            "Parada de seguridad",
+            if (i.paradaSeguridadMin > 0f) "${i.paradaSeguridadMin.limpio()} min" else "Sin parada",
+            if (i.paradaSeguridadMin > 0f) "a 5 m" else ""
+        )
+    }
+
+    TarjetaCondicion("📝 Notas") {
+        Text("Actividad", style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
+        Text(i.actividad.ifBlank { "—" }, modifier = Modifier.padding(top = 2.dp, bottom = 8.dp))
+        if (i.comentarios.isNotBlank()) {
+            // Comentario como "cita": barrita celeste a la izquierda
+            Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                Box(Modifier.width(3.dp).fillMaxHeight().background(Acento))
+                Spacer(Modifier.width(10.dp))
+                Text("“${i.comentarios}”", fontStyle = FontStyle.Italic)
+            }
+        }
     }
 }
 
 @Composable
 private fun PestanaGrafico(i: InmersionEntity, perfil: List<PuntoPerfil>) {
-    TarjetaCondicion("Perfil de la inmersión") {
+    // La curva se dibuja de izquierda a derecha cada vez que se entra a la pestaña
+    val progreso = remember { Animatable(0f) }
+    LaunchedEffect(perfil) {
+        progreso.snapTo(0f)
+        progreso.animateTo(1f, tween(durationMillis = 1200, easing = FastOutSlowInEasing))
+    }
+
+    TarjetaCondicion("📈 Perfil de la inmersión") {
         if (perfil.size < 2) {
             Text(
                 "No hay datos suficientes para armar el perfil (revisá profundidad y tiempo de fondo).",
                 color = TextoSecundario
             )
         } else {
-            GraficoPerfil(perfil)
-            Spacer(Modifier.height(8.dp))
-            FilaDato("Tipo de perfil", if (PerfilSimulado.esApnea(i)) "Apnea" else "Buceo con parada")
-            FilaDato("Duración del perfil", formatearDuracion(perfil.last().segundo))
-            FilaDato("Profundidad máxima", "${i.profundidadMetros.limpio()} m")
+            GraficoPerfil(perfil, progreso = progreso.value)
         }
-        Text(
-            "Perfil estimado a partir de los datos cargados; no es un registro de computadora de buceo.",
-            style = MaterialTheme.typography.bodySmall,
-            color = TextoSecundario,
-            modifier = Modifier.padding(top = 8.dp)
-        )
     }
+
+    if (perfil.size >= 2) {
+        val apnea = PerfilSimulado.esApnea(i)
+        val bajada = if (apnea) "${PerfilSimulado.VELOCIDAD_APNEA.limpio()} m/s"
+        else "${(PerfilSimulado.DESCENSO_BUCEO * 60).limpio()} m/min"
+        val subida = if (apnea) "${PerfilSimulado.VELOCIDAD_APNEA.limpio()} m/s"
+        else "${(PerfilSimulado.ASCENSO_BUCEO * 60).limpio()} m/min"
+        FilaMosaicos {
+            Mosaico("⬇️ Descenso", bajada, "supuesto")
+            Mosaico("⬆️ Ascenso", subida, "supuesto")
+            Mosaico("⏱️ Duración", formatearDuracion(perfil.last().segundo), "del perfil")
+        }
+    }
+
+    TarjetaAviso(
+        titulo = "Perfil estimado",
+        texto = "Se armó a partir de profundidad, tiempo de fondo y parada. " +
+                "No es un registro de computadora de buceo.",
+        modifier = Modifier.padding(bottom = 12.dp)
+    )
 }
 
 @Composable
 private fun PestanaEquipo(i: InmersionEntity) {
-    TarjetaFilas("Equipo", listOf(
-        "Lastre" to "${i.lastreKg.limpio()} kg",
-        "Protección" to "${i.proteccionMm.limpio()} mm",
-        "Equipamiento" to i.equipamiento.joinToString().ifBlank { "—" }
-    ))
+    FilaMosaicos {
+        Mosaico("⚖️ Lastre", "${i.lastreKg.limpio()} kg", "plomos")
+        Mosaico("🧥 Protección", "${i.proteccionMm.limpio()} mm", "espesor del traje")
+    }
+    TarjetaCondicion("🎒 Equipamiento") {
+        Chips(i.equipamiento.map { "${emojiEquipo(it)} $it" }, vacio = "No se cargó equipamiento")
+    }
 }
 
 @Composable
 private fun PestanaCondiciones(i: InmersionEntity) {
-    // Lo que cargó el usuario en el formulario
-    TarjetaFilas("Datos cargados", listOf(
-        "Agua" to i.caracteristicasAgua.joinToString().ifBlank { "—" },
-        "Temperatura del aire" to "${i.temperaturaAireC.limpio()} °C",
-        "Temperatura del agua" to "${i.temperaturaAguaC.limpio()} °C",
-        "Visibilidad" to "${i.visibilidadMetros.limpio()} m"
-    ))
-
-    // Lo guardado automáticamente al registrar (null en inmersiones viejas)
     val c = i.condiciones
-    if (c == null) {
+
+    // ---- Clima grande, como ResumenAhora de Inicio (solo si se guardó con internet) ----
+    if (c != null && c.conDatosOnline) {
+        val aptitud = Aptitud.entries.firstOrNull { it.texto == c.aptitudAgua }
+        TarjetaHero(
+            emoji = emojiClima(c.codigoClima),
+            valor = c.temperaturaC?.let { num(it, unidad = "°C") } ?: "${i.temperaturaAireC.limpio()}°C",
+            subtitulo = c.codigoClima?.let { descripcionClima(it) } ?: "Sin datos del cielo",
+            modifier = Modifier.padding(bottom = 12.dp),
+            derecha = {
+                c.sensacionTermicaC?.let {
+                    Text("Sensación ${num(it, unidad = "°")}", style = MaterialTheme.typography.bodySmall)
+                }
+            },
+            abajo = {
+                Spacer(Modifier.height(10.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    DatoChico("💨 Viento", c.vientoKmh?.let { "${num(it)} ${direccion(c.direccionVientoGrados)}" } ?: "-")
+                    DatoChico("Ráfagas", num(c.rafagasKmh, unidad = " km/h"))
+                    DatoChico("💧 Humedad", num(c.humedadPorc?.toDouble(), unidad = "%"))
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    DatoChico("Presión", num(c.presionHpa, unidad = " hPa"))
+                    DatoChico("🌊 Olas", c.olaM?.let { num(it, 1, " m") } ?: "-")
+                    DatoChico("🌡️ Agua", c.temperaturaAguaC?.let { num(it, 1, "°C") } ?: "-")
+                }
+                if (aptitud != null) {
+                    Spacer(Modifier.height(10.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Para entrar al agua: ", style = MaterialTheme.typography.bodyMedium)
+                        Semaforo(colorAptitud(aptitud), aptitud.texto)
+                    }
+                }
+            }
+        )
+    }
+
+    // ---- Mosaicos: marea, luna, pesca, visibilidad ----
+    if (c != null) {
+        val nivel = NivelActividad.entries.firstOrNull { it.texto == c.nivelActividad }
+            ?: NivelActividad.desde(c.actividadPesca)
+        FilaMosaicos {
+            Mosaico("Marea", c.estadoMarea ?: "Sin datos", c.alturaMareaM?.let { num(it, 2, " m") } ?: "")
+            Mosaico("Luna", "${emojiLuna(c.faseLunar)} ${c.iluminacionLunaPorc}%", c.faseLunar)
+        }
+        FilaMosaicos {
+            Mosaico(
+                "Actividad de pesca", nivel.texto, "${c.actividadPesca}/100",
+                colorValor = colorNivel(nivel),
+                extra = { PecesActividad(nivel, tamanio = 16) }
+            )
+            Mosaico("👁️ Visibilidad", "${i.visibilidadMetros.limpio()} m", "cargada por vos")
+        }
+    } else {
         TarjetaCondicion {
-            Text(
-                "Esta inmersión no tiene condiciones registradas automáticamente.",
-                color = TextoSecundario
-            )
-        }
-        return
-    }
-
-    TarjetaFilas("Clima", listOf(
-        "Estado" to c.codigoClima?.let { "${emojiClima(it)} ${descripcionClima(it)}" },
-        "Temperatura" to c.temperaturaC?.let { num(it, 0, " °C") },
-        "Sensación térmica" to c.sensacionTermicaC?.let { num(it, 0, " °C") },
-        "Humedad" to c.humedadPorc?.let { "$it %" },
-        "Presión" to c.presionHpa?.let { num(it, 0, " hPa") },
-        "Nubosidad" to c.nubosidadPorc?.let { "$it %" },
-        "Viento" to c.vientoKmh?.let { "${num(it)} km/h ${direccion(c.direccionVientoGrados)}" },
-        "Ráfagas" to c.rafagasKmh?.let { num(it, 0, " km/h") }
-    ))
-
-    val aptitud = Aptitud.entries.firstOrNull { it.texto == c.aptitudAgua }
-    TarjetaFilas("Mar", listOf(
-        "Olas" to c.olaM?.let { num(it, 1, " m") },
-        "Período" to c.periodoOlaS?.let { num(it, 0, " s") },
-        "Dirección de olas" to c.direccionOlaGrados?.let { direccion(it) },
-        "Mar de fondo" to c.marDeFondoM?.let { num(it, 1, " m") },
-        "Temperatura del agua" to c.temperaturaAguaC?.let { num(it, 1, " °C") },
-        "Corriente" to c.corrienteKmh?.let { num(it, 1, " km/h") }
-    )) {
-        if (aptitud != null) {
-            Semaforo(colorAptitud(aptitud), "Condiciones ${aptitud.texto.lowercase()}")
-            Spacer(Modifier.height(6.dp))
+            Text("Esta inmersión no tiene condiciones registradas automáticamente.", color = TextoSecundario)
         }
     }
 
-    TarjetaFilas("Marea", listOf(
-        "Estado" to c.estadoMarea,
-        "Altura" to c.alturaMareaM?.let { num(it, 2, " m") }
-    ))
-
-    val nivel = NivelActividad.entries.firstOrNull { it.texto == c.nivelActividad }
-        ?: NivelActividad.desde(c.actividadPesca)
-    TarjetaCondicion("Luna y pesca") {
-        FilaDato("Fase lunar", c.faseLunar.ifBlank { "—" })
-        FilaDato("Iluminación", "${c.iluminacionLunaPorc} %")
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 6.dp)) {
-            PecesActividad(nivel)
-            Spacer(Modifier.width(8.dp))
-            Text(
-                "${nivel.texto} (${c.actividadPesca}/100)",
-                color = colorNivel(nivel),
-                fontWeight = FontWeight.Bold
-            )
-        }
+    // ---- Lo que cargó el usuario ----
+    TarjetaCondicion("✍️ Tu registro") {
+        Chips(i.caracteristicasAgua.map { "${emojiAgua(it)} $it" }, vacio = "Sin características del agua")
+        Spacer(Modifier.height(10.dp))
+        FilaDato("Temperatura del aire", "${i.temperaturaAireC.limpio()} °C")
+        FilaDato("Temperatura del agua", "${i.temperaturaAguaC.limpio()} °C")
     }
 
-    if (!c.conDatosOnline) {
+    if (c != null && !c.conDatosOnline) {
         Text(
             "Sin conexión al guardar: solo hay datos astronómicos (luna y actividad).",
             style = MaterialTheme.typography.bodySmall,
@@ -313,26 +384,59 @@ private fun PestanaCondiciones(i: InmersionEntity) {
 
 // ============================ Helpers ============================
 
-/** Tarjeta con filas; oculta las filas con valor null y no dibuja nada si quedan todas vacías. */
-@Composable
-private fun TarjetaFilas(
-    titulo: String,
-    filas: List<Pair<String, String?>>,
-    encabezado: @Composable ColumnScope.() -> Unit = {}
-) {
-    val visibles = filas.mapNotNull { (etiqueta, valor) -> valor?.let { etiqueta to it } }
-    if (visibles.isEmpty()) return
-    TarjetaCondicion(titulo) {
-        encabezado()
-        visibles.forEach { (etiqueta, valor) -> FilaDato(etiqueta, valor) }
-    }
-}
-
+/*
+PestanaGeneral utilizaa BLoqueTexto pero como era la unica que lo usaba lo saque
 @Composable
 private fun BloqueTexto(etiqueta: String, texto: String) {
     Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
     Text(texto.ifBlank { "—" }, modifier = Modifier.padding(top = 2.dp, bottom = 8.dp))
+}*/
+
+// Minutos entre entrada y salida (si cruza la medianoche, suma 24 h)
+private fun minutosEnAgua(i: InmersionEntity): Long {
+    val m = JDuration.between(i.horaEntrada, i.horaSalida).toMinutes()
+    return if (m >= 0) m else m + 24 * 60
 }
 
 // 18.0 -> "18", 18.5 -> "18.5"
 private fun Float.limpio(): String = if (this % 1f == 0f) toInt().toString() else toString()
+
+// 1.0 -> "1", 0.3 -> "0.3" (para las velocidades, que son Double)
+private fun Double.limpio(): String = if (this % 1.0 == 0.0) toInt().toString() else "%.1f".format(this)
+
+// ---------- Emojis (si no hay coincidencia devuelven uno genérico: nunca fallan) ----------
+
+private fun emojiEquipo(item: String): String = when (item.lowercase()) {
+    "guantes" -> "🧤"
+    "botas" -> "🥾"
+    "casco" -> "🪖"
+    "ninguna" -> "🩳"
+    else -> "🧥"   // Corto, Largo, Dos piezas, Semi seco, Seco
+}
+
+private fun emojiAgua(item: String): String = when (item.lowercase()) {
+    "dulce" -> "💧"
+    "salada" -> "🧂"
+    "orilla" -> "🏖️"
+    "bote" -> "🚤"
+    "olas" -> "🌊"
+    "corrientes" -> "🌀"
+    "resaca" -> "↩️"
+    else -> "💦"
+}
+
+// CondicionesRegistro guarda solo el nombre de la fase, así que se deduce el emoji del texto
+private fun emojiLuna(fase: String): String {
+    val f = fase.lowercase()
+    return when {
+        "nueva" in f -> "🌑"
+        "llena" in f -> "🌕"
+        "cuarto creciente" in f -> "🌓"
+        "cuarto menguante" in f -> "🌗"
+        "gibosa creciente" in f -> "🌔"
+        "gibosa menguante" in f -> "🌖"
+        "creciente" in f -> "🌒"
+        "menguante" in f -> "🌘"
+        else -> "🌙"
+    }
+}

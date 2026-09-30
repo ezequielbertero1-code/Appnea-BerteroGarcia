@@ -121,13 +121,13 @@ data class PuntoPerfil(val segundo: Int, val profundidadM: Double)
  */
 object PerfilSimulado {
     /** SUPUESTO: velocidad de descenso en buceo, 18 m/min expresado en m/s. */
-    private const val DESCENSO_BUCEO = 18.0 / 60
+    const val DESCENSO_BUCEO = 18.0 / 60
 
     /** SUPUESTO: velocidad de ascenso en buceo, 9 m/min expresado en m/s. */
-    private const val ASCENSO_BUCEO = 9.0 / 60
+    const val ASCENSO_BUCEO = 9.0 / 60
 
     /** SUPUESTO: velocidad de bajada y subida en apnea, en m/s. */
-    private const val VELOCIDAD_APNEA = 1.0
+    const val VELOCIDAD_APNEA = 1.0
 
     /** SUPUESTO: profundidad a la que se hace la parada de seguridad, en metros. */
     private const val PROF_PARADA_M = 5.0

@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -37,7 +38,7 @@ private fun DrawScope.texto(
 
 /** Perfil profundidad/tiempo: superficie arriba, profundidad hacia abajo. */
 @Composable
-fun GraficoPerfil(puntos: List<PuntoPerfil>, modifier: Modifier = Modifier) {
+fun GraficoPerfil(puntos: List<PuntoPerfil>, modifier: Modifier = Modifier, progreso: Float = 1f) {
     val medidor = rememberTextMeasurer()
     Canvas(modifier = modifier.fillMaxWidth().height(240.dp)) {
         if (puntos.size < 2) return@Canvas
@@ -61,23 +62,30 @@ fun GraficoPerfil(puntos: List<PuntoPerfil>, modifier: Modifier = Modifier) {
         }
 
         // Curva (ya viene suavizada) + relleno entre la superficie y el perfil
-        val curva = Path().apply {
-            moveTo(x(puntos[0].segundo), y(puntos[0].profundidadM))
-            for (k in 1 until puntos.size) lineTo(x(puntos[k].segundo), y(puntos[k].profundidadM))
+        // Solo se ve la parte de la curva hasta "progreso" → efecto de que se va dibujando
+        clipRect(right = izq + ancho * progreso.coerceIn(0f, 1f)) {
+            val curva = Path().apply {
+                moveTo(x(puntos[0].segundo), y(puntos[0].profundidadM))
+                for (k in 1 until puntos.size) lineTo(
+                    x(puntos[k].segundo),
+                    y(puntos[k].profundidadM)
+                )
+            }
+            val relleno = Path().apply { addPath(curva); close() }   // empieza y termina en 0 m
+            drawPath(relleno, color = Acento.copy(alpha = 0.25f))
+            drawPath(curva, color = Acento, style = Stroke(width = 2.5.dp.toPx()))
+
+            // Punto de máxima profundidad
+            val pico = puntos.maxBy { it.profundidadM }
+
+            val centro = Offset(x(pico.segundo), y(pico.profundidadM))
+
+            drawCircle(ColorBajamar, radius = 5.dp.toPx(), center = centro)
+            texto(
+                medidor, "%.1f m".format(pico.profundidadM), centro.x, centro.y + 8.dp.toPx(),
+                TextStyle(color = ColorBajamar, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            )
         }
-        val relleno = Path().apply { addPath(curva); close() }   // empieza y termina en 0 m
-        drawPath(relleno, color = Acento.copy(alpha = 0.25f))
-        drawPath(curva, color = Acento, style = Stroke(width = 2.5.dp.toPx()))
-
-        // Punto de máxima profundidad
-        val pico = puntos.maxBy { it.profundidadM }
-        val centro = Offset(x(pico.segundo), y(pico.profundidadM))
-        drawCircle(ColorBajamar, radius = 5.dp.toPx(), center = centro)
-        texto(
-            medidor, "%.1f m".format(pico.profundidadM), centro.x, centro.y + 8.dp.toPx(),
-            TextStyle(color = ColorBajamar, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-        )
-
         // Eje X en mm:ss
         for (k in 0..4) {
             val s = tMax * k / 4

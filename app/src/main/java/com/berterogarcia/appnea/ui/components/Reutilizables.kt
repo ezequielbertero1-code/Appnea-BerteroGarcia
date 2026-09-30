@@ -1,14 +1,45 @@
 package com.berterogarcia.appnea.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.ui.condiciones.Acento
+import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
+import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
 
 
 @Composable
@@ -55,4 +86,135 @@ fun CampoTexto(
             errorCursorColor = Color(0xFFFF6B6B)
         )
     )
+}
+
+// ============================ Tarjetas y datos ============================
+// Estilo tomado de la sección de clima de Inicio (Clima.kt), compartido por toda la app.
+
+/** Etiqueta gris arriba, valor en negrita abajo. */
+@Composable
+fun DatoChico(etiqueta: String, valor: String) {
+    Column {
+        Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
+        Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+    }
+}
+
+/**
+ * Mosaico de dato para usar dentro de un Row (ocupa el mismo ancho que sus hermanos).
+ * Si [onClick] es null no es clickeable.
+ */
+@Composable
+fun RowScope.Mosaico(
+    titulo: String,
+    valor: String,
+    detalle: String = "",
+    onClick: (() -> Unit)? = null,
+    colorValor: Color = Color.White,
+    extra: (@Composable () -> Unit)? = null
+) {
+    Card(
+        modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()   // solo tiene efecto si el Row tiene altura (ver FilaMosaicos)
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
+        colors = CardDefaults.cardColors(containerColor = FondoTarjeta, contentColor = Color.White)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(titulo, style = MaterialTheme.typography.labelMedium, color = Acento)
+            Spacer(Modifier.height(4.dp))
+            Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = colorValor)
+            extra?.invoke()
+            if (detalle.isNotBlank()) {
+                Text(detalle, style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
+            }
+        }
+    }
+}
+
+/** Fila de mosaicos con la misma altura aunque uno tenga más texto. */
+@Composable
+fun FilaMosaicos(contenido: @Composable RowScope.() -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .padding(bottom = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        content = contenido
+    )
+}
+
+/** Tarjeta protagonista: emoji grande + número grande + subtítulo, con contenido extra. */
+@Composable
+fun TarjetaHero(
+    emoji: String,
+    valor: String,
+    subtitulo: String,
+    modifier: Modifier = Modifier,
+    derecha: @Composable ColumnScope.() -> Unit = {},
+    abajo: @Composable ColumnScope.() -> Unit = {}
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = FondoTarjeta, contentColor = Color.White)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(emoji, fontSize = 44.sp)
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(valor, fontSize = 34.sp, fontWeight = FontWeight.Bold)
+                    Text(subtitulo, style = MaterialTheme.typography.bodyMedium)
+                }
+                Column(horizontalAlignment = Alignment.End, content = derecha)
+            }
+            abajo()
+        }
+    }
+}
+
+/** Aviso naranja con ícono de info (condiciones orientativas, perfil simulado, etc.). */
+@Composable
+fun TarjetaAviso(titulo: String, texto: String, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))
+    ) {
+        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
+            Icon(painterResource(R.drawable.ic_info), contentDescription = "Advertencia", tint = Color(0xFFE65100))
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text(titulo, fontWeight = FontWeight.Bold, color = Color(0xFFE65100))
+                Text(texto, style = MaterialTheme.typography.bodySmall, color = Color(0xFF5D4037))
+            }
+        }
+    }
+}
+
+/** Chips celestes. Si la lista está vacía muestra [vacio]. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun Chips(items: List<String>, vacio: String) {
+    if (items.isEmpty()) {
+        Text(vacio, color = TextoSecundario)
+        return
+    }
+    val forma = RoundedCornerShape(50)
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items.forEach { t ->
+            Text(
+                t,
+                style = MaterialTheme.typography.labelLarge,
+                color = Acento,
+                modifier = Modifier
+                    .background(Acento.copy(alpha = 0.12f), forma)
+                    .border(1.dp, Acento.copy(alpha = 0.4f), forma)
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+        }
+    }
 }

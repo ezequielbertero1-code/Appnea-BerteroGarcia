@@ -4,11 +4,9 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +17,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -28,16 +25,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.Condiciones
 import com.berterogarcia.appnea.data.remote.descripcionClima
 import com.berterogarcia.appnea.data.remote.emojiClima
-import com.berterogarcia.appnea.ui.condiciones.Acento
+import com.berterogarcia.appnea.ui.components.DatoChico
+import com.berterogarcia.appnea.ui.components.Mosaico
+import com.berterogarcia.appnea.ui.components.TarjetaAviso
 import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
 import com.berterogarcia.appnea.ui.condiciones.PecesActividad
 import com.berterogarcia.appnea.ui.condiciones.Semaforo
@@ -46,7 +43,6 @@ import com.berterogarcia.appnea.ui.condiciones.colorAptitud
 import com.berterogarcia.appnea.ui.condiciones.direccion
 import com.berterogarcia.appnea.ui.condiciones.hora
 import com.berterogarcia.appnea.ui.condiciones.num
-import kotlin.math.roundToInt
 
 /**
  * Sección de clima de Inicio: resumen de ahora + accesos a marea, sol/luna, pesca y
@@ -130,7 +126,11 @@ fun ClimaSeccion(
                     Text("Ver todas las condiciones")
                 }
                 Spacer(Modifier.height(12.dp))
-                AvisoOrientativo()
+                TarjetaAviso(
+                    titulo = "Estas condiciones son orientativas",
+                    texto = "Evaluá siempre las condiciones reales en el lugar antes de entrar al agua, " +
+                            "y nunca te metas al agua solo/a."
+                )
             }
         }
     }
@@ -195,14 +195,6 @@ private fun ResumenAhora(c: Condiciones) {
 }
 
 @Composable
-private fun DatoChico(etiqueta: String, valor: String) {
-    Column {
-        Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
-        Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
 private fun AccesosRapidos(c: Condiciones, onClick: () -> Unit) {
     val marea = c.estadoMarea
     val astro = c.astroHoy
@@ -237,62 +229,4 @@ private fun AccesosRapidos(c: Condiciones, onClick: () -> Unit) {
         )
     }
     Spacer(Modifier.height(8.dp))
-}
-
-@Composable
-private fun RowScope.Mosaico(
-    titulo: String,
-    valor: String,
-    detalle: String,
-    onClick: () -> Unit,
-    extra: (@Composable () -> Unit)? = null
-) {
-    Card(
-        modifier = Modifier
-            .weight(1f)
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = FondoTarjeta, contentColor = Color.White)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(titulo, style = MaterialTheme.typography.labelMedium, color = Acento)
-            Spacer(Modifier.height(4.dp))
-            Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-            extra?.invoke()
-            if (detalle.isNotBlank()) {
-                Text(detalle, style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
-            }
-        }
-    }
-}
-
-@Composable
-private fun AvisoOrientativo() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_info),
-                contentDescription = "Advertencia",
-                tint = Color(0xFFE65100)
-            )
-            Spacer(Modifier.width(8.dp))
-            Column {
-                Text(
-                    "Estas condiciones son orientativas",
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFE65100)
-                )
-                Text(
-                    "Evaluá siempre las condiciones reales en el lugar antes de entrar al agua, y nunca te metas al agua solo/a.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF5D4037)
-                )
-            }
-        }
-    }
 }
