@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.data.local.CapturaPesca
+import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
 import com.berterogarcia.appnea.data.local.FotoHelper
 import com.berterogarcia.appnea.data.local.SalidaPescaEntity
 import com.berterogarcia.appnea.data.local.Ubicacion
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -33,6 +36,7 @@ data class NuevaSalidaUiState(
     val fotoPath: String? = null,
     val comentario: String = "",
     val guardadoOk: Boolean = false,
+    val guardando: Boolean = false,
     val errores: Map<CampoSalida, String> = emptyMap(),
     val mensajeUbicacion: String? = null
 )
@@ -91,19 +95,28 @@ class NuevaSalidaPescaViewModel(
             _uiState.update { it.copy(errores = errores) }
             return
         }
+        if (s.guardando) return
+        _uiState.update { it.copy(guardando = true, errores = emptyMap()) }
         viewModelScope.launch {
+            val fecha = LocalDate.parse(s.fecha, FORMATO_FECHA)
+            // Momento de referencia: ahora si la salida es de hoy, si no las 10:00 de ese día
+            val momento = if (fecha == LocalDate.now()) LocalDateTime.now() else fecha.atTime(10, 0)
+            val lat = s.latitud ?: UBICACION_COMODORO_RIVADAVIA.latitud
+            val lon = s.longitud ?: UBICACION_COMODORO_RIVADAVIA.longitud
+            val condiciones = runCatching { CondicionesRepository.registroPara(lat, lon, momento) }.getOrNull()
             repository.guardar(
                 SalidaPescaEntity(
-                    fecha = LocalDate.parse(s.fecha, FORMATO_FECHA),
+                    fecha = fecha,
                     lugar = s.lugar.trim(),
                     latitud = s.latitud,
                     longitud = s.longitud,
                     capturas = s.capturas,
                     fotoPath = s.fotoPath,
-                    comentario = s.comentario.trim()
+                    comentario = s.comentario.trim(),
+                    condiciones = condiciones
                 )
             )
-            _uiState.update { it.copy(guardadoOk = true) }
+            _uiState.update { it.copy(guardadoOk = true, guardando = false) }
         }
     }
 

@@ -70,6 +70,7 @@ fun InicioScreen(
     nombreUsuario: String?,
     climaViewModel: ClimaViewModel,
     onIrA: (AppDestinations) -> Unit,
+    onVerCondiciones: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -88,7 +89,7 @@ fun InicioScreen(
         )
 
         // ============================ CLIMA ============================
-        ClimaSeccion(viewModel = climaViewModel)
+        ClimaSeccion(viewModel = climaViewModel, onVerCondiciones = onVerCondiciones)
 
         // =========================== AMBIENTES ===========================
         Spacer(Modifier.height(20.dp))

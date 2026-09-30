@@ -26,5 +26,7 @@ data class InmersionEntity(
     val temperaturaAguaC: Float,
     val visibilidadMetros: Float,
     val actividad: String,
-    val comentarios: String
+    val comentarios: String,
+    // Condiciones (clima, mar, marea, luna) guardadas automáticamente al registrar
+    val condiciones: CondicionesRegistro? = null
 )

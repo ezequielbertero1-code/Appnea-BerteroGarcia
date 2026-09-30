@@ -224,8 +224,18 @@ fun NuevaSalidaPescaScreen(
 
         Spacer(Modifier.height(20.dp))
 
-        Button(onClick = { viewModel.guardar() }, modifier = Modifier.fillMaxWidth()) {
-            Text("Guardar salida")
+        Button(
+            onClick = { viewModel.guardar() },
+            enabled = !uiState.guardando,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(if (uiState.guardando) "Guardando y obteniendo condiciones…" else "Guardar salida")
         }
+        Text(
+            "Al guardar se registran solas las condiciones del momento: clima, olas, marea, luna y actividad de pesca.",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.8f),
+            modifier = Modifier.padding(top = 6.dp)
+        )
     }
 }

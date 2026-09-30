@@ -15,5 +15,7 @@ data class SalidaPescaEntity(
     val longitud: Double?,
     val capturas: List<CapturaPesca>,
     val fotoPath: String?,
-    val comentario: String
+    val comentario: String,
+    // Condiciones (clima, mar, marea, luna, actividad de pesca) guardadas al registrar
+    val condiciones: CondicionesRegistro? = null
 )

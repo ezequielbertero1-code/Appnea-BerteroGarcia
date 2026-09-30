@@ -5,12 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.data.condiciones.Condiciones
+import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
 import com.berterogarcia.appnea.data.local.Ubicacion
 import com.berterogarcia.appnea.data.local.UbicacionHelper
-import com.berterogarcia.appnea.data.remote.ClimaActual
-import com.berterogarcia.appnea.data.remote.MarActual
-import com.berterogarcia.appnea.data.remote.OpenMeteoService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -19,12 +18,14 @@ import kotlinx.coroutines.launch
 data class ClimaUiState(
     val ubicacion: Ubicacion = UBICACION_COMODORO_RIVADAVIA,
     val cargando: Boolean = false,
-    val clima: ClimaActual? = null,
-    val mar: MarActual? = null,
-    val marDisponible: Boolean = true,
+    val condiciones: Condiciones? = null,
     val error: String? = null
 )
 
+/**
+ * Carga todas las condiciones (clima, mar, mareas, sol, luna, actividad de pesca).
+ * Lo usan la sección de clima de Inicio y la pantalla completa de Condiciones.
+ */
 class ClimaViewModel(private val appContext: Context) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ClimaUiState())
@@ -38,21 +39,9 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
         val ubicacion = _uiState.value.ubicacion
         viewModelScope.launch {
             _uiState.update { it.copy(cargando = true, error = null) }
-
-            val climaResultado = OpenMeteoService.obtenerClimaActual(ubicacion.latitud, ubicacion.longitud)
-            val marResultado = OpenMeteoService.obtenerMarActual(ubicacion.latitud, ubicacion.longitud)
-
-            climaResultado.fold(
-                onSuccess = { clima ->
-                    _uiState.update {
-                        it.copy(
-                            cargando = false,
-                            clima = clima,
-                            mar = marResultado.getOrNull(),
-                            marDisponible = marResultado.isSuccess,
-                            error = null
-                        )
-                    }
+            CondicionesRepository.obtener(ubicacion).fold(
+                onSuccess = { condiciones ->
+                    _uiState.update { it.copy(cargando = false, condiciones = condiciones, error = null) }
                 },
                 onFailure = {
                     _uiState.update {

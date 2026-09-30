@@ -15,7 +15,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         SesionApneaEntity::class,
         SalidaPescaEntity::class
     ],
-    version = 4,
+    version = 5, // v5: condiciones guardadas en inmersiones y salidas de pesca
     exportSchema = false
 )
 @TypeConverters(Converters::class)

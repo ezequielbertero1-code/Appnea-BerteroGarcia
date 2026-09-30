@@ -2,6 +2,7 @@ package com.berterogarcia.appnea.data.local
 
 import android.content.Context
 import androidx.core.content.edit
+import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.time.Duration.Companion.minutes
@@ -38,12 +39,51 @@ object SeedDatos {
             db.usuarioDao().insertar(UsuarioEntity(USUARIO_PRUEBA, hashearPassword(PASSWORD_PRUEBA)))
         }
 
-        inmersiones().forEach { db.inmersionDao().insertar(it) }
+        inmersiones().zip(CLIMA_INMERSIONES) { inmersion, clima ->
+            inmersion.copy(condiciones = clima.aRegistro(inmersion.fecha.atTime(inmersion.horaEntrada)))
+        }.forEach { db.inmersionDao().insertar(it) }
         sesionesApnea().forEach { db.sesionApneaDao().insertar(it) }
-        salidasPesca().forEach { db.salidaPescaDao().insertar(it) }
+        salidasPesca().zip(CLIMA_SALIDAS) { salida, clima ->
+            salida.copy(condiciones = clima.aRegistro(salida.fecha.atTime(10, 0)))
+        }.forEach { db.salidaPescaDao().insertar(it) }
 
         prefs.edit { putBoolean(CLAVE_SEMBRADO, true) }
     }
+
+    /** Clima de ejemplo para cada registro sembrado (lo astronómico se calcula de verdad). */
+    private data class ClimaEjemplo(
+        val lat: Double, val lon: Double,
+        val tempC: Double, val vientoKmh: Double, val dirViento: Double, val rafagasKmh: Double,
+        val presionHpa: Double, val codigo: Int, val olaM: Double, val periodoS: Double,
+        val aguaC: Double, val marea: String, val aptitud: String
+    ) {
+        fun aRegistro(momento: java.time.LocalDateTime): CondicionesRegistro =
+            CondicionesRepository.registroAstronomico(lat, lon, momento).copy(
+                temperaturaC = tempC,
+                vientoKmh = vientoKmh,
+                direccionVientoGrados = dirViento,
+                rafagasKmh = rafagasKmh,
+                presionHpa = presionHpa,
+                codigoClima = codigo,
+                olaM = olaM,
+                periodoOlaS = periodoS,
+                temperaturaAguaC = aguaC,
+                estadoMarea = marea,
+                aptitudAgua = aptitud,
+                conDatosOnline = true
+            )
+    }
+
+    private val CLIMA_INMERSIONES = listOf(
+        ClimaEjemplo(-45.75, -67.37, 8.0, 12.0, 270.0, 22.0, 1016.0, 1, 0.4, 7.0, 9.1, "Subiendo hacia pleamar 12:40", "Buenas"),
+        ClimaEjemplo(-45.93, -67.55, 11.0, 18.0, 250.0, 30.0, 1011.0, 2, 0.7, 6.0, 9.8, "Bajando hacia bajamar 17:05", "Buenas"),
+        ClimaEjemplo(-45.12, -66.53, 12.0, 9.0, 340.0, 17.0, 1019.0, 0, 0.3, 8.0, 10.2, "Subiendo hacia pleamar 11:55", "Buenas")
+    )
+
+    private val CLIMA_SALIDAS = listOf(
+        ClimaEjemplo(-45.95, -67.53, 10.0, 14.0, 260.0, 26.0, 1013.0, 1, 0.5, 7.0, 9.6, "Bajando hacia bajamar 12:10", "Buenas"),
+        ClimaEjemplo(-45.75, -67.37, 9.0, 28.0, 270.0, 46.0, 1006.0, 3, 0.9, 5.0, 9.9, "Subiendo hacia pleamar 13:30", "Regulares")
+    )
 
     private fun inmersiones() = listOf(
         InmersionEntity(

@@ -52,6 +52,14 @@ class Converters {
             Fase(TipoFase.valueOf(tipo), segundos.toInt())
         }
 
+    // CondicionesRegistro <-> JSON (puede ser null en registros viejos o sin datos)
+    @TypeConverter
+    fun fromCondiciones(value: CondicionesRegistro?): String? = value?.aJson()
+
+    @TypeConverter
+    fun toCondiciones(value: String?): CondicionesRegistro? =
+        value?.let { CondicionesRegistro.desdeJson(it) }
+
     // List<CapturaPesca> <-> "especie,cantidad,peso;especie,cantidad,peso;..." (peso vacío si no se cargó)
     @TypeConverter
     fun fromCapturas(value: List<CapturaPesca>): String =

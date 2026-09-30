@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.data.local.CapturaPesca
 import com.berterogarcia.appnea.data.local.SalidaPescaEntity
+import com.berterogarcia.appnea.ui.condiciones.ResumenCondicionesRegistro
 
 @Composable
 fun PescaSubmarinaScreen(
@@ -102,6 +103,8 @@ private fun SalidaCard(
                     }
                 }
             }
+
+            salida.condiciones?.let { ResumenCondicionesRegistro(it) }
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 if (salida.latitud != null && salida.longitud != null) {
