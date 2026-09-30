@@ -8,10 +8,14 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.export.UddfExporter
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.perfil.PerfilSimulado
+import com.berterogarcia.appnea.data.perfil.PuntoPerfil
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,6 +31,12 @@ class DetalleInmersionViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = null
     )
+
+    /** Perfil simulado para la pestaña Gráfico (se recalcula solo si cambia la inmersión). */
+    val perfil: StateFlow<List<PuntoPerfil>> = inmersion
+        .map { it?.let(PerfilSimulado::generar).orEmpty() }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun eliminar(onEliminada: () -> Unit) {
         val i = inmersion.value ?: return

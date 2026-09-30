@@ -3,6 +3,7 @@ package com.berterogarcia.appnea.data.export
 import android.util.Xml
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.formatearDuracion
+import com.berterogarcia.appnea.data.perfil.PerfilSimulado
 import org.xmlpull.v1.XmlSerializer
 import java.io.StringWriter
 import java.time.LocalDateTime
@@ -47,6 +48,16 @@ object UddfExporter {
                         dato("airtemperature", kelvin(i.temperaturaAireC))
                         dato("datetime", LocalDateTime.of(i.fecha, i.horaEntrada).format(ISO))
                     }
+                    // Perfil simulado: es lo que usa el viewer (Subsurface, etc.) para dibujar el gráfico
+                    val perfil = PerfilSimulado.generar(i)
+                    if (perfil.isNotEmpty()) bloque("samples") {
+                        perfil.forEach { p ->
+                            bloque("waypoint") {
+                                dato("depth", String.format(Locale.US, "%.2f", p.profundidadM))
+                                dato("divetime", p.segundo.toString())
+                            }
+                        }
+                    }
                     bloque("informationafterdive") {
                         dato("lowesttemperature", kelvin(i.temperaturaAguaC))
                         dato("greatestdepth", numero(i.profundidadMetros))
@@ -72,6 +83,8 @@ object UddfExporter {
         add("Protección: ${numero(i.proteccionMm)} mm")
         if (i.equipamiento.isNotEmpty()) add("Equipamiento: ${i.equipamiento.joinToString()}")
         if (i.caracteristicasAgua.isNotEmpty()) add("Agua: ${i.caracteristicasAgua.joinToString()}")
+        if (PerfilSimulado.generar(i).isNotEmpty())
+            add("Perfil simulado a partir del resumen (no registrado por computadora de buceo)")
         if (i.comentarios.isNotBlank()) add("Comentarios: ${i.comentarios}")
     }
 
@@ -148,4 +161,6 @@ object UddfExporter {
  *    porque la app no lo registra: el archivo contiene solo el resumen.
  *  - Si la hora de salida es menor que la de entrada, se asume que la inmersión
  *    cruzó la medianoche y se suman 24 h a la duración.
+ *  - El perfil (<samples>) es simulado con PerfilSimulado a partir de profundidad, tiempo de fondo y parada; no es un registro real.
+ *
  */
