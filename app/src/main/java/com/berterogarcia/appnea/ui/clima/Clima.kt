@@ -43,6 +43,7 @@ import com.berterogarcia.appnea.ui.condiciones.colorAptitud
 import com.berterogarcia.appnea.ui.condiciones.direccion
 import com.berterogarcia.appnea.ui.condiciones.hora
 import com.berterogarcia.appnea.ui.condiciones.num
+import androidx.compose.material3.LinearProgressIndicator
 
 /**
  * Sección de clima de Inicio: resumen de ahora + accesos a marea, sol/luna, pesca y
@@ -57,14 +58,15 @@ fun ClimaSeccion(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val lanzadorPermiso = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { concedido ->
-        if (concedido) viewModel.usarMiUbicacion()
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { resultado ->
+        if (resultado.values.any { it }) viewModel.usarMiUbicacion() else viewModel.permisoDenegado()
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "📍 ${uiState.ubicacion.nombre ?: "Ubicación seleccionada"}",
+            text = if (uiState.buscandoUbicacion) "📍 Buscando tu ubicación…"
+            else "📍 ${uiState.ubicacion.nombre ?: "Ubicación seleccionada"}",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.fillMaxWidth()
@@ -74,12 +76,21 @@ fun ClimaSeccion(
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
-                onClick = { lanzadorPermiso.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
+                enabled = !uiState.cargando,
+                onClick = {
+                    lanzadorPermiso.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                },
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF16F7FB)),
                 border = BorderStroke(1.dp, Color(0xFF16F7FB)),
                 modifier = Modifier.weight(1f)
             ) { Text("Usar mi ubicación") }
             OutlinedButton(
+                enabled = !uiState.cargando,
                 onClick = { viewModel.usarComodoroRivadavia() },
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF16F7FB)),
                 border = BorderStroke(1.dp, Color(0xFF16F7FB)),
@@ -90,6 +101,7 @@ fun ClimaSeccion(
         Spacer(Modifier.height(8.dp))
 
         Button(
+            enabled = !uiState.cargando,
             onClick = { viewModel.cargarClima() },
             modifier = Modifier.fillMaxWidth()
         ) { Text("Actualizar") }
@@ -99,10 +111,18 @@ fun ClimaSeccion(
         val condiciones = uiState.condiciones
         when {
             uiState.cargando && condiciones == null -> {
-                Row(
+                Column(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) { CircularProgressIndicator() }
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        if (uiState.buscandoUbicacion) "Buscando tu ubicación…"
+                        else "Cargando condiciones…",
+                        color = TextoSecundario
+                    )
+                }
             }
             uiState.error != null && condiciones == null -> {
                 Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))) {
@@ -114,6 +134,9 @@ fun ClimaSeccion(
                 }
             }
             condiciones != null -> {
+                if (uiState.cargando) {   // "Actualizar": deja los datos y muestra una barrita
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
+                }
                 uiState.error?.let {
                     Text(it, color = Color(0xFFFF6B6B), style = MaterialTheme.typography.bodySmall)
                     Spacer(Modifier.height(8.dp))
