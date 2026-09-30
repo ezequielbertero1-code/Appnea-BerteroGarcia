@@ -22,12 +22,14 @@ fun CampoTexto(
     mensajeError: String = "",
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    minLines: Int = 1
+    minLines: Int = 1,
+    trailingIcon: (@Composable () -> Unit)? = null
 ) {
     OutlinedTextField(
         value = valor,
         onValueChange = onValorChange,
         label = { Text(etiqueta) },
+        trailingIcon = trailingIcon,
         visualTransformation = if (esPassword) PasswordVisualTransformation() else visualTransformation,
         isError = esError,
         supportingText = { if (esError) Text(mensajeError) },

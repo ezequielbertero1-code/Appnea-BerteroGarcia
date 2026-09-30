@@ -1,10 +1,14 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
+import com.berterogarcia.appnea.data.local.UbicacionHelper
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,11 +60,13 @@ data class NuevaInmersionUiState(
     val actividad: String = "",
     val comentarios: String = "",
     val guardadoOk: Boolean = false,
+    val guardando: Boolean = false,
     val errores: Map<Campo, String> = emptyMap(),
 )
 
 class NuevaInmersionViewModel(
-    private val repository: InmersionRepository
+    private val repository: InmersionRepository,
+    private val appContext: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -96,8 +102,29 @@ class NuevaInmersionViewModel(
     fun onHoraSalidaChange(v: String) = _uiState.update { it.copy(horaSalida = v) }
     fun onLastreChange(v: String) = _uiState.update { it.copy(lastreKg = v.filter { c -> c.isDigit() }) }
     fun onProteccionMmChange(v: String) = _uiState.update { it.copy(proteccionMm = v.filter { c -> c.isDigit() }) }
-    fun onTempAireChange(v: String) = _uiState.update { it.copy(temperaturaAireC = v.filter { c -> c.isDigit() }) }
-    fun onTempAguaChange(v: String) = _uiState.update { it.copy(temperaturaAguaC = v.filter { c -> c.isDigit() }) }
+
+    // Normaliza lo que escribe el usuario:
+    // - acepta "," o "." como decimal (el teclado en español suele mostrar ",")
+    // - un solo "-" y solo al principio (por si el teclado sí lo tiene, o se pega texto)
+    // - un solo separador decimal y como mucho 6 caracteres ("-12.55")
+    private fun filtrarTemperatura(v: String): String {
+        val normalizado = v.replace(',', '.')
+        val signo = if (normalizado.startsWith("-")) "-" else ""
+        val cuerpo = normalizado.filter { it.isDigit() || it == '.' }
+        val punto = cuerpo.indexOf('.')
+        val numero = if (punto == -1) cuerpo
+        else cuerpo.substring(0, punto + 1) + cuerpo.substring(punto + 1).replace(".", "")
+        return (signo + numero).take(6)
+    }
+
+    // Pone o saca el "-" adelante, sin importar qué muestre el teclado
+    private fun alternarSigno(v: String): String = if (v.startsWith("-")) v.drop(1) else "-$v"
+
+    fun onTempAireChange(v: String) = _uiState.update { it.copy(temperaturaAireC = filtrarTemperatura(v)) }
+    fun onTempAguaChange(v: String) = _uiState.update { it.copy(temperaturaAguaC = filtrarTemperatura(v)) }
+    fun onAlternarSignoAire() = _uiState.update { it.copy(temperaturaAireC = alternarSigno(it.temperaturaAireC)) }
+    fun onAlternarSignoAgua() = _uiState.update { it.copy(temperaturaAguaC = alternarSigno(it.temperaturaAguaC)) }
+
     fun onVisibilidadChange(v: String) = _uiState.update { it.copy(visibilidadMetros = v.filter { c -> c.isDigit() }) }
     fun onActividadChange(v: String) = _uiState.update { it.copy(actividad = v) }
     fun onComentariosChange(v: String) = _uiState.update { it.copy(comentarios = v) }
@@ -124,7 +151,17 @@ class NuevaInmersionViewModel(
             _uiState.update { it.copy(errores = errores, etapa = primera) }
             return
         }
+        if (s.guardando) return
+        _uiState.update { it.copy(guardando = true, errores = emptyMap()) }
+
         viewModelScope.launch {
+            val fecha = LocalDate.parse(s.fecha, FORMATO_FECHA)
+            val horaEntrada = LocalTime.parse(s.horaEntrada)
+            // Ubicación del teléfono si hay permiso; si no, Comodoro. Sin internet guarda solo luna/actividad.
+            val ubicacion = UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
+            val condiciones = runCatching {
+                CondicionesRepository.registroPara(ubicacion.latitud, ubicacion.longitud, fecha.atTime(horaEntrada))
+            }.getOrNull()
             repository.guardar(
                 InmersionEntity(
                     fecha = LocalDate.parse(s.fecha, FORMATO_FECHA),
@@ -142,10 +179,11 @@ class NuevaInmersionViewModel(
                     temperaturaAguaC = s.temperaturaAguaC.toFloatOrNull() ?: 0f,
                     visibilidadMetros = s.visibilidadMetros.toFloatOrNull() ?: 0f,
                     actividad = s.actividad,
-                    comentarios = s.comentarios
+                    comentarios = s.comentarios,
+                    condiciones = condiciones
                 )
             )
-            _uiState.update { it.copy(guardadoOk = true) }
+            _uiState.update { it.copy(guardadoOk = true, guardando = false) }
         }
     }
 
@@ -178,12 +216,12 @@ class NuevaInmersionViewModel(
         if (proteccion == null || proteccion < 0f) errores[Campo.PROTECCION] = "Proteccion minima 0mm."
 
         val temperaturaAire = s.temperaturaAireC.toFloatOrNull()
-        if (temperaturaAire == null || temperaturaAire < 0f) errores[Campo.TEMP_AIRE] = "Temperatura mínima 0°C."
-            else if (temperaturaAire > 40f) errores[Campo.TEMP_AIRE] = "Temperatura máxima 40°C."
+        if (temperaturaAire == null || temperaturaAire < -20f) errores[Campo.TEMP_AIRE] = "Temperatura mínima -20°C."
+        else if (temperaturaAire > 45f) errores[Campo.TEMP_AIRE] = "Temperatura máxima 45°C."
 
         val temperaturaAgua = s.temperaturaAguaC.toFloatOrNull()
-        if (temperaturaAgua == null || temperaturaAgua < -10f) errores[Campo.TEMP_AGUA] = "Temperatura mínima -10°C."
-            else if (temperaturaAgua > 10f) errores[Campo.TEMP_AGUA] = "Temperatura máxima 10°C."
+        if (temperaturaAgua == null || temperaturaAgua < -2f) errores[Campo.TEMP_AGUA] = "Temperatura mínima -2°C."
+        else if (temperaturaAgua > 40f) errores[Campo.TEMP_AGUA] = "Temperatura máxima 40°C."
 
         val visibilidad = s.visibilidadMetros.toFloatOrNull()
         if (visibilidad == null || visibilidad < 0f) errores[Campo.VISIBILIDAD] = "Visibilidad minima 0m."
@@ -191,8 +229,8 @@ class NuevaInmersionViewModel(
     }
 
     companion object {
-        fun Factory(repository: InmersionRepository) = viewModelFactory {
-            initializer { NuevaInmersionViewModel(repository) }
+        fun Factory(repository: InmersionRepository, appContext: Context) = viewModelFactory {
+            initializer { NuevaInmersionViewModel(repository, appContext) }
         }
     }
 }

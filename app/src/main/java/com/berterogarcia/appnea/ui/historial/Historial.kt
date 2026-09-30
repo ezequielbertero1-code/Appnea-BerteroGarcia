@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.ui.condiciones.ResumenCondicionesRegistro
 
 @Composable
 fun HistorialScreen(
@@ -70,25 +71,30 @@ private fun InmersionCard(inmersion: InmersionEntity, onVerDetalle: () -> Unit) 
             contentColor = Color.White
         )
     ) {
-        Row(
-            modifier = Modifier.padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
+        // Column de afuera: arriba la fila de datos + botón, abajo el clima
+        Column(
+            modifier = Modifier.padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 4.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("${inmersion.fecha} — ${inmersion.lugar}", fontWeight = FontWeight.Bold)
-                if (inmersion.actividad.isNotBlank()) {
-                    Text(inmersion.actividad, style = MaterialTheme.typography.bodySmall)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("${inmersion.fecha} — ${inmersion.lugar}", fontWeight = FontWeight.Bold)
+                    if (inmersion.actividad.isNotBlank()) {
+                        Text(inmersion.actividad, style = MaterialTheme.typography.bodySmall)
+                    }
+                    Text("Profundidad: ${inmersion.profundidadMetros} m")
+                    Text("Fondo: ${inmersion.tiempoFondo}")
                 }
-                Text("Profundidad: ${inmersion.profundidadMetros} m")
-                Text("Fondo: ${inmersion.tiempoFondo}")
+                IconButton(onClick = onVerDetalle) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = "Ver detalle",
+                        tint = Color(0xFF16F7FB)
+                    )
+                }
             }
-            IconButton(onClick = onVerDetalle) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = "Ver detalle",
-                    tint = Color(0xFF16F7FB)
-                )
-            }
+
+            // Clima/mar/marea/luna guardados al registrar (null en inmersiones viejas → no muestra nada)
+            inmersion.condiciones?.let { ResumenCondicionesRegistro(it) }
         }
     }
 }

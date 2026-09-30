@@ -3,6 +3,7 @@ package com.berterogarcia.appnea.navigation
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -15,6 +16,7 @@ import androidx.navigation.navArgument
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.MyApplication
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
+import com.berterogarcia.appnea.ui.condiciones.CondicionesScreen
 import com.berterogarcia.appnea.ui.cronometro.CronometroScreen
 import com.berterogarcia.appnea.ui.cronometro.EntrenamientoApneaViewModel
 import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
@@ -40,6 +42,7 @@ const val RUTA_REGISTRO = "registro"
 const val RUTA_LOGIN = "login"
 const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
 const val RUTA_DETALLE_INMERSION = "detalle_inmersion/{id}"
+const val RUTA_CONDICIONES = "condiciones"
 const val RUTA_NUEVA_SALIDA_PESCA = "nueva_salida_pesca"
 
 @Composable
@@ -93,6 +96,7 @@ fun AppNavHost(
             InicioScreen(
                 nombreUsuario = app.sessionManager.obtenerUsuario(),
                 climaViewModel = climaViewModel,
+                onVerCondiciones = { navController.navigate(RUTA_CONDICIONES) },
                 onIrA = { destino ->
                     // Misma navegación que la barra inferior
                     navController.navigate(destino.name) {
@@ -103,7 +107,18 @@ fun AppNavHost(
                 }
             )
         }
-
+        //==============================CONDICIONES==============================================
+        composable(RUTA_CONDICIONES) { entrada ->
+            // Reutiliza el mismo ViewModel de Inicio (así no vuelve a descargar todoo)
+            val duenio = remember(entrada) {
+                runCatching { navController.getBackStackEntry(AppDestinations.INICIO.name) }.getOrNull()
+            } ?: entrada
+            val climaViewModel: ClimaViewModel = viewModel(
+                viewModelStoreOwner = duenio,
+                factory = ClimaViewModel.Factory(app.applicationContext)
+            )
+            CondicionesScreen(viewModel = climaViewModel)
+        }
         //==============================ENTRENAMIENTO (antes Cronometro)=========================
         composable(AppDestinations.ENTRENAMIENTO.name) {
             val entrenamientoViewModel: EntrenamientoApneaViewModel = viewModel(
@@ -134,7 +149,7 @@ fun AppNavHost(
         }
         composable(RUTA_NUEVA_INMERSION) {
             val viewModel: NuevaInmersionViewModel = viewModel(
-                factory = NuevaInmersionViewModel.Factory(app.inmersionRepository)
+                factory = NuevaInmersionViewModel.Factory(app.inmersionRepository, app.applicationContext)
             )
             NuevaInmersionScreen(
                 viewModel = viewModel,

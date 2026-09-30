@@ -50,6 +50,9 @@ import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.CheckboxGroup
 import com.berterogarcia.appnea.ui.components.DatePickerField
 import com.berterogarcia.appnea.ui.components.TimePickerField
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 
 private val OPCIONES_AGUA = listOf(
     "Dulce", "Salada", "Orilla", "Bote", "Olas", "Corrientes", "Resaca"
@@ -141,8 +144,12 @@ fun NuevaInmersionScreen(
             else OutlinedButton(onClick = viewModel::anterior, modifier = Modifier.weight(1f)) {
                 Text("Anterior")
             }
-            if (esUltima) Button(onClick = viewModel::guardar, modifier = Modifier.weight(1f)) {
-                Text("Guardar")
+            if (esUltima) Button(
+                onClick = viewModel::guardar,
+                enabled = !uiState.guardando,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(if (uiState.guardando) "Guardando…" else "Guardar")
             }
             else Button(onClick = viewModel::siguiente, modifier = Modifier.weight(1f)) {
                 Text("Siguiente")
@@ -264,14 +271,16 @@ private fun EtapaCondiciones(uiState: NuevaInmersionUiState, viewModel: NuevaInm
         valor = uiState.temperaturaAireC, onValorChange = viewModel::onTempAireChange,
         etiqueta = "Temperatura del aire (°C)",
         esError = uiState.errores.containsKey(Campo.TEMP_AIRE), mensajeError = uiState.errores[Campo.TEMP_AIRE] ?: "",
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
+        trailingIcon = { BotonSigno(onClick = viewModel::onAlternarSignoAire) },
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
     )
     CampoTexto(
         valor = uiState.temperaturaAguaC, onValorChange = viewModel::onTempAguaChange,
         etiqueta = "Temperatura del agua (°C)",
         esError = uiState.errores.containsKey(Campo.TEMP_AGUA), mensajeError = uiState.errores[Campo.TEMP_AGUA] ?: "",
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
+        trailingIcon = { BotonSigno(onClick = viewModel::onAlternarSignoAgua) },
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
     )
     CampoTexto(
@@ -320,4 +329,21 @@ private fun EtapaNotas(uiState: NuevaInmersionUiState, viewModel: NuevaInmersion
         minLines = 3,
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
     )
+    Text(
+        "Al guardar se registran solas las condiciones del momento de entrada: clima, olas, marea y luna.",
+        style = MaterialTheme.typography.bodySmall,
+        color = Color.White.copy(alpha = 0.8f),
+        modifier = Modifier.padding(top = 8.dp)
+    )
+}
+
+// Botón para cambiar el signo: muchos teclados numéricos no tienen la tecla "-"
+@Composable
+private fun BotonSigno(onClick: () -> Unit) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier.semantics { contentDescription = "Cambiar signo" } // para TalkBack
+    ) {
+        Text("±", style = MaterialTheme.typography.titleLarge, color = Color(0xFF16F7FB))
+    }
 }
