@@ -13,18 +13,31 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         UsuarioEntity::class,
         TablaPersonalizadaEntity::class,
         SesionApneaEntity::class,
-        SalidaPescaEntity::class
+        SalidaPescaEntity::class,
+        // [NUEVO v6] Perfil del usuario
+        PerfilUsuarioEntity::class,
+        EquipoEntity::class,
+        CertificadoEntity::class,
+        ContactoEmergenciaEntity::class
     ],
-    version = 5, // v5: condiciones guardadas en inmersiones y salidas de pesca
+    // v5: condiciones guardadas en inmersiones y salidas de pesca
+    // v6: [NUEVO] perfil, equipamiento, certificados y contactos de emergencia
+    version = 6,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
+@TypeConverters(Converters::class, PerfilConverters::class) // [CAMBIO] + PerfilConverters
 abstract class AppDatabase : RoomDatabase() {
     abstract fun inmersionDao(): InmersionDao
     abstract fun usuarioDao(): UsuarioDao
     abstract fun tablaPersonalizadaDao(): TablaPersonalizadaDao
     abstract fun sesionApneaDao(): SesionApneaDao
     abstract fun salidaPescaDao(): SalidaPescaDao
+
+    // [NUEVO v6]
+    abstract fun perfilUsuarioDao(): PerfilUsuarioDao
+    abstract fun equipoDao(): EquipoDao
+    abstract fun certificadoDao(): CertificadoDao
+    abstract fun contactoEmergenciaDao(): ContactoEmergenciaDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -33,7 +46,7 @@ abstract class AppDatabase : RoomDatabase() {
         // (instalación nueva o cuando se borra por un cambio de versión/esquema).
         // Login: Franco / Mamalesa21
         // Además reinicia la marca de SeedDatos para que se vuelvan a cargar los datos de ejemplo.
-        private fun seedCallback(appContext: Context) = object : RoomDatabase.Callback() {
+        private fun seedCallback(appContext: Context) = object : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
                 db.execSQL(
@@ -44,10 +57,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        // Elimina la BD si no la encuentra, es para ahora que estamos en produccion
+        // Elimina la BD si no la encuentra, es para ahora que estamos en produccion.
+        // OJO: al pasar de v5 a v6 se borran los datos cargados a mano (el seed de Franco
+        // se vuelve a generar solo). Ver README_cambios.md si quieren conservarlos.
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                Room.databaseBuilder(
+                // [CAMBIO] doble chequeo: si dos hilos entran a la vez, el segundo reutiliza la instancia.
+                INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "app_database"

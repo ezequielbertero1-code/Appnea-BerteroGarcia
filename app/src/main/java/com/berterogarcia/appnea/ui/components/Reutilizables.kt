@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,7 +42,6 @@ import com.berterogarcia.appnea.ui.condiciones.Acento
 import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
 import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
 
-
 @Composable
 fun CampoTexto(
     valor: String,
@@ -52,6 +52,7 @@ fun CampoTexto(
     esError: Boolean = false,
     mensajeError: String = "",
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     minLines: Int = 1,
     trailingIcon: (@Composable () -> Unit)? = null
@@ -65,6 +66,7 @@ fun CampoTexto(
         isError = esError,
         supportingText = { if (esError) Text(mensajeError) },
         keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         singleLine = minLines == 1,
         minLines = minLines,
         modifier = modifier,

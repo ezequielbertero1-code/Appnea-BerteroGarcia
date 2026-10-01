@@ -4,75 +4,51 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.data.local.CertificadoEntity
+import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
+import com.berterogarcia.appnea.data.local.EquipoEntity
+import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
 import com.berterogarcia.appnea.data.local.SessionManager
 import com.berterogarcia.appnea.data.local.formatearDuracion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
+import com.berterogarcia.appnea.data.repository.PerfilRepository
 import com.berterogarcia.appnea.data.repository.SalidaPescaRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
+import com.berterogarcia.appnea.ui.perfil.certificados.ordenarCertificados
+import com.berterogarcia.appnea.ui.perfil.comun.EstadoVencimiento
+import com.berterogarcia.appnea.ui.perfil.comun.estadoVencimiento
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlin.time.Duration
 
-/**
- * Perfil SIMULADO: todavía no guardamos estos datos en la base, así que se muestran
- * valores de ejemplo para ver cómo quedaría la pantalla con todos los campos.
- */
-data class PerfilSimulado(
-    val nombreCompleto: String,
-    val email: String,
-    val fechaNacimiento: String,
-    val ciudad: String,
-    val telefono: String,
-    val certificacionBuceo: String,
-    val certificacionApnea: String,
-    val escuela: String,
-    val numeroCertificado: String,
-    val aptoMedicoVence: String,
-    val contactoEmergenciaNombre: String,
-    val contactoEmergenciaRelacion: String,
-    val contactoEmergenciaTelefono: String,
-    val companeroHabitual: String
-)
+// [CAMBIO] Se eliminó PerfilSimulado / perfilDeEjemplo: ahora los datos salen de la base.
 
-private fun perfilDeEjemplo(usuario: String?): PerfilSimulado {
-    val nombre = usuario?.takeIf { it.isNotBlank() } ?: "Usuario"
-    return if (nombre.equals("Franco", ignoreCase = true)) {
-        PerfilSimulado(
-            nombreCompleto = "Franco García",
-            email = "franco.garcia@appnea.com.ar",
-            fechaNacimiento = "14/03/1995",
-            ciudad = "Comodoro Rivadavia, Chubut",
-            telefono = "+54 297 415-2231",
-            certificacionBuceo = "Buceador 2 Estrellas (CMAS)",
-            certificacionApnea = "Apnea Nivel 1",
-            escuela = "Escuela de Buceo Zeus",
-            numeroCertificado = "ARG-CMAS-2023-04871",
-            aptoMedicoVence = "30/06/2027",
-            contactoEmergenciaNombre = "Laura González",
-            contactoEmergenciaRelacion = "Hermana",
-            contactoEmergenciaTelefono = "+54 297 430-8812",
-            companeroHabitual = "Eze Bertero"
-        )
-    } else {
-        PerfilSimulado(
-            nombreCompleto = nombre,
-            email = "${nombre.lowercase()}@appnea.com.ar",
-            fechaNacimiento = "01/01/1998",
-            ciudad = "Comodoro Rivadavia, Chubut",
-            telefono = "+54 297 400-0000",
-            certificacionBuceo = "Buceador 1 Estrella (CMAS)",
-            certificacionApnea = "Apnea Nivel 1",
-            escuela = "Escuela de Buceo Zeus",
-            numeroCertificado = "ARG-CMAS-2024-00000",
-            aptoMedicoVence = "31/12/2026",
-            contactoEmergenciaNombre = "Contacto de ejemplo",
-            contactoEmergenciaRelacion = "Familiar",
-            contactoEmergenciaTelefono = "+54 297 400-0001",
-            companeroHabitual = "Sin cargar"
-        )
-    }
+/**
+ * Resumen del perfil para la pantalla Cuenta (datos reales de la base).
+ * `cargando` evita mostrar "no cargaste nada" durante el primer instante.
+ */
+data class ResumenPerfil(
+    val cargando: Boolean = true,
+    val perfil: PerfilUsuarioEntity? = null,
+    val equipos: List<EquipoEntity> = emptyList(),
+    val certificados: List<CertificadoEntity> = emptyList(),
+    val contactos: List<ContactoEmergenciaEntity> = emptyList(),
+    val error: Boolean = false
+) {
+    val equiposEnUso: List<EquipoEntity> get() = equipos.filter { it.enUso }
+
+    val equiposConServicePendiente: Int
+        get() = equiposEnUso.count {
+            estadoVencimiento(it.proximoMantenimiento) in setOf(EstadoVencimiento.POR_VENCER, EstadoVencimiento.VENCIDO)
+        }
+
+    val contactoPrincipal: ContactoEmergenciaEntity?
+        get() = contactos.firstOrNull { it.esPrincipal } ?: contactos.firstOrNull()
 }
 
 /**
@@ -93,13 +69,39 @@ data class EstadisticasCuenta(
 
 class CuentaViewModel(
     private val sessionManager: SessionManager,
+    perfilRepository: PerfilRepository,
     inmersionRepository: InmersionRepository,
     sesionApneaRepository: SesionApneaRepository,
     salidaPescaRepository: SalidaPescaRepository
 ) : ViewModel() {
     val usuario: String? = sessionManager.obtenerUsuario()
 
-    val perfil: PerfilSimulado = perfilDeEjemplo(usuario)
+    // [NUEVO] Perfil real, se actualiza solo cuando se edita en las otras pantallas (Flow de Room).
+    private val resumenFlow: Flow<ResumenPerfil> =
+        if (usuario == null) {
+            flowOf(ResumenPerfil(cargando = false))
+        } else {
+            combine(
+                perfilRepository.observarPerfil(usuario),
+                perfilRepository.observarEquipamiento(usuario),
+                perfilRepository.observarCertificados(usuario),
+                perfilRepository.observarContactos(usuario)
+            ) { perfil, equipos, certificados, contactos ->
+                ResumenPerfil(
+                    cargando = false,
+                    perfil = perfil,
+                    equipos = equipos,
+                    certificados = ordenarCertificados(certificados),
+                    contactos = contactos
+                )
+            }.catch { emit(ResumenPerfil(cargando = false, error = true)) }
+        }
+
+    val resumen: StateFlow<ResumenPerfil> = resumenFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = ResumenPerfil()
+    )
 
     val estadisticas: StateFlow<EstadisticasCuenta> = combine(
         inmersionRepository.todasLasInmersiones,
@@ -123,11 +125,13 @@ class CuentaViewModel(
             capturasTotales = capturas.sumOf { it.cantidad },
             mayorPieza = mayor?.let { "${it.especie} (${"%.1f".format(it.pesoKg)} kg)" } ?: "-"
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = EstadisticasCuenta()
-    )
+    }
+        .catch { emit(EstadisticasCuenta()) } // [CAMBIO] si falla la base, se muestran guiones en vez de crashear
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = EstadisticasCuenta()
+        )
 
     fun cerrarSesion() {
         sessionManager.cerrarSesion()
@@ -136,12 +140,19 @@ class CuentaViewModel(
     companion object {
         fun Factory(
             sessionManager: SessionManager,
+            perfilRepository: PerfilRepository,
             inmersionRepository: InmersionRepository,
             sesionApneaRepository: SesionApneaRepository,
             salidaPescaRepository: SalidaPescaRepository
         ) = viewModelFactory {
             initializer {
-                CuentaViewModel(sessionManager, inmersionRepository, sesionApneaRepository, salidaPescaRepository)
+                CuentaViewModel(
+                    sessionManager,
+                    perfilRepository,
+                    inmersionRepository,
+                    sesionApneaRepository,
+                    salidaPescaRepository
+                )
             }
         }
     }

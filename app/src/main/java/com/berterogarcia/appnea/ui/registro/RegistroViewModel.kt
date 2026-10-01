@@ -31,7 +31,7 @@ class RegistroViewModel(private val repository: UsuarioRepository) : ViewModel()
         }
         viewModelScope.launch {
             _uiState.value = RegistroUiState.Cargando
-            val creado = repository.registrar(usuario, password)
+            val creado = repository.registrar(usuario.trim(), password)
             _uiState.value = if (creado) RegistroUiState.Exitoso
             else RegistroUiState.Error("Ese usuario ya existe.")
         }

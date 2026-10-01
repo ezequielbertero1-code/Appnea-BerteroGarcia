@@ -16,7 +16,7 @@
     <string name="sin_cuenta">No tenes una cuenta? Registrate.</string>
 
     <!-- ==========================CUENTA=================================== -->
-    <string name="cuenta_greeting">Hola, </string>
+    <string name="cuenta_greeting">Hola, %1$s</string>
     <string name="cuenta_username">Nombre de Usuario</string>
     <string name="cuenta_cerrar_session">Cerrar Sesion</string>
 </resources>

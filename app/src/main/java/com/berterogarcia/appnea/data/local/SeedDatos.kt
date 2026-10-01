@@ -47,6 +47,8 @@ object SeedDatos {
             salida.copy(condiciones = clima.aRegistro(salida.fecha.atTime(10, 0)))
         }.forEach { db.salidaPescaDao().insertar(it) }
 
+        // Perfil de ejemplo (datos personales, certificados, equipo, contacto). Es idempotente.
+        runCatching { SeedPerfil.sembrarPerfilFranco(db) }
         prefs.edit { putBoolean(CLAVE_SEMBRADO, true) }
     }
 

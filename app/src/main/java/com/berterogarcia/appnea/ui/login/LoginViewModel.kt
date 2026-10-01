@@ -25,11 +25,26 @@ class LoginViewModel(
     val uiState: StateFlow<LoginUiState> = _uiState
 
     fun login(usuario: String, password: String) {
+        // [NUEVO] Evita logins duplicados (doble toque en el botón + Enter, por ejemplo).
+        if (_uiState.value is LoginUiState.Cargando || _uiState.value is LoginUiState.Exitoso) return
+
+        // [NUEVO] El teclado del celular suele agregar un espacio al final al autocompletar.
+        val nombre = usuario.trim()
+        if (nombre.isEmpty() || password.isEmpty()) {
+            _uiState.value = LoginUiState.Error("Completá usuario y contraseña.")
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = LoginUiState.Cargando
-            val valido = repository.validar(usuario, password)
+            // [NUEVO] Si falla la base, se muestra un error en vez de crashear.
+            val valido = runCatching { repository.validar(nombre, password) }.getOrElse {
+                _uiState.value = LoginUiState.Error("No se pudo verificar el usuario. Intentá de nuevo.")
+                return@launch
+            }
             if (valido) {
-                sessionManager.guardarUsuario(usuario)
+                // Esto es lo que deja la sesión guardada: al reabrir la app, SesionViewModel lo lee.
+                sessionManager.guardarUsuario(nombre)
                 _uiState.value = LoginUiState.Exitoso
             } else {
                 _uiState.value = LoginUiState.Error("Usuario o contraseña incorrectos.")

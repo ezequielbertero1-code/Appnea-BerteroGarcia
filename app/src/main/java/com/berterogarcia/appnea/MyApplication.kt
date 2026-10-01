@@ -6,8 +6,10 @@ import com.berterogarcia.appnea.data.local.SeedDatos
 import com.berterogarcia.appnea.data.local.SessionManager
 import com.berterogarcia.appnea.data.local.SonidoManager
 import com.berterogarcia.appnea.data.repository.InmersionRepository
+import com.berterogarcia.appnea.data.repository.PerfilRepository
 import com.berterogarcia.appnea.data.repository.SalidaPescaRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
+import com.berterogarcia.appnea.data.repository.SesionRepository
 import com.berterogarcia.appnea.data.repository.TablaPersonalizadaRepository
 import com.berterogarcia.appnea.data.repository.UsuarioRepository
 import kotlinx.coroutines.CoroutineScope
@@ -25,6 +27,19 @@ class MyApplication : Application() {
     val tablaPersonalizadaRepository by lazy { TablaPersonalizadaRepository(database.tablaPersonalizadaDao()) }
     val sesionApneaRepository by lazy { SesionApneaRepository(database.sesionApneaDao()) }
     val salidaPescaRepository by lazy { SalidaPescaRepository(database.salidaPescaDao()) }
+
+    // [NUEVO] Perfil (datos personales, equipamiento, certificados, contactos)
+    val perfilRepository by lazy {
+        PerfilRepository(
+            perfilDao = database.perfilUsuarioDao(),
+            equipoDao = database.equipoDao(),
+            certificadoDao = database.certificadoDao(),
+            contactoDao = database.contactoEmergenciaDao()
+        )
+    }
+
+    // [NUEVO] Valida la sesión guardada al abrir la app
+    val sesionRepository by lazy { SesionRepository(sessionManager, database.usuarioDao()) }
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
