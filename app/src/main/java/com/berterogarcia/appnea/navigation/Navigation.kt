@@ -142,11 +142,17 @@ fun AppNavHost(
         }
         composable(RUTA_REGISTRO) {
             val viewModel: RegistroViewModel = viewModel(
-                factory = RegistroViewModel.Factory(app.usuarioRepository)
+                factory = RegistroViewModel.Factory(app.registroRepository, app.sessionManager)
             )
             RegistroScreen(
                 viewModel = viewModel,
-                onRegistroExitoso = { navController.popBackStack() } // vuelve al login para que inicie sesión
+                onCancelar = { navController.popBackStack() },
+                // La sesión ya quedó iniciada: va a Inicio y limpia la pila (no se vuelve a login/registro).
+                onRegistroExitoso = {
+                    navController.navigate(AppDestinations.INICIO.name) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                }
             )
         }
 

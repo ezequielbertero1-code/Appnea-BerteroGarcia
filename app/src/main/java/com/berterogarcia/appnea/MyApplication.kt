@@ -7,6 +7,7 @@ import com.berterogarcia.appnea.data.local.SessionManager
 import com.berterogarcia.appnea.data.local.SonidoManager
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.data.repository.RegistroRepository
 import com.berterogarcia.appnea.data.repository.SalidaPescaRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.data.repository.SesionRepository
@@ -30,6 +31,7 @@ class MyApplication : Application() {
     }
     val sesionApneaRepository by lazy { SesionApneaRepository(database.sesionApneaDao(), sessionManager) }
     val salidaPescaRepository by lazy { SalidaPescaRepository(database.salidaPescaDao(), sessionManager) }
+    val registroRepository by lazy { RegistroRepository(database) }
 
     // [NUEVO] Perfil (datos personales, equipamiento, certificados, contactos)
     val perfilRepository by lazy {

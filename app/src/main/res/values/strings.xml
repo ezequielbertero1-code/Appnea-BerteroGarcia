@@ -12,7 +12,7 @@
     <string name="registro_username">Nombre de Usuario</string>
     <string name="registro_password">Contraseña</string>
     <string name="registro_confirmar_password">Confirmar Contraseña</string>
-    <string name="registro_button">Registrarme</string>
+    <string name="registro_button">Crear Cuenta</string>
     <string name="sin_cuenta">No tenes una cuenta? Registrate.</string>
 
     <!-- ==========================CUENTA=================================== -->
