@@ -154,7 +154,7 @@ class RegistroViewModel(
         val s = _uiState.value
         if (s.ocupado || s.registroOk) return
 
-        // Se valida toodo de nuevo y, si algo falla, se vuelve al primer paso con error.
+        // Se valida toodoo de nuevo y, si algo falla, se vuelve al primer paso con error.
         val errores = validar(s)
         if (errores.isNotEmpty()) {
             val primerPaso = errores.keys.minOf { it.paso.ordinal }
