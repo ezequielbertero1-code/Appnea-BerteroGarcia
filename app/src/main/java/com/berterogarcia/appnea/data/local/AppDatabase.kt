@@ -23,7 +23,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     // v5: condiciones guardadas en inmersiones y salidas de pesca
     // v6: [NUEVO] perfil, equipamiento, certificados y contactos de emergencia
     version = 6,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(Converters::class, PerfilConverters::class) // [CAMBIO] + PerfilConverters
 abstract class AppDatabase : RoomDatabase() {
