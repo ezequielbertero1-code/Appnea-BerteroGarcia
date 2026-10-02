@@ -41,11 +41,11 @@ object SeedDatos {
 
         inmersiones().zip(CLIMA_INMERSIONES) { inmersion, clima ->
             inmersion.copy(condiciones = clima.aRegistro(inmersion.fecha.atTime(inmersion.horaEntrada)))
-        }.forEach { db.inmersionDao().insertar(it) }
-        sesionesApnea().forEach { db.sesionApneaDao().insertar(it) }
+        }.forEach { db.inmersionDao().insertar(it.copy(nombreUsuario = USUARIO_PRUEBA)) }
+        sesionesApnea().forEach { db.sesionApneaDao().insertar(it.copy(nombreUsuario = USUARIO_PRUEBA)) }
         salidasPesca().zip(CLIMA_SALIDAS) { salida, clima ->
             salida.copy(condiciones = clima.aRegistro(salida.fecha.atTime(10, 0)))
-        }.forEach { db.salidaPescaDao().insertar(it) }
+        }.forEach { db.salidaPescaDao().insertar(it.copy(nombreUsuario = USUARIO_PRUEBA)) }
 
         // Perfil de ejemplo (datos personales, certificados, equipo, contacto). Es idempotente.
         runCatching { SeedPerfil.sembrarPerfilFranco(db) }
