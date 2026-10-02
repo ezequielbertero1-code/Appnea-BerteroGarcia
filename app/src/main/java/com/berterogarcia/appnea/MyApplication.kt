@@ -23,10 +23,13 @@ class MyApplication : Application() {
     val sessionManager by lazy { SessionManager(this) }
     val sonidoManager by lazy { SonidoManager(this) }
     val usuarioRepository by lazy { UsuarioRepository(database.usuarioDao()) }
-    val inmersionRepository by lazy { InmersionRepository(database.inmersionDao()) }
-    val tablaPersonalizadaRepository by lazy { TablaPersonalizadaRepository(database.tablaPersonalizadaDao()) }
-    val sesionApneaRepository by lazy { SesionApneaRepository(database.sesionApneaDao()) }
-    val salidaPescaRepository by lazy { SalidaPescaRepository(database.salidaPescaDao()) }
+    // Estos repositorios reciben la sesión: trabajan siempre sobre el usuario logueado.
+    val inmersionRepository by lazy { InmersionRepository(database.inmersionDao(), sessionManager) }
+    val tablaPersonalizadaRepository by lazy {
+        TablaPersonalizadaRepository(database.tablaPersonalizadaDao(), sessionManager)
+    }
+    val sesionApneaRepository by lazy { SesionApneaRepository(database.sesionApneaDao(), sessionManager) }
+    val salidaPescaRepository by lazy { SalidaPescaRepository(database.salidaPescaDao(), sessionManager) }
 
     // [NUEVO] Perfil (datos personales, equipamiento, certificados, contactos)
     val perfilRepository by lazy {

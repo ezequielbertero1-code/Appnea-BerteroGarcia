@@ -14,26 +14,27 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         TablaPersonalizadaEntity::class,
         SesionApneaEntity::class,
         SalidaPescaEntity::class,
-        // [NUEVO v6] Perfil del usuario
         PerfilUsuarioEntity::class,
         EquipoEntity::class,
         CertificadoEntity::class,
         ContactoEmergenciaEntity::class
     ],
     // v5: condiciones guardadas en inmersiones y salidas de pesca
-    // v6: [NUEVO] perfil, equipamiento, certificados y contactos de emergencia
-    version = 6,
-    exportSchema = false
+    // v6: perfil, equipamiento, certificados y contactos de emergencia
+    // v7: inmersiones, sesiones, salidas de pesca y tablas pasan a ser de cada usuario
+    version = 7,
+    // [CAMBIO] Room guarda el esquema de cada versión en app/schemas/ (configurado en
+    // app/build.gradle.kts). Hace falta para escribir migraciones y para usar AutoMigration.
+    // Esa carpeta SE COMMITEA.
+    exportSchema = true
 )
-@TypeConverters(Converters::class, PerfilConverters::class) // [CAMBIO] + PerfilConverters
+@TypeConverters(Converters::class, PerfilConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun inmersionDao(): InmersionDao
     abstract fun usuarioDao(): UsuarioDao
     abstract fun tablaPersonalizadaDao(): TablaPersonalizadaDao
     abstract fun sesionApneaDao(): SesionApneaDao
     abstract fun salidaPescaDao(): SalidaPescaDao
-
-    // [NUEVO v6]
     abstract fun perfilUsuarioDao(): PerfilUsuarioDao
     abstract fun equipoDao(): EquipoDao
     abstract fun certificadoDao(): CertificadoDao
@@ -42,8 +43,14 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
 
+        /**
+         * Versiones viejas (de antes de tener migraciones) que se pueden borrar al actualizar.
+         * NO agregar versiones nuevas acá: desde la v6 cada cambio lleva su migración.
+         */
+        private val VERSIONES_SIN_MIGRACION = intArrayOf(1, 2, 3, 4, 5)
+
         // Usuario de prueba: se crea solo la primera vez que se genera la base
-        // (instalación nueva o cuando se borra por un cambio de versión/esquema).
+        // (instalación nueva o cuando se borra por venir de una versión vieja).
         // Login: Franco / Mamalesa21
         // Además reinicia la marca de SeedDatos para que se vuelvan a cargar los datos de ejemplo.
         private fun seedCallback(appContext: Context) = object : Callback() {
@@ -57,19 +64,21 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        // Elimina la BD si no la encuentra, es para ahora que estamos en produccion.
-        // OJO: al pasar de v5 a v6 se borran los datos cargados a mano (el seed de Franco
-        // se vuelve a generar solo). Ver README_cambios.md si quieren conservarlos.
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                // [CAMBIO] doble chequeo: si dos hilos entran a la vez, el segundo reutiliza la instancia.
-                INSTANCE ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "app_database"
-                )
-                    .fallbackToDestructiveMigration(true)
-                    .addCallback(seedCallback(context.applicationContext))
+                val appContext = context.applicationContext
+                INSTANCE ?: Room.databaseBuilder(appContext, AppDatabase::class.java, "app_database")
+                    // [CAMBIO] Actualizar ya NO borra los datos:
+                    //  - v6 → v7 (y las que vengan) usan las migraciones de Migraciones.kt.
+                    //  - Solo las versiones 1 a 5 (anteriores a las migraciones) se recrean de cero.
+                    //  - Si alguien sube la versión y se olvida la migración, la app falla al abrir
+                    //    (en desarrollo se ve enseguida) en vez de borrar los datos sin avisar.
+                    .addMigrations(*Migraciones.todas { SessionManager.leerUsuarioGuardado(appContext) })
+                    .fallbackToDestructiveMigrationFrom(true, *VERSIONES_SIN_MIGRACION)
+                    // Instalar un APK más viejo encima de uno más nuevo (pasa al cambiar de rama
+                    // con Franco) borra la base en vez de cerrar la app. Solo afecta a desarrollo.
+                    .fallbackToDestructiveMigrationOnDowngrade(true)
+                    .addCallback(seedCallback(appContext))
                     .build()
                     .also { INSTANCE = it }
             }

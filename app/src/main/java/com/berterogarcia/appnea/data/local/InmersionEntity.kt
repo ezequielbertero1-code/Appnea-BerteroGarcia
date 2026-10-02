@@ -1,13 +1,28 @@
 package com.berterogarcia.appnea.data.local
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import kotlin.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
-@Entity(tableName = "inmersiones")
+// [CAMBIO v7] Cada inmersión pertenece a un usuario (FK a usuarios, se borra en cascada).
+@Entity(
+    tableName = "inmersiones",
+    foreignKeys = [
+        ForeignKey(
+            entity = UsuarioEntity::class,
+            parentColumns = ["nombreUsuario"],
+            childColumns = ["nombreUsuario"],
+            onDelete = ForeignKey.CASCADE,
+            onUpdate = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index(value = ["nombreUsuario"])]
+)
 @TypeConverters(Converters::class)
 data class InmersionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -28,5 +43,8 @@ data class InmersionEntity(
     val actividad: String,
     val comentarios: String,
     // Condiciones (clima, mar, marea, luna) guardadas automáticamente al registrar
-    val condiciones: CondicionesRegistro? = null
+    val condiciones: CondicionesRegistro? = null,
+    // [NUEVO v7] Dueño. Lo completa InmersionRepository con el usuario logueado: no hace falta
+    // pasarlo desde los ViewModels (por eso tiene valor por defecto y va al final).
+    val nombreUsuario: String = ""
 )
