@@ -2,6 +2,7 @@ package com.berterogarcia.appnea
 
 import android.app.Application
 import com.berterogarcia.appnea.data.local.AppDatabase
+import com.berterogarcia.appnea.data.local.PreferenciasLogin
 import com.berterogarcia.appnea.data.local.SeedDatos
 import com.berterogarcia.appnea.data.local.SessionManager
 import com.berterogarcia.appnea.data.local.SonidoManager
@@ -25,6 +26,7 @@ class MyApplication : Application() {
     val sonidoManager by lazy { SonidoManager(this) }
     val usuarioRepository by lazy { UsuarioRepository(database.usuarioDao()) }
     // Estos repositorios reciben la sesión: trabajan siempre sobre el usuario logueado.
+    val preferenciasLogin by lazy { PreferenciasLogin(this) }
     val inmersionRepository by lazy { InmersionRepository(database.inmersionDao(), sessionManager) }
     val tablaPersonalizadaRepository by lazy {
         TablaPersonalizadaRepository(database.tablaPersonalizadaDao(), sessionManager)

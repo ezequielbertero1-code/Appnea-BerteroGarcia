@@ -128,7 +128,7 @@ fun AppNavHost(
         //================================LOGIN==========================================
         composable(RUTA_LOGIN) {
             val viewModel: LoginViewModel = viewModel(
-                factory = LoginViewModel.Factory(app.usuarioRepository, app.sessionManager)
+                factory = LoginViewModel.Factory(app.usuarioRepository, app.sessionManager, app.preferenciasLogin)
             )
             LoginScreen(
                 viewModel = viewModel,

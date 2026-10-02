@@ -21,6 +21,7 @@ import com.berterogarcia.appnea.R
 /**
  * Campo de contraseña con el ojo para mostrar/ocultar. Usa CampoTexto por debajo (mismo estilo).
  * @param onImeAction qué hace el botón del teclado (Siguiente / Listo). Si es null, "Siguiente" pasa al próximo campo.
+ * @param enabled false = deshabilitado (ej: mientras se verifica el login o durante un bloqueo).
  */
 @Composable
 fun CampoPassword(
@@ -31,7 +32,8 @@ fun CampoPassword(
     esError: Boolean = false,
     mensajeError: String = "",
     imeAction: ImeAction = ImeAction.Next,
-    onImeAction: (() -> Unit)? = null
+    onImeAction: (() -> Unit)? = null,
+    enabled: Boolean = true
 ) {
     var visible by rememberSaveable { mutableStateOf(false) }
 
@@ -42,13 +44,14 @@ fun CampoPassword(
         modifier = modifier,
         esError = esError,
         mensajeError = mensajeError,
+        enabled = enabled,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = imeAction),
         keyboardActions = onImeAction?.let { accion ->
             KeyboardActions(onNext = { accion() }, onDone = { accion() })
         } ?: KeyboardActions.Default,
         visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
-            IconButton(onClick = { visible = !visible }) {
+            IconButton(onClick = { visible = !visible }, enabled = enabled) {
                 Icon(
                     painter = painterResource(if (visible) R.drawable.ic_ocultar else R.drawable.ic_ver),
                     contentDescription = if (visible) "Ocultar contraseña" else "Mostrar contraseña",

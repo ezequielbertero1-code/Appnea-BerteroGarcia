@@ -55,7 +55,8 @@ fun CampoTexto(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     minLines: Int = 1,
-    trailingIcon: (@Composable () -> Unit)? = null
+    trailingIcon: (@Composable () -> Unit)? = null,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         value = valor,
@@ -70,6 +71,7 @@ fun CampoTexto(
         singleLine = minLines == 1,
         minLines = minLines,
         modifier = modifier,
+        enabled = enabled,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = Color.White.copy(alpha = 0.10f),
             unfocusedContainerColor = Color.White.copy(alpha = 0.06f),
