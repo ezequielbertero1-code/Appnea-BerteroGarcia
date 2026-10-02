@@ -14,4 +14,8 @@ interface UsuarioDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM usuarios WHERE nombreUsuario = :nombreUsuario)")
     suspend fun existeUsuario(nombreUsuario: String): Boolean
+
+    /** Para pasar el hash viejo (SHA-256) a PBKDF2 la próxima vez que el usuario entra. */
+    @Query("UPDATE usuarios SET password = :hash WHERE nombreUsuario = :nombreUsuario")
+    suspend fun actualizarPassword(nombreUsuario: String, hash: String): Int
 }

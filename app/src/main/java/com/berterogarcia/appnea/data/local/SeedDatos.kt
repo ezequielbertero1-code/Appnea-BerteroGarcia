@@ -36,7 +36,7 @@ object SeedDatos {
         if (prefs.getBoolean(CLAVE_SEMBRADO, false)) return
 
         if (!existeFranco) {
-            db.usuarioDao().insertar(UsuarioEntity(USUARIO_PRUEBA, hashearPassword(PASSWORD_PRUEBA)))
+            db.usuarioDao().insertar(UsuarioEntity(USUARIO_PRUEBA, SeguridadPassword.hashear(PASSWORD_PRUEBA)))
         }
 
         inmersiones().zip(CLIMA_INMERSIONES) { inmersion, clima ->

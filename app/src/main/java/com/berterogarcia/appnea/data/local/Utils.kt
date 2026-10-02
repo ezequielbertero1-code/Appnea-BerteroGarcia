@@ -1,11 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
-import java.security.MessageDigest
-
-fun hashearPassword(password: String): String {
-    val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
-    return bytes.joinToString("") { "%02x".format(it) }
-}
+// Se eliminó hashearPassword (SHA-256 sin salt). Ahora se usa SeguridadPassword.hashear.
 
 // Formatea segundos totales como mm:ss, para mostrar tiempos de fases y marcas de apnea
 fun formatearDuracion(totalSegundos: Int): String {

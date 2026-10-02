@@ -58,7 +58,7 @@ abstract class AppDatabase : RoomDatabase() {
                 super.onCreate(db)
                 db.execSQL(
                     "INSERT INTO usuarios (nombreUsuario, password) VALUES (?, ?)",
-                    arrayOf(SeedDatos.USUARIO_PRUEBA, hashearPassword(SeedDatos.PASSWORD_PRUEBA))
+                    arrayOf(SeedDatos.USUARIO_PRUEBA, SeguridadPassword.hashear(SeedDatos.PASSWORD_PRUEBA))
                 )
                 SeedDatos.reiniciarMarca(appContext)
             }
