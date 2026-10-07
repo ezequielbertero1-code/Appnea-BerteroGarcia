@@ -39,8 +39,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.AvisoAcento
+import com.berterogarcia.appnea.ui.theme.AvisoFondo
+import com.berterogarcia.appnea.ui.theme.AvisoTexto
+import com.berterogarcia.appnea.ui.theme.BordeSuave
+import com.berterogarcia.appnea.ui.theme.ColorError
 import com.berterogarcia.appnea.ui.theme.FondoTarjeta
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import com.berterogarcia.appnea.ui.theme.VeloFuerte
+import com.berterogarcia.appnea.ui.theme.VeloSuave
 
 @Composable
 fun CampoTexto(
@@ -73,21 +81,21 @@ fun CampoTexto(
         modifier = modifier,
         enabled = enabled,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White.copy(alpha = 0.10f),
-            unfocusedContainerColor = Color.White.copy(alpha = 0.06f),
-            focusedBorderColor = Color(0xFF16F7FB),
-            unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
-            focusedLabelColor = Color(0xFF16F7FB),
-            unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+            focusedContainerColor = VeloFuerte,
+            unfocusedContainerColor = VeloSuave,
+            focusedBorderColor = Acento,
+            unfocusedBorderColor = BordeSuave,
+            focusedLabelColor = Acento,
+            unfocusedLabelColor = TextoTerciario,
             focusedTextColor = Color.White,
             unfocusedTextColor = Color.White,
-            cursorColor = Color(0xFF16F7FB),
-            errorContainerColor = Color.White.copy(alpha = 0.10f),
-            errorBorderColor = Color(0xFFFF6B6B),
-            errorLabelColor = Color(0xFFFF6B6B),
+            cursorColor = Acento,
+            errorContainerColor = VeloFuerte,
+            errorBorderColor = ColorError,
+            errorLabelColor = ColorError,
             errorTextColor = Color.White,
-            errorSupportingTextColor = Color(0xFFFF6B6B),
-            errorCursorColor = Color(0xFFFF6B6B)
+            errorSupportingTextColor = ColorError,
+            errorCursorColor = ColorError
         )
     )
 }
@@ -183,14 +191,14 @@ fun TarjetaHero(
 fun TarjetaAviso(titulo: String, texto: String, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))
+        colors = CardDefaults.cardColors(containerColor = AvisoFondo)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-            Icon(painterResource(R.drawable.ic_info), contentDescription = "Advertencia", tint = Color(0xFFE65100))
+            Icon(painterResource(R.drawable.ic_info), contentDescription = "Advertencia", tint = AvisoAcento)
             Spacer(Modifier.width(8.dp))
             Column {
-                Text(titulo, fontWeight = FontWeight.Bold, color = Color(0xFFE65100))
-                Text(texto, style = MaterialTheme.typography.bodySmall, color = Color(0xFF5D4037))
+                Text(titulo, fontWeight = FontWeight.Bold, color = AvisoAcento)
+                Text(texto, style = MaterialTheme.typography.bodySmall, color = AvisoTexto)
             }
         }
     }

@@ -1,6 +1,9 @@
 package com.berterogarcia.appnea.ui.perfil.comun
 
 import androidx.compose.ui.graphics.Color
+import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
+import com.berterogarcia.appnea.ui.theme.ColorError
+import com.berterogarcia.appnea.ui.theme.ColorOk
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -26,14 +29,11 @@ fun estadoVencimiento(
 /** Etiqueta + color para mostrar como insignia. null = no mostrar nada. */
 data class Insignia(val texto: String, val color: Color)
 
-private val ROJO = Color(0xFFFF6B6B)
-private val NARANJA = Color(0xFFFFB74D)
-private val VERDE = Color(0xFF81C784)
 
 fun insigniaVencimiento(fecha: LocalDate?, hoy: LocalDate = LocalDate.now()): Insignia? =
     when (estadoVencimiento(fecha, hoy)) {
         EstadoVencimiento.SIN_FECHA -> null
-        EstadoVencimiento.VENCIDO -> Insignia("Vencido", ROJO)
+        EstadoVencimiento.VENCIDO -> Insignia("Vencido", ColorError)
         EstadoVencimiento.POR_VENCER -> {
             val dias = fecha?.let { ChronoUnit.DAYS.between(hoy, it) } ?: 0L
             val texto = when (dias) {
@@ -41,14 +41,14 @@ fun insigniaVencimiento(fecha: LocalDate?, hoy: LocalDate = LocalDate.now()): In
                 1L -> "Vence mañana"
                 else -> "Vence en $dias días"
             }
-            Insignia(texto, NARANJA)
+            Insignia(texto, ColorAdvertencia)
         }
-        EstadoVencimiento.VIGENTE -> Insignia("Vigente", VERDE)
+        EstadoVencimiento.VIGENTE -> Insignia("Vigente", ColorOk)
     }
 
 fun insigniaMantenimiento(fecha: LocalDate?, hoy: LocalDate = LocalDate.now()): Insignia? =
     when (estadoVencimiento(fecha, hoy)) {
         EstadoVencimiento.SIN_FECHA, EstadoVencimiento.VIGENTE -> null
-        EstadoVencimiento.VENCIDO -> Insignia("Service atrasado", ROJO)
-        EstadoVencimiento.POR_VENCER -> Insignia("Service pronto", NARANJA)
+        EstadoVencimiento.VENCIDO -> Insignia("Service atrasado", ColorError)
+        EstadoVencimiento.POR_VENCER -> Insignia("Service pronto", ColorAdvertencia)
     }

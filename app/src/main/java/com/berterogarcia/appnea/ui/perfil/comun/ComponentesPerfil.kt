@@ -43,6 +43,7 @@ import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.FormaBoton
 import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorError
 import com.berterogarcia.appnea.ui.theme.FondoTarjeta
 import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
@@ -50,7 +51,6 @@ import com.berterogarcia.appnea.ui.theme.TextoSecundario
 // Componentes compartidos por todas las pantallas del perfil.
 // Mismo estilo que el resto de la app: tarjetas FondoTarjeta, acento celeste, texto blanco.
 
-private val RojoError = Color(0xFFFF6B6B)
 
 /** Título de pantalla con botón de volver. */
 @Composable
@@ -87,7 +87,7 @@ fun MensajeError(texto: String?, modifier: Modifier = Modifier) {
     if (texto.isNullOrBlank()) return
     Text(
         text = texto,
-        color = RojoError,
+        color = ColorError,
         style = MaterialTheme.typography.bodyMedium,
         modifier = modifier.padding(vertical = 8.dp)
     )
@@ -245,7 +245,7 @@ fun TarjetaItemPerfil(
                     Icon(Icons.Default.Edit, contentDescription = "Editar", tint = Color.White)
                 }
                 IconButton(onClick = onEliminar) {
-                    Icon(painterResource(R.drawable.ic_borrar), contentDescription = "Eliminar", tint = RojoError)
+                    Icon(painterResource(R.drawable.ic_borrar), contentDescription = "Eliminar", tint = ColorError)
                 }
             }
             lineas.filter { it.isNotBlank() }.forEach { linea ->
@@ -278,7 +278,7 @@ fun DialogoConfirmarEliminacion(
         confirmButton = {
             TextButton(
                 onClick = onConfirmar,
-                colors = ButtonDefaults.textButtonColors(contentColor = RojoError)
+                colors = ButtonDefaults.textButtonColors(contentColor = ColorError)
             ) { Text("Eliminar") }
         },
         dismissButton = { TextButton(onClick = onCancelar) { Text("Cancelar") } }

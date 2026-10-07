@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -20,14 +19,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.data.condiciones.ExtremoMarea
 import com.berterogarcia.appnea.data.condiciones.HoraMar
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorBajamar
 import com.berterogarcia.appnea.ui.theme.ColorRegular
+import com.berterogarcia.appnea.ui.theme.Contorno
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
-private val estiloEje = TextStyle(color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp)
+private val estiloEje = TextStyle(color = TextoTerciario, fontSize = 11.sp)
 
 private fun DrawScope.texto(medidor: TextMeasurer, t: String, x: Float, y: Float, estilo: TextStyle, centrado: Boolean = true) {
     val medida = medidor.measure(t, estilo)
@@ -107,14 +108,14 @@ fun GraficoMarea(
         // Eje X
         for (h in 0..24 step 4) {
             val xh = izq + h / 24f * ancho
-            drawLine(Color.White.copy(alpha = 0.3f), Offset(xh, abajo), Offset(xh, abajo + 4.dp.toPx()))
+            drawLine(Contorno, Offset(xh, abajo), Offset(xh, abajo + 4.dp.toPx()))
             texto(medidor, "$h h", xh, abajo + 5.dp.toPx(), estiloEje)
         }
 
         // Ahora
         if (ahora != null && !ahora.isBefore(inicio) && ahora.isBefore(fin)) {
             val xa = x(ahora)
-            drawLine(Color.White.copy(alpha = 0.7f), Offset(xa, arriba), Offset(xa, abajo), strokeWidth = 1.5.dp.toPx())
+            drawLine(TextoTerciario, Offset(xa, arriba), Offset(xa, abajo), strokeWidth = 1.5.dp.toPx())
         }
 
         // Pleamares y bajamares

@@ -57,13 +57,15 @@ import com.berterogarcia.appnea.ui.components.CampoPassword
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.formatoLargo
 import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
+import com.berterogarcia.appnea.ui.theme.ColorError
+import com.berterogarcia.appnea.ui.theme.ColorOk
+import com.berterogarcia.appnea.ui.theme.Divisor
 import com.berterogarcia.appnea.ui.theme.FondoTarjeta
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
 import java.time.LocalDate
 
-private val RojoError = Color(0xFFFF6B6B)
-private val Naranja = Color(0xFFFFB74D)
-private val Verde = Color(0xFF81C784)
 
 /**
  * Registro por pasos (mismo esquema que Nueva inmersión):
@@ -123,7 +125,7 @@ fun RegistroScreen(
         }
 
         s.errorGeneral?.let {
-            Text(it, color = RojoError, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
+            Text(it, color = ColorError, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
         }
 
         BotonesNavegacion(
@@ -301,9 +303,9 @@ private fun IndicadorPasos(
         PasoRegistro.entries.forEach { paso ->
             val visitado = paso.ordinal <= actual.ordinal
             val fondo = when {
-                paso in conErrores -> RojoError
+                paso in conErrores -> ColorError
                 visitado -> Acento
-                else -> Color.White.copy(alpha = 0.15f)
+                else -> Divisor
             }
             Box(
                 modifier = Modifier
@@ -324,7 +326,7 @@ private fun IndicadorPasos(
     LinearProgressIndicator(
         progress = { (actual.ordinal + 1f) / PasoRegistro.entries.size },
         color = Acento,
-        trackColor = Color.White.copy(alpha = 0.15f),
+        trackColor = Divisor,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 12.dp)
@@ -342,15 +344,15 @@ private fun IndicadorPasos(
 private fun BarraFuerza(fuerza: FuerzaPassword) {
     if (fuerza == FuerzaPassword.VACIA) return
     val color = when (fuerza) {
-        FuerzaPassword.DEBIL -> RojoError
-        FuerzaPassword.MEDIA -> Naranja
-        else -> Verde
+        FuerzaPassword.DEBIL -> ColorError
+        FuerzaPassword.MEDIA -> ColorAdvertencia
+        else -> ColorOk
     }
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         LinearProgressIndicator(
             progress = { fuerza.nivel / 3f },
             color = color,
-            trackColor = Color.White.copy(alpha = 0.15f),
+            trackColor = Divisor,
             modifier = Modifier
                 .weight(1f)
                 .height(6.dp)
@@ -400,23 +402,23 @@ private fun TarjetaResumen(titulo: String, filas: List<Pair<String, String>>, on
 
 @Composable
 private fun AvisoSeguridad(aceptado: Boolean, error: String?, onCambio: (Boolean) -> Unit) {
-    val borde = if (error != null) RojoError else Naranja.copy(alpha = 0.6f)
+    val borde = if (error != null) ColorError else ColorAdvertencia.copy(alpha = 0.6f)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .border(1.dp, borde, RoundedCornerShape(12.dp))
-            .background(Naranja.copy(alpha = 0.08f))
+            .background(ColorAdvertencia.copy(alpha = 0.08f))
             .padding(12.dp)
     ) {
-        Text("Aviso de seguridad", fontWeight = FontWeight.Bold, color = Naranja)
+        Text("Aviso de seguridad", fontWeight = FontWeight.Bold, color = ColorAdvertencia)
         Text(
             "AppneaMe es un registro personal de tus inmersiones y entrenamientos. " +
                     "No reemplaza la formación con un instructor certificado ni el criterio en el agua. " +
                     "Las condiciones del mar son orientativas. Nunca bucees ni hagas apnea solo/a: " +
                     "siempre con un compañero que te vigile desde la superficie.",
             style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.85f),
+            color = TextoSecundario,
             modifier = Modifier.padding(top = 4.dp)
         )
         Row(
@@ -431,14 +433,14 @@ private fun AvisoSeguridad(aceptado: Boolean, error: String?, onCambio: (Boolean
                 onCheckedChange = onCambio,
                 colors = CheckboxDefaults.colors(
                     checkedColor = Acento,
-                    uncheckedColor = if (error != null) RojoError else Color.White.copy(alpha = 0.6f),
+                    uncheckedColor = if (error != null) ColorError else TextoTerciario,
                     checkmarkColor = FondoTarjeta
                 )
             )
             Text("Leí y acepto el aviso de seguridad", style = MaterialTheme.typography.bodyMedium)
         }
         if (error != null) {
-            Text(error, color = RojoError, style = MaterialTheme.typography.bodySmall)
+            Text(error, color = ColorError, style = MaterialTheme.typography.bodySmall)
         }
     }
 }

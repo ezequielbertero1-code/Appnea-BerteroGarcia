@@ -63,15 +63,17 @@ import com.berterogarcia.appnea.ui.components.FilaMosaicos
 import com.berterogarcia.appnea.ui.components.Mosaico
 import com.berterogarcia.appnea.ui.components.TarjetaAviso
 import com.berterogarcia.appnea.ui.components.TarjetaHero
-import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.condiciones.FilaDato
 import com.berterogarcia.appnea.ui.condiciones.Semaforo
 import com.berterogarcia.appnea.ui.condiciones.TarjetaCondicion
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.condiciones.colorAptitud
 import com.berterogarcia.appnea.ui.condiciones.direccion
 import com.berterogarcia.appnea.ui.condiciones.duracion
 import com.berterogarcia.appnea.ui.condiciones.num
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorError
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.time.Duration as JDuration
@@ -126,11 +128,11 @@ fun DetalleInmersionScreen(
                     Icon(
                         painterResource(R.drawable.ic_borrar),
                         contentDescription = "Eliminar inmersión",
-                        tint = Color(0xFFFF6B6B)   // el mismo rojo de error de Reutilizables.kt
+                        tint = ColorError   // el mismo rojo de error de Reutilizables.kt
                     )
                 }
             }
-            Text(i.fecha.format(FORMATO_FECHA), color = Color.White.copy(alpha = 0.7f))
+            Text(i.fecha.format(FORMATO_FECHA), color = TextoTerciario)
         }
 
         // ---- Pestañas (mismo patrón que Inmersión / Entrenar) ----
@@ -188,7 +190,7 @@ fun DetalleInmersionScreen(
                         Toast.makeText(context, "Inmersión eliminada", Toast.LENGTH_SHORT).show()
                         onEliminada()
                     }
-                }) { Text("Eliminar", color = Color(0xFFFF6B6B)) }
+                }) { Text("Eliminar", color = ColorError) }
             },
             dismissButton = {
                 TextButton(onClick = { mostrarDialogo = false }) { Text("Cancelar") }

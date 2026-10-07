@@ -33,13 +33,13 @@ private val EsquemaAppnea = darkColorScheme(
     // Diálogos, menús y date pickers usan estos: azules de la app en vez del gris violáceo por defecto
     surfaceContainerLowest = FondoAbajo,
     surfaceContainerLow = FondoTarjeta,
-    surfaceContainer = Color(0xFF0A2A3D),
+    surfaceContainer = FondoIntermedio,
     surfaceContainerHigh = FondoArriba,
     surfaceContainerHighest = FondoTarjetaResaltada,
     error = ColorMalo,
     onError = FondoTarjeta,
-    outline = Color.White.copy(alpha = 0.3f),
-    outlineVariant = Color.White.copy(alpha = 0.15f)
+    outline = Contorno,
+    outlineVariant = Divisor
 )
 
 /** La app es siempre oscura (fondo marino), así que hay un solo esquema. */

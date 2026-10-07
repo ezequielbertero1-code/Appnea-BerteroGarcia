@@ -12,6 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.BordeSuave
+import com.berterogarcia.appnea.ui.theme.TextoSobreAcento
 
 @Composable
 fun CheckboxGroup(
@@ -32,9 +35,9 @@ fun CheckboxGroup(
                     checked = opcion in seleccionadas,
                     onCheckedChange = { checked -> onCambio(opcion, checked) },
                     colors = CheckboxDefaults.colors(
-                        checkedColor = Color(0xFF16F7FB),
-                        uncheckedColor = Color.White.copy(alpha = 0.5f),
-                        checkmarkColor = Color(0xFF0A3049)
+                        checkedColor = Acento,
+                        uncheckedColor = BordeSuave,
+                        checkmarkColor = TextoSobreAcento
                     )
                 )
                 Text(text = opcion, color = Color.White)

@@ -13,7 +13,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -22,6 +21,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.perfil.comun.CargandoPerfil
 import com.berterogarcia.appnea.ui.perfil.comun.FormularioPerfil
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
 
 @Composable
 fun ContactoFormScreen(
@@ -111,14 +112,14 @@ fun ContactoFormScreen(
                         s.eraPrincipal -> "Para cambiarlo, marcá otro contacto como principal."
                         else -> "Es el que se muestra primero en tu cuenta."
                     },
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = TextoTerciario
                 )
             }
             Switch(
                 checked = s.esPrincipal,
                 onCheckedChange = viewModel::onPrincipalChange,
                 enabled = !s.principalBloqueado,
-                colors = SwitchDefaults.colors(checkedTrackColor = Color(0xFF16F7FB))
+                colors = SwitchDefaults.colors(checkedTrackColor = Acento)
             )
         }
     }

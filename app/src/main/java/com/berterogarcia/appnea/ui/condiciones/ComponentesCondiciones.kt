@@ -36,6 +36,7 @@ import com.berterogarcia.appnea.data.remote.direccionCardinal
 import com.berterogarcia.appnea.ui.theme.ColorBueno
 import com.berterogarcia.appnea.ui.theme.ColorMalo
 import com.berterogarcia.appnea.ui.theme.ColorRegular
+import com.berterogarcia.appnea.ui.theme.Divisor
 import com.berterogarcia.appnea.ui.theme.FondoTarjeta
 import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
@@ -171,7 +172,7 @@ fun MedioCirculo(progreso: Float, color: Color, modifier: Modifier = Modifier, a
         val arriba = grosor / 2
         val izquierda = grosor / 2
         drawArc(
-            color = Color.White.copy(alpha = 0.15f),
+            color = Divisor,
             startAngle = 180f, sweepAngle = 180f, useCenter = false,
             topLeft = Offset(izquierda, arriba), size = Size(diametro, diametro),
             style = Stroke(width = grosor, cap = StrokeCap.Round)

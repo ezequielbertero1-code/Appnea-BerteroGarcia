@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -22,9 +21,12 @@ import com.berterogarcia.appnea.data.local.formatearDuracion
 import com.berterogarcia.appnea.data.perfil.PuntoPerfil
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorBajamar
+import com.berterogarcia.appnea.ui.theme.Contorno
+import com.berterogarcia.appnea.ui.theme.Divisor
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
 import kotlin.math.roundToInt
 
-private val estiloEje = TextStyle(color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp)
+private val estiloEje = TextStyle(color = TextoTerciario, fontSize = 11.sp)
 
 private fun DrawScope.texto(
     medidor: TextMeasurer, t: String, x: Float, y: Float,
@@ -57,7 +59,7 @@ fun GraficoPerfil(puntos: List<PuntoPerfil>, modifier: Modifier = Modifier, prog
 
         // Líneas guía: superficie, mitad y máxima
         listOf(0.0, pMax / 2, pMax).forEach { p ->
-            drawLine(Color.White.copy(alpha = 0.15f), Offset(izq, y(p)), Offset(izq + ancho, y(p)))
+            drawLine(Divisor, Offset(izq, y(p)), Offset(izq + ancho, y(p)))
             texto(medidor, "${p.roundToInt()} m", 0f, y(p) - 7.dp.toPx(), centrado = false)
         }
 
@@ -90,7 +92,7 @@ fun GraficoPerfil(puntos: List<PuntoPerfil>, modifier: Modifier = Modifier, prog
         for (k in 0..4) {
             val s = tMax * k / 4
             val xs = x(s)
-            drawLine(Color.White.copy(alpha = 0.3f), Offset(xs, abajo), Offset(xs, abajo + 4.dp.toPx()))
+            drawLine(Contorno, Offset(xs, abajo), Offset(xs, abajo + 4.dp.toPx()))
             texto(medidor, formatearDuracion(s), xs, abajo + 5.dp.toPx())
         }
     }
