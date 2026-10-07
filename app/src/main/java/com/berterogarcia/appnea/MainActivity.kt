@@ -25,6 +25,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,11 +39,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.berterogarcia.appnea.navigation.AppNavHost
-import com.berterogarcia.appnea.navigation.PREFIJO_PERFIL
 import com.berterogarcia.appnea.navigation.RUTAS_SIN_BARRA
 import com.berterogarcia.appnea.navigation.RUTA_LOGIN
 import com.berterogarcia.appnea.navigation.RUTA_REGISTRO
 import com.berterogarcia.appnea.navigation.irAPestania
+import com.berterogarcia.appnea.navigation.pestaniaAbierta
 import com.berterogarcia.appnea.ui.sesion.EstadoArranque
 import com.berterogarcia.appnea.ui.sesion.SesionViewModel
 import com.berterogarcia.appnea.ui.theme.MyApplicationTheme
@@ -101,6 +102,9 @@ fun MyApplicationApp(destinoInicial: String = RUTA_LOGIN) { // [CAMBIO] recibe e
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route ?: destinoInicial
+    // Pestaña a marcar en la barra: la de origen, aunque estés en un detalle o en Condiciones.
+    // Se recalcula cada vez que cambia la pantalla (backStackEntry).
+    val pestaniaSeleccionada = remember(backStackEntry) { navController.pestaniaAbierta() }
 
     val mostrarMenu = currentRoute != RUTA_LOGIN && currentRoute != RUTA_REGISTRO
     val esFormulario = currentRoute in RUTAS_SIN_BARRA // [CAMBIO] incluye los formularios del perfil
@@ -121,8 +125,7 @@ fun MyApplicationApp(destinoInicial: String = RUTA_LOGIN) { // [CAMBIO] recibe e
                         icon = { Icon(painterResource(destination.icon), contentDescription = destination.label, modifier = Modifier.size(28.dp)) },
                         label = { Text(destination.label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                         // [CAMBIO] Las pantallas "perfil/..." cuentan como parte de Cuenta.
-                        selected = destination.name == currentRoute ||
-                            (destination == AppDestinations.CUENTA && currentRoute.startsWith(PREFIJO_PERFIL)),
+                        selected = destination == pestaniaSeleccionada,
                         onClick = {
                             if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
                                 navController.irAPestania(destination)

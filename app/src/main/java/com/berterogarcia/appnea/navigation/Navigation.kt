@@ -18,12 +18,12 @@ import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.MyApplication
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.condiciones.CondicionesScreen
-import com.berterogarcia.appnea.ui.entrenamiento.CronometroScreen
-import com.berterogarcia.appnea.ui.entrenamiento.EntrenamientoApneaViewModel
 import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
 import com.berterogarcia.appnea.ui.cuenta.CuentaViewModel
 import com.berterogarcia.appnea.ui.detalleinmersion.DetalleInmersionScreen
 import com.berterogarcia.appnea.ui.detalleinmersion.DetalleInmersionViewModel
+import com.berterogarcia.appnea.ui.entrenamiento.CronometroScreen
+import com.berterogarcia.appnea.ui.entrenamiento.EntrenamientoApneaViewModel
 import com.berterogarcia.appnea.ui.historial.HistorialViewModel
 import com.berterogarcia.appnea.ui.informacion.InformacionScreen
 import com.berterogarcia.appnea.ui.inicio.InicioScreen
@@ -58,7 +58,6 @@ const val RUTA_DETALLE_INMERSION = "detalle_inmersion/{id}"
 const val RUTA_CONDICIONES = "condiciones"
 
 //  Perfil. Todas empiezan con "perfil/" para que la barra marque "Cuenta" como seleccionada.
-const val PREFIJO_PERFIL = "perfil/"
 const val RUTA_DATOS_PERSONALES = "perfil/datos"
 const val RUTA_EQUIPAMIENTO = "perfil/equipamiento"
 const val RUTA_FORM_EQUIPO = "perfil/equipamiento/form?id={id}"
@@ -338,6 +337,15 @@ fun AppNavHost(
     }
 }
 /**
+ * Pestaña a la que pertenece la pantalla actual: la raíz de pestaña (además de Inicio) que
+ * esté en la pila; si no hay ninguna, Inicio. Ej.: detalle abierto desde Inmersión → INMERSION;
+ * detalle o Condiciones abiertos desde Inicio → INICIO; perfil/... → CUENTA.
+ */
+fun NavHostController.pestaniaAbierta(): AppDestinations =
+    AppDestinations.entries
+        .firstOrNull { it != AppDestinations.INICIO && estaEnLaPila(it.name) }
+        ?: AppDestinations.INICIO
+/**
  * Navegación entre pestañas (barra inferior y accesos de Inicio).
  *  - Tocar la pestaña en la que ya estás (o una pantalla abierta desde ella, ej. un detalle)
  *    te devuelve a su pantalla principal.
@@ -347,12 +355,7 @@ fun AppNavHost(
 fun NavHostController.irAPestania(destino: AppDestinations) {
     val inicio = AppDestinations.INICIO.name
 
-    // Pestaña abierta: la que (además de Inicio) está en la pila. Si no hay otra, es Inicio.
-    val pestaniaAbierta = AppDestinations.entries
-        .firstOrNull { it != AppDestinations.INICIO && estaEnLaPila(it.name) }
-        ?: AppDestinations.INICIO
-
-    if (destino == pestaniaAbierta) {
+    if (destino == pestaniaAbierta()) {
         // Re-seleccionar la pestaña actual: cierra lo que haya arriba de su raíz
         popBackStack(destino.name, inclusive = false)
         return
