@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun InformacionScreen(modifier: Modifier = Modifier) {
     val titulos = listOf("Apnea", "Buceo")
+    val iconos = listOf(R.drawable.ic_apnea, R.drawable.ic_buceo)
     val pagerState = rememberPagerState(initialPage = 0) { titulos.size }
     val scope = rememberCoroutineScope()
 
@@ -36,9 +37,7 @@ fun InformacionScreen(modifier: Modifier = Modifier) {
                     text = { Text(titulo) },
                     icon = {
                         Icon(
-                            painter = painterResource(
-                                if (index == 0) R.drawable.ic_apnea else R.drawable.ic_informate
-                            ),
+                            painter = painterResource(iconos[index]),
                             contentDescription = titulo
                         )
                     }
