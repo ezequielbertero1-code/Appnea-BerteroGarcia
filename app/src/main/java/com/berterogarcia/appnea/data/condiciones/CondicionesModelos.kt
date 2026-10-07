@@ -70,13 +70,6 @@ data class EstadoMarea(
     val siguiente: ExtremoMarea?
 )
 
-data class PeriodoSolunar(
-    val inicio: LocalDateTime,
-    val fin: LocalDateTime,
-    val mayor: Boolean,
-    val motivo: String
-)
-
 data class DiaAstro(
     val fecha: LocalDate,
     val amanecer: LocalDateTime?,
@@ -96,7 +89,6 @@ data class DiaAstro(
     val emojiFase: String,
     val proximaLunaNueva: LocalDate,
     val proximaLunaLlena: LocalDate,
-    val periodos: List<PeriodoSolunar>
 )
 
 enum class Aptitud(val texto: String) {

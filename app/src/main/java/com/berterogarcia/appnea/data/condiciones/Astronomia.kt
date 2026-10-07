@@ -4,7 +4,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -12,8 +11,8 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
- * Cálculos astronómicos propios (sin internet): posición del Sol y la Luna, salida/puesta,
- * fase lunar y períodos solunares.
+ * Cálculos astronómicos propios (sin internet): posición del Sol y la Luna, salida/puesta y
+ * fase lunar.
  *
  * Usa el método de baja precisión de Paul Schlyter ("How to compute planetary positions",
  * stjarnhimlen.se), con un error típico de pocos minutos en las horas de salida/puesta.
@@ -168,7 +167,7 @@ object Astronomia {
     }
 
     /**
-     * Calcula todo lo astronómico de un día local: Sol, Luna y períodos solunares.
+     * Calcula tpodo lo astronómico de un día local: Sol y Luna.
      */
     fun calcularDia(fecha: LocalDate, lat: Double, lon: Double, zona: ZoneId): DiaAstro {
         val inicio = fecha.atStartOfDay(zona).toInstant()
@@ -213,15 +212,6 @@ object Astronomia {
         val mediodia = tiempos.indices.maxByOrNull { altSol[it] }?.let { aLocal(tiempos[it]) }
         val elong = elongacion(fecha.atTime(12, 0).atZone(zona).toInstant())
 
-        // Períodos solunares: mayores = tránsito/antitránsito de la luna (±1 h),
-        // menores = salida/puesta de la luna (±30 min).
-        val periodos = buildList {
-            transito?.let { add(PeriodoSolunar(it.minusHours(1), it.plusHours(1), true, "Luna en lo alto")) }
-            antitransito?.let { add(PeriodoSolunar(it.minusHours(1), it.plusHours(1), true, "Luna en lo bajo")) }
-            salidaLuna?.let { add(PeriodoSolunar(it.minusMinutes(30), it.plusMinutes(30), false, "Salida de la luna")) }
-            puestaLuna?.let { add(PeriodoSolunar(it.minusMinutes(30), it.plusMinutes(30), false, "Puesta de la luna")) }
-        }.sortedBy { it.inicio }
-
         return DiaAstro(
             fecha = fecha,
             amanecer = amanecer,
@@ -240,11 +230,7 @@ object Astronomia {
             fase = nombreFase(elong),
             emojiFase = emojiFase(elong),
             proximaLunaNueva = proximaFase(fecha, zona, 0.0),
-            proximaLunaLlena = proximaFase(fecha, zona, 180.0),
-            periodos = periodos
+            proximaLunaLlena = proximaFase(fecha, zona, 180.0)
         )
     }
-
-    /** Factor 0..1: 1 en luna nueva o llena (mayor amplitud de marea y actividad), 0 en cuartos. */
-    fun factorFase(elongacion: Double): Double = abs(cos(rad(elongacion)))
 }
