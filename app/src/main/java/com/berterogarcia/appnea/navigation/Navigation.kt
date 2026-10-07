@@ -49,7 +49,6 @@ import com.berterogarcia.appnea.ui.perfil.equipamiento.EquipoFormScreen
 import com.berterogarcia.appnea.ui.perfil.equipamiento.EquipoFormViewModel
 import com.berterogarcia.appnea.ui.pesca.NuevaSalidaPescaScreen
 import com.berterogarcia.appnea.ui.pesca.NuevaSalidaPescaViewModel
-import com.berterogarcia.appnea.ui.pesca.PescaSubmarinaViewModel
 import com.berterogarcia.appnea.ui.registro.RegistroScreen
 import com.berterogarcia.appnea.ui.registro.RegistroViewModel
 
@@ -200,20 +199,15 @@ fun AppNavHost(
             CronometroScreen(entrenamientoViewModel = entrenamientoViewModel)
         }
 
-        //==============================INMERSION (buceo, apnea y pesca submarina)===============
+        //==============================INMERSION (buceo y apnea)=============================
         composable(AppDestinations.INMERSION.name) {
             val historialViewModel: HistorialViewModel = viewModel(
                 factory = HistorialViewModel.Factory(app.inmersionRepository)
             )
-            val pescaViewModel: PescaSubmarinaViewModel = viewModel(
-                factory = PescaSubmarinaViewModel.Factory(app.salidaPescaRepository)
-            )
             InmersionScreen(
                 historialViewModel = historialViewModel,
-                pescaViewModel = pescaViewModel,
-                onAgregarInmersion = { navController.navigate(RUTA_NUEVA_INMERSION) },
-                onAgregarSalidaPesca = { navController.navigate(RUTA_NUEVA_SALIDA_PESCA) },
-                onVerDetalleInmersion = { id -> navController.navigate("detalle_inmersion/$id") }
+                onAgregarInmersion = { navController.navigate(RUTA_NUEVA_INMERSION) { launchSingleTop = true } },
+                onVerDetalleInmersion = { id -> navController.navigate("detalle_inmersion/$id") { launchSingleTop = true } }
             )
         }
         composable(RUTA_NUEVA_INMERSION) {
