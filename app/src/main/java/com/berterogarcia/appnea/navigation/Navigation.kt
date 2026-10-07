@@ -28,6 +28,7 @@ import com.berterogarcia.appnea.ui.detalleinmersion.DetalleInmersionViewModel
 import com.berterogarcia.appnea.ui.historial.HistorialViewModel
 import com.berterogarcia.appnea.ui.informacion.InformacionScreen
 import com.berterogarcia.appnea.ui.inicio.InicioScreen
+import com.berterogarcia.appnea.ui.inicio.InicioViewModel
 import com.berterogarcia.appnea.ui.inmersion.InmersionScreen
 import com.berterogarcia.appnea.ui.login.LoginScreen
 import com.berterogarcia.appnea.ui.login.LoginViewModel
@@ -157,15 +158,22 @@ fun AppNavHost(
         }
 
         //================================INICIO================================================
-        // Clima del día + explicación de cada ambiente de la app.
+        // Registrar inmersión primero, últimas inmersiones y resumen del clima.
         composable(AppDestinations.INICIO.name) {
             val climaViewModel: ClimaViewModel = viewModel(
                 factory = ClimaViewModel.Factory(app.applicationContext)
             )
+            val inicioViewModel: InicioViewModel = viewModel(
+                factory = InicioViewModel.Factory(app.inmersionRepository)
+            )
             InicioScreen(
                 nombreUsuario = app.sessionManager.obtenerUsuario(),
+                inicioViewModel = inicioViewModel,
                 climaViewModel = climaViewModel,
-                onVerCondiciones = { navController.navigate(RUTA_CONDICIONES) },
+                // launchSingleTop: un doble toque no abre el formulario dos veces
+                onNuevaInmersion = { navController.navigate(RUTA_NUEVA_INMERSION) { launchSingleTop = true } },
+                onVerDetalleInmersion = { id -> navController.navigate("detalle_inmersion/$id") { launchSingleTop = true } },
+                onVerCondiciones = { navController.navigate(RUTA_CONDICIONES) { launchSingleTop = true } },
                 onIrA = { destino ->
                     // Misma navegación que la barra inferior
                     navController.navigate(destino.name) {

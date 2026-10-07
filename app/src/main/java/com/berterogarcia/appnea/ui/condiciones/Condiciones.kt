@@ -41,6 +41,7 @@ import com.berterogarcia.appnea.data.condiciones.DiaAstro
 import com.berterogarcia.appnea.data.remote.descripcionClima
 import com.berterogarcia.appnea.data.remote.emojiClima
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
+import com.berterogarcia.appnea.ui.clima.SelectorUbicacion
 import kotlinx.coroutines.launch
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
@@ -59,10 +60,15 @@ fun CondicionesScreen(viewModel: ClimaViewModel, modifier: Modifier = Modifier) 
 
     Column(modifier = modifier.fillMaxSize()) {
         Text(
-            "📍 ${uiState.ubicacion.nombre ?: "Ubicación seleccionada"}",
+            text = if (uiState.buscandoUbicacion) "📍 Buscando tu ubicación…"
+            else "📍 ${uiState.ubicacion.nombre ?: "Ubicación seleccionada"}",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp)
+        )
+        SelectorUbicacion(
+            viewModel = viewModel,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
         SecondaryScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
