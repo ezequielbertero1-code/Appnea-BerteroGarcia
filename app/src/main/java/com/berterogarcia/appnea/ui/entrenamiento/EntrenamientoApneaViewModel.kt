@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.entrenamiento
 
+import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -20,7 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class EtapaEntrenamiento { SELECCION, EN_CURSO, GUARDANDO }
 
@@ -65,6 +66,8 @@ class EntrenamientoApneaViewModel(
 
     private var job: Job? = null
     private var mejorApneaSegundos = 0
+    // Momento (reloj monotónico) en que se tocó "Abortar": para medir exacto la apnea interrumpida
+    private var momentoAbortoMs: Long? = null
 
     init {
         viewModelScope.launch {
@@ -113,19 +116,28 @@ class EntrenamientoApneaViewModel(
         if (_uiState.value.corriendo) return
 
         mejorApneaSegundos = 0
+        momentoAbortoMs = null
         _uiState.update { it.copy(etapa = EtapaEntrenamiento.EN_CURSO, corriendo = true) }
 
+        job?.cancel() // por si quedó una corrida vieja
         job = viewModelScope.launch {
-            var indice = 0
-            while (indice < tabla.fases.size) {
-                val fase = tabla.fases[indice]
+            // Cada fase termina en un instante FIJO calculado desde el inicio de la tabla.
+            // Lo que tarden los sonidos o la UI en cada vuelta no se acumula: el tiempo restante
+            // siempre se calcula contra el reloj, no contando vueltas.
+            var finFaseMs = SystemClock.elapsedRealtime()
+
+            for ((indice, fase) in tabla.fases.withIndex()) {
+                val inicioFaseMs = finFaseMs
+                finFaseMs = inicioFaseMs + fase.duracionSegundos * 1000L
+
                 _uiState.update { it.copy(indiceFase = indice, segundosRestantes = fase.duracionSegundos) }
                 sonido.avisarInicioFase(fase.tipo)
 
-                var restante = fase.duracionSegundos
+                val mitad = fase.duracionSegundos / 2
                 var avisoMitadHecho = false
                 var aviso15Hecho = false
-                val mitad = fase.duracionSegundos / 2
+                var ultimoBeep = Int.MAX_VALUE // cada beep de 3-2-1 suena una sola vez
+                var restante = segundosRestantes(finFaseMs)
 
                 while (restante > 0 && _uiState.value.corriendo) {
                     if (!aviso15Hecho && restante <= 15 && fase.duracionSegundos > 20) {
@@ -135,16 +147,25 @@ class EntrenamientoApneaViewModel(
                         sonido.avisarMitadDeFase()
                         avisoMitadHecho = true
                     }
-                    if (restante in 1..3) sonido.beepCuentaAtras()
+                    if (restante in 1..3 && restante < ultimoBeep) {
+                        sonido.beepCuentaAtras()
+                        ultimoBeep = restante
+                    }
 
-                    delay(1.seconds)
-                    restante--
+                    // Espera justo hasta que el reloj cambie de segundo (no "1 segundo desde ahora")
+                    val msRestantes = finFaseMs - SystemClock.elapsedRealtime()
+                    val hastaProximoSegundo = (msRestantes - (restante - 1) * 1000L).coerceAtLeast(0L)
+                    delay(hastaProximoSegundo.milliseconds)
+
+                    restante = segundosRestantes(finFaseMs)
                     _uiState.update { it.copy(segundosRestantes = restante) }
                 }
 
                 if (!_uiState.value.corriendo) {
-                    // Se abortó durante esta fase
-                    val transcurridos = fase.duracionSegundos - restante
+                    // Se abortó durante esta fase: se mide hasta el momento exacto del toque
+                    val hasta = momentoAbortoMs ?: SystemClock.elapsedRealtime()
+                    val transcurridos = ((hasta - inicioFaseMs) / 1000L).toInt()
+                        .coerceIn(0, fase.duracionSegundos)
                     if (fase.tipo == TipoFase.APNEA) {
                         mejorApneaSegundos = maxOf(mejorApneaSegundos, transcurridos)
                     }
@@ -155,7 +176,6 @@ class EntrenamientoApneaViewModel(
                 if (fase.tipo == TipoFase.APNEA) {
                     mejorApneaSegundos = maxOf(mejorApneaSegundos, fase.duracionSegundos)
                 }
-                indice++
             }
             sonido.avisarFinTabla()
             finalizarSesion(completada = true, faseAlcanzada = tabla.fases.size)
@@ -163,8 +183,14 @@ class EntrenamientoApneaViewModel(
     }
 
     fun onAbortar() {
+        if (!_uiState.value.corriendo) return
+        momentoAbortoMs = SystemClock.elapsedRealtime()
         _uiState.update { it.copy(corriendo = false) }
     }
+
+    /** Segundos que faltan hasta [finMs], redondeado hacia arriba (2,3 s restantes → muestra 3). */
+    private fun segundosRestantes(finMs: Long): Int =
+        ((finMs - SystemClock.elapsedRealtime() + 999L) / 1000L).toInt().coerceAtLeast(0)
 
     private fun finalizarSesion(completada: Boolean, faseAlcanzada: Int) {
         _uiState.update {
