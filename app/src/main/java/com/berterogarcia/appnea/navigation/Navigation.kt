@@ -18,8 +18,8 @@ import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.MyApplication
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.condiciones.CondicionesScreen
-import com.berterogarcia.appnea.ui.cronometro.CronometroScreen
-import com.berterogarcia.appnea.ui.cronometro.EntrenamientoApneaViewModel
+import com.berterogarcia.appnea.ui.entrenamiento.CronometroScreen
+import com.berterogarcia.appnea.ui.entrenamiento.EntrenamientoApneaViewModel
 import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
 import com.berterogarcia.appnea.ui.cuenta.CuentaViewModel
 import com.berterogarcia.appnea.ui.detalleinmersion.DetalleInmersionScreen

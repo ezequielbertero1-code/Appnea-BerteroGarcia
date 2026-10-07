@@ -15,7 +15,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,6 +41,7 @@ import com.berterogarcia.appnea.data.remote.descripcionClima
 import com.berterogarcia.appnea.data.remote.emojiClima
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.clima.SelectorUbicacion
+import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import kotlinx.coroutines.launch
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
@@ -99,7 +99,7 @@ fun CondicionesScreen(viewModel: ClimaViewModel, modifier: Modifier = Modifier) 
             ) {
                 Text(uiState.error ?: "Sin datos", textAlign = TextAlign.Center)
                 Spacer(Modifier.height(12.dp))
-                Button(onClick = { viewModel.cargarClima() }) { Text("Reintentar") }
+                BotonPrincipal(texto = "Reintentar", onClick = { viewModel.cargarClima() })
             }
 
             else -> HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->

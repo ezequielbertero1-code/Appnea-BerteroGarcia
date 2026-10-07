@@ -24,7 +24,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -58,6 +57,7 @@ import com.berterogarcia.appnea.data.perfil.PerfilSimulado
 import com.berterogarcia.appnea.data.perfil.PuntoPerfil
 import com.berterogarcia.appnea.data.remote.descripcionClima
 import com.berterogarcia.appnea.data.remote.emojiClima
+import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.Chips
 import com.berterogarcia.appnea.ui.components.DatoChico
 import com.berterogarcia.appnea.ui.components.FilaMosaicos
@@ -77,7 +77,7 @@ import com.berterogarcia.appnea.ui.condiciones.duracion
 import com.berterogarcia.appnea.ui.condiciones.num
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
-import java.time.Duration as JDuration   // alias: la entidad usa kotlin.time.Duration
+import java.time.Duration as JDuration
 
 private val FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 private val HH_MM = DateTimeFormatter.ofPattern("HH:mm")
@@ -172,12 +172,11 @@ fun DetalleInmersionScreen(
         }
 
         // ---- Exportar, fijo abajo ----
-        Button(
+        BotonPrincipal(
+            texto = "Exportar en formato UDDF",
             onClick = { exportarLauncher.launch("inmersion_${i.id}_${i.fecha}.uddf") },
             modifier = Modifier.fillMaxWidth().padding(16.dp)
-        ) {
-            Text("Exportar en formato UDDF")
-        }
+        )
     }
 
     if (mostrarDialogo) {

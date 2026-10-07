@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.ui.cronometro
+package com.berterogarcia.appnea.ui.entrenamiento
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

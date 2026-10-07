@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.ui.cronometro
+package com.berterogarcia.appnea.ui.entrenamiento
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,7 +13,6 @@ import com.berterogarcia.appnea.data.local.TablasPredefinidas
 import com.berterogarcia.appnea.data.local.TipoFase
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.data.repository.TablaPersonalizadaRepository
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.time.Duration.Companion.seconds
 
 enum class EtapaEntrenamiento { SELECCION, EN_CURSO, GUARDANDO }
 
@@ -131,13 +131,13 @@ class EntrenamientoApneaViewModel(
                     if (!aviso15Hecho && restante <= 15 && fase.duracionSegundos > 20) {
                         sonido.avisarQuedan15Segundos()
                         aviso15Hecho = true
-                    } else if (!avisoMitadHecho && restante <= mitad && mitad > 0 && fase.duracionSegundos >= 6) {
+                    } else if (!avisoMitadHecho && restante <= mitad && fase.duracionSegundos >= 6) {
                         sonido.avisarMitadDeFase()
                         avisoMitadHecho = true
                     }
                     if (restante in 1..3) sonido.beepCuentaAtras()
 
-                    delay(1000)
+                    delay(1.seconds)
                     restante--
                     _uiState.update { it.copy(segundosRestantes = restante) }
                 }

@@ -16,8 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,6 +40,7 @@ import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.ui.clima.ClimaCompacto
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
+import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
 import com.berterogarcia.appnea.ui.condiciones.FondoTarjetaResaltada
 import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
@@ -90,13 +89,13 @@ fun InicioScreen(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             BotonSecundario(
                 texto = "Entrenar",
-                icono = R.drawable.ic_cronometro,
+                icono = painterResource(R.drawable.ic_cronometro),
                 onClick = { onIrA(AppDestinations.ENTRENAMIENTO) },
                 modifier = Modifier.weight(1f)
             )
             BotonSecundario(
                 texto = "Aprender",
-                icono = R.drawable.ic_informate,
+                icono = painterResource(R.drawable.ic_informate),
                 onClick = { onIrA(AppDestinations.APRENDER) },
                 modifier = Modifier.weight(1f)
             )
@@ -175,32 +174,6 @@ private fun TarjetaNuevaInmersion(onClick: () -> Unit) {
                 tint = AcentoCian
             )
         }
-    }
-}
-
-/**
- * Botón secundario "tonal": un velo blanco translúcido en vez de un color fijo, así se ve
- * bien en cualquier punto del degradado de fondo y no le compite al botón principal.
- */
-@Composable
-private fun BotonSecundario(texto: String, icono: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White.copy(alpha = 0.08f),
-            contentColor = Color.White
-        )
-    ) {
-        Icon(
-            painter = painterResource(icono),
-            contentDescription = null,
-            tint = AcentoCian,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(Modifier.width(6.dp))
-        Text(texto)
     }
 }
 

@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.ui.cronometro
+package com.berterogarcia.appnea.ui.entrenamiento
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

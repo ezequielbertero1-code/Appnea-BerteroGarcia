@@ -23,11 +23,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -46,13 +47,12 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.berterogarcia.appnea.ui.components.BotonPrincipal
+import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.CheckboxGroup
 import com.berterogarcia.appnea.ui.components.DatePickerField
 import com.berterogarcia.appnea.ui.components.TimePickerField
-import androidx.compose.material3.TextButton
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.contentDescription
 
 private val OPCIONES_AGUA = listOf(
     "Dulce", "Salada", "Orilla", "Bote", "Olas", "Corrientes", "Resaca"
@@ -141,19 +141,23 @@ fun NuevaInmersionScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (esPrimera) Spacer(Modifier.weight(1f))
-            else OutlinedButton(onClick = viewModel::anterior, modifier = Modifier.weight(1f)) {
-                Text("Anterior")
-            }
-            if (esUltima) Button(
-                onClick = viewModel::guardar,
-                enabled = !uiState.guardando,
+            else BotonSecundario(
+                texto = "Anterior",
+                onClick = viewModel::anterior,
+                enabled = !uiState.guardando, // que no se pueda volver mientras guarda
                 modifier = Modifier.weight(1f)
-            ) {
-                Text(if (uiState.guardando) "Guardando…" else "Guardar")
-            }
-            else Button(onClick = viewModel::siguiente, modifier = Modifier.weight(1f)) {
-                Text("Siguiente")
-            }
+            )
+            if (esUltima) BotonPrincipal(
+                texto = if (uiState.guardando) "Guardando…" else "Guardar",
+                onClick = viewModel::guardar,
+                cargando = uiState.guardando,
+                modifier = Modifier.weight(1f)
+            )
+            else BotonPrincipal(
+                texto = "Siguiente",
+                onClick = viewModel::siguiente,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }

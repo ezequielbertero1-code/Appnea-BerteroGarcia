@@ -1,15 +1,15 @@
-package com.berterogarcia.appnea.ui.cronometro
+package com.berterogarcia.appnea.ui.entrenamiento
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.ui.components.BotonPrincipal
+import com.berterogarcia.appnea.ui.components.BotonSecundario
 import kotlinx.coroutines.launch
 
 @Composable
@@ -87,12 +89,13 @@ private fun CronometroLibre(
     ) {
         Text(text = uiState.tiempoFormateado, fontSize = 48.sp)
         Spacer(modifier = Modifier.height(16.dp))
-        Row {
-            Button(onClick = viewModel::onIniciar) { Text("Iniciar") }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = viewModel::onParar) { Text("Parar") }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = viewModel::onResetear) { Text("Resetear") }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            BotonPrincipal(texto = "Iniciar", onClick = viewModel::onIniciar, modifier = Modifier.weight(1f))
+            BotonSecundario(texto = "Parar", onClick = viewModel::onParar, modifier = Modifier.weight(1f))
+            BotonSecundario(texto = "Resetear", onClick = viewModel::onResetear, modifier = Modifier.weight(1f))
         }
     }
 }

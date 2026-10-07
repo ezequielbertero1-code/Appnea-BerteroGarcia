@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.ui.cronometro
+package com.berterogarcia.appnea.ui.entrenamiento
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -38,6 +36,9 @@ import com.berterogarcia.appnea.data.local.SesionApneaEntity
 import com.berterogarcia.appnea.data.local.TablaApnea
 import com.berterogarcia.appnea.data.local.TipoFase
 import com.berterogarcia.appnea.data.local.formatearDuracion
+import com.berterogarcia.appnea.ui.components.BotonPeligro
+import com.berterogarcia.appnea.ui.components.BotonPrincipal
+import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.CheckboxGroup
 
@@ -112,11 +113,13 @@ private fun SeleccionTablaContenido(
         CreadorDeTablas(onTablaCreada = { viewModel.onGuardarTablaPersonalizada(it) })
 
         Spacer(Modifier.height(16.dp))
-        Button(
+        BotonPrincipal(
+            texto = "Iniciar entrenamiento",
             onClick = viewModel::onIniciar,
             enabled = uiState.tablaSeleccionada != null,
+            icono = painterResource(R.drawable.ic_cronometro),
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Iniciar entrenamiento") }
+        )
     }
 }
 
@@ -200,10 +203,11 @@ private fun EnCursoContenido(
             modifier = Modifier.fillMaxWidth(0.8f)
         )
         Spacer(Modifier.height(24.dp))
-        Button(
+        BotonPeligro(
+            texto = "Abortar",
             onClick = viewModel::onAbortar,
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-        ) { Text("Abortar") }
+            modifier = Modifier.fillMaxWidth(0.8f)
+        )
     }
 }
 
@@ -216,9 +220,11 @@ private fun GuardandoContenido(
         if (uiState.guardadoOk) {
             Text("¡Sesión guardada!", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
-            Button(onClick = viewModel::onVolverASeleccion, modifier = Modifier.fillMaxWidth()) {
-                Text("Volver")
-            }
+            BotonPrincipal(
+                texto = "Volver",
+                onClick = viewModel::onVolverASeleccion,
+                modifier = Modifier.fillMaxWidth()
+            )
         } else {
             Text(
                 if (uiState.completada) "¡Completaste la tabla!" else "Abortaste en la fase ${uiState.faseAlcanzada} de ${uiState.totalFases}",
@@ -246,10 +252,17 @@ private fun GuardandoContenido(
             )
 
             Spacer(Modifier.height(16.dp))
-            Row {
-                Button(onClick = viewModel::onGuardarSesion) { Text("Guardar") }
-                Spacer(Modifier.width(8.dp))
-                TextButton(onClick = viewModel::onVolverASeleccion) { Text("Descartar") }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                BotonSecundario(
+                    texto = "Descartar",
+                    onClick = viewModel::onVolverASeleccion,
+                    modifier = Modifier.weight(1f)
+                )
+                BotonPrincipal(
+                    texto = "Guardar",
+                    onClick = viewModel::onGuardarSesion,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }

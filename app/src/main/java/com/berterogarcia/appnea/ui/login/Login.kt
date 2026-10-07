@@ -20,11 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.CampoPassword
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.alPresionarEnter
@@ -140,22 +138,19 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistr
 
                 MensajesEstado(s)
 
-                Button(
+                BotonPrincipal(
+                    texto = when {
+                        s.cargando -> "Ingresando…"
+                        s.bloqueado -> "Esperá ${s.bloqueadoSegundos} s"
+                        else -> stringResource(R.string.login_button)
+                    },
                     onClick = intentarLogin,
                     enabled = s.habilitado,
-                    colors = ButtonDefaults.buttonColors(containerColor = Acento, contentColor = FondoTarjeta),
+                    cargando = s.cargando,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)
-                ) {
-                    when {
-                        s.cargando -> CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = FondoTarjeta
-                        )
-                        s.bloqueado -> Text("Esperá ${s.bloqueadoSegundos} s")
-                        else -> Text(stringResource(R.string.login_button))
-                    }
-                }
+                )
 
                 if (s.usuarioRecordado) {
                     TextButton(

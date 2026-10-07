@@ -28,8 +28,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -37,7 +35,6 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,6 +51,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.ui.components.BotonPrincipal
+import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.CampoFecha
 import com.berterogarcia.appnea.ui.components.CampoPassword
 import com.berterogarcia.appnea.ui.components.CampoTexto
@@ -459,20 +458,22 @@ private fun BotonesNavegacion(
             .padding(top = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        OutlinedButton(onClick = onAnterior, enabled = !s.ocupado, modifier = Modifier.weight(1f)) {
-            Text(if (s.esPrimerPaso) "Volver" else "Anterior")
-        }
-        Button(
-            onClick = if (s.esUltimoPaso) onCrear else onSiguiente,
+        BotonSecundario(
+            texto = if (s.esPrimerPaso) "Volver" else "Anterior",
+            onClick = onAnterior,
             enabled = !s.ocupado,
-            colors = ButtonDefaults.buttonColors(containerColor = Acento, contentColor = FondoTarjeta),
             modifier = Modifier.weight(1f)
-        ) {
-            if (s.ocupado) {
-                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = FondoTarjeta)
-            } else {
-                Text(if (s.esUltimoPaso) stringResource(R.string.registro_button) else "Siguiente")
-            }
+        )
+        BotonPrincipal(
+            texto = if (s.esUltimoPaso) stringResource(R.string.registro_button) else "Siguiente",
+            onClick = if (s.esUltimoPaso) onCrear else onSiguiente,
+            cargando = s.ocupado,
+            modifier = Modifier.weight(1f)
+        )
+        if (s.ocupado) {
+            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = FondoTarjeta)
+        } else {
+            Text(if (s.esUltimoPaso) stringResource(R.string.registro_button) else "Siguiente")
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.berterogarcia.appnea.ui.perfil.comun
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +21,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,8 +40,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.ui.components.BotonPrincipal
+import com.berterogarcia.appnea.ui.components.FormaBoton
 import com.berterogarcia.appnea.ui.condiciones.Acento
 import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
+import com.berterogarcia.appnea.ui.condiciones.FondoTarjetaResaltada
 import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
 
 // Componentes compartidos por todas las pantallas del perfil.
@@ -93,21 +96,15 @@ fun MensajeError(texto: String?, modifier: Modifier = Modifier) {
 /** Botón principal de los formularios: se deshabilita y muestra progreso mientras guarda. */
 @Composable
 fun BotonGuardar(guardando: Boolean, habilitado: Boolean = true, onClick: () -> Unit) {
-    Button(
+    BotonPrincipal(
+        texto = if (guardando) "Guardando…" else "Guardar",
         onClick = onClick,
-        enabled = habilitado && !guardando,
+        enabled = habilitado,
+        cargando = guardando,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp)
-    ) {
-        if (guardando) {
-            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-            Spacer(Modifier.width(8.dp))
-            Text("Guardando...")
-        } else {
-            Text("Guardar")
-        }
-    }
+    )
 }
 
 /**
@@ -165,11 +162,16 @@ fun FormularioPerfil(
 fun BotonAgregar(descripcion: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     FloatingActionButton(
         onClick = onClick,
-        containerColor = Acento,
-        contentColor = Color(0xFF03141F),
-        modifier = modifier
+        shape = FormaBoton,
+        containerColor = FondoTarjetaResaltada,
+        contentColor = Color.White,
+        modifier = modifier.border(1.dp, Acento.copy(alpha = 0.45f), FormaBoton)
     ) {
-        Icon(painterResource(R.drawable.ic_agregar), contentDescription = descripcion)
+        Icon(
+            painterResource(R.drawable.ic_agregar),
+            contentDescription = descripcion,
+            modifier = Modifier.size(28.dp)
+        )
     }
 }
 
@@ -184,7 +186,7 @@ fun EstadoVacio(texto: String, textoBoton: String, onAccion: () -> Unit, modifie
     ) {
         Text(texto, color = TextoSecundario, textAlign = TextAlign.Center)
         Spacer(Modifier.height(12.dp))
-        Button(onClick = onAccion) { Text(textoBoton) }
+        BotonPrincipal(texto = textoBoton, onClick = onAccion)
     }
 }
 

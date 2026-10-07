@@ -3,7 +3,6 @@ package com.berterogarcia.appnea.ui.clima
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,17 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -37,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.data.remote.emojiClima
+import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
 import com.berterogarcia.appnea.ui.condiciones.Semaforo
 import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
@@ -159,7 +153,8 @@ fun SelectorUbicacion(viewModel: ClimaViewModel, modifier: Modifier = Modifier) 
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedButton(
+            BotonSecundario(
+                texto = "Mi ubicación",
                 enabled = !uiState.cargando,
                 onClick = {
                     lanzadorPermiso.launch(
@@ -169,20 +164,14 @@ fun SelectorUbicacion(viewModel: ClimaViewModel, modifier: Modifier = Modifier) 
                         )
                     )
                 },
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = AcentoCian),
-                border = BorderStroke(1.dp, AcentoCian),
                 modifier = Modifier.weight(1f)
-            ) { Text("Mi ubicación", maxLines = 1) }
-            OutlinedButton(
+            )
+            BotonSecundario(
+                texto = "Comodoro",
                 enabled = !uiState.cargando,
                 onClick = { viewModel.usarComodoroRivadavia() },
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = AcentoCian),
-                border = BorderStroke(1.dp, AcentoCian),
                 modifier = Modifier.weight(1f)
-            ) { Text("Comodoro", maxLines = 1) }
-            IconButton(enabled = !uiState.cargando, onClick = { viewModel.cargarClima() }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Actualizar", tint = AcentoCian)
-            }
+            )
         }
 
         // Avisos cuando YA hay datos en pantalla (ej.: falló el GPS y se volvió a Comodoro).

@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.ui.cronometro
+package com.berterogarcia.appnea.ui.entrenamiento
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,6 +27,8 @@ import com.berterogarcia.appnea.data.local.Fase
 import com.berterogarcia.appnea.data.local.TablaApnea
 import com.berterogarcia.appnea.data.local.TipoFase
 import com.berterogarcia.appnea.data.local.formatearDuracion
+import com.berterogarcia.appnea.ui.components.BotonPrincipal
+import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.CampoTexto
 
 @Composable
@@ -97,12 +98,15 @@ fun CreadorDeTablas(
                         modifier = Modifier.width(80.dp)
                     )
                     Spacer(Modifier.width(8.dp))
-                    Button(onClick = {
-                        val min = minutosTexto.toIntOrNull() ?: 0
-                        val seg = segundosTexto.toIntOrNull() ?: 0
-                        val totalSeg = min * 60 + seg
-                        if (totalSeg > 0) fases.add(Fase(tipoSeleccionado, totalSeg))
-                    }) { Text("Agregar") }
+                    BotonSecundario(
+                        texto = "Agregar",
+                        onClick = {
+                            val min = minutosTexto.toIntOrNull() ?: 0
+                            val seg = segundosTexto.toIntOrNull() ?: 0
+                            val totalSeg = min * 60 + seg
+                            if (totalSeg > 0) fases.add(Fase(tipoSeleccionado, totalSeg))
+                        }
+                    )
                 }
 
                 Spacer(Modifier.height(12.dp))
@@ -121,7 +125,8 @@ fun CreadorDeTablas(
                 }
 
                 Spacer(Modifier.height(12.dp))
-                Button(
+                BotonPrincipal(
+                    texto = "Guardar tabla",
                     onClick = {
                         if (nombre.isNotBlank() && fases.isNotEmpty()) {
                             onTablaCreada(TablaApnea(nombre, fases.toList()))
@@ -129,8 +134,9 @@ fun CreadorDeTablas(
                             fases.clear()
                         }
                     },
-                    enabled = nombre.isNotBlank() && fases.isNotEmpty()
-                ) { Text("Guardar tabla") }
+                    enabled = nombre.isNotBlank() && fases.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
