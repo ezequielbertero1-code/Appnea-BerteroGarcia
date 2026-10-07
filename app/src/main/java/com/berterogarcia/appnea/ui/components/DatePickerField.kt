@@ -20,6 +20,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.BordeSuave
+import com.berterogarcia.appnea.ui.theme.ColorError
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import com.berterogarcia.appnea.ui.theme.VeloFuerte
+import com.berterogarcia.appnea.ui.theme.VeloSuave
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -55,26 +61,26 @@ fun DatePickerField(
         },
         modifier = modifier,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White.copy(alpha = 0.10f),
-            unfocusedContainerColor = Color.White.copy(alpha = 0.06f),
-            disabledContainerColor = Color.White.copy(alpha = 0.06f),
-            focusedBorderColor = Color(0xFF16F7FB),
-            unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
-            focusedLabelColor = Color(0xFF16F7FB),
-            unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+            focusedContainerColor = VeloFuerte,
+            unfocusedContainerColor = VeloSuave,
+            disabledContainerColor = VeloSuave,
+            focusedBorderColor = Acento,
+            unfocusedBorderColor = BordeSuave,
+            focusedLabelColor = Acento,
+            unfocusedLabelColor = TextoTerciario,
             focusedTextColor = Color.White,
             unfocusedTextColor = Color.White,
             disabledTextColor = Color.White,
-            cursorColor = Color(0xFF16F7FB),
-            focusedTrailingIconColor = Color(0xFF16F7FB),
-            unfocusedTrailingIconColor = Color.White.copy(alpha = 0.7f),
-            errorContainerColor = Color.White.copy(alpha = 0.10f),
-            errorBorderColor = Color(0xFFFF6B6B),
-            errorLabelColor = Color(0xFFFF6B6B),
+            cursorColor = Acento,
+            focusedTrailingIconColor = Acento,
+            unfocusedTrailingIconColor = TextoTerciario,
+            errorContainerColor = VeloFuerte,
+            errorBorderColor = ColorError,
+            errorLabelColor = ColorError,
             errorTextColor = Color.White,
-            errorSupportingTextColor = Color(0xFFFF6B6B),
-            errorCursorColor = Color(0xFFFF6B6B),
-            errorTrailingIconColor = Color(0xFFFF6B6B)
+            errorSupportingTextColor = ColorError,
+            errorCursorColor = ColorError,
+            errorTrailingIconColor = ColorError
         )
     )
 

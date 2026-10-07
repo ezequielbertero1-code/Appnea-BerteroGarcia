@@ -46,6 +46,7 @@ import com.berterogarcia.appnea.navigation.irAPestania
 import com.berterogarcia.appnea.navigation.pestaniaAbierta
 import com.berterogarcia.appnea.ui.sesion.EstadoArranque
 import com.berterogarcia.appnea.ui.sesion.SesionViewModel
+import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.MyApplicationTheme
 import com.berterogarcia.appnea.ui.theme.fondoApp
 
@@ -68,7 +69,7 @@ class MainActivity : ComponentActivity() {
             // Legibilidad: como el fondo es siempre oscuro, usamos siempre el esquema oscuro
             // (si el teléfono está en modo claro, los textos quedaban oscuros sobre fondo oscuro)
             // y el color de texto por defecto pasa a ser blanco.
-            MyApplicationTheme(darkTheme = true) {
+            MyApplicationTheme {
                 CompositionLocalProvider(LocalContentColor provides Color.White) {
                     Box(
                         modifier = Modifier
@@ -92,7 +93,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun PantallaArranque() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = Color(0xFF16F7FB))
+        CircularProgressIndicator(color = Acento)
     }
 }
 

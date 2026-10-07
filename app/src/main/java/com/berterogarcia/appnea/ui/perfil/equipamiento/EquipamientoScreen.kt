@@ -14,7 +14,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.data.local.EquipoEntity
@@ -29,6 +28,7 @@ import com.berterogarcia.appnea.ui.perfil.comun.Insignia
 import com.berterogarcia.appnea.ui.perfil.comun.MensajeError
 import com.berterogarcia.appnea.ui.perfil.comun.TarjetaItemPerfil
 import com.berterogarcia.appnea.ui.perfil.comun.insigniaMantenimiento
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
 
 @Composable
 fun EquipamientoScreen(
@@ -96,7 +96,7 @@ fun EquipamientoScreen(
 @Composable
 private fun TarjetaEquipo(equipo: EquipoEntity, onEditar: () -> Unit, onEliminar: () -> Unit) {
     val insignias = buildList {
-        if (!equipo.enUso) add(Insignia("Retirado", Color.White.copy(alpha = 0.6f)))
+        if (!equipo.enUso) add(Insignia("Retirado", TextoTerciario))
         if (equipo.enUso) insigniaMantenimiento(equipo.proximoMantenimiento)?.let { add(it) }
     }
     val marcaModelo = listOf(equipo.marca, equipo.modelo).filter { it.isNotBlank() }.joinToString(" ")

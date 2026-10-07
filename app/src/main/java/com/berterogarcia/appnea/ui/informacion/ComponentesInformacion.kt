@@ -47,6 +47,12 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.ui.theme.AvisoAcento
+import com.berterogarcia.appnea.ui.theme.AvisoFondo
+import com.berterogarcia.appnea.ui.theme.AvisoTexto
+import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 
 /**
  * Tarjeta destacada de PREVENCIÓN / SEGURIDAD. Se usa a lo largo de toda la pantalla,
@@ -62,7 +68,7 @@ fun TarjetaSeguridad(
         modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))
+        colors = CardDefaults.cardColors(containerColor = AvisoFondo)
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
@@ -71,21 +77,21 @@ fun TarjetaSeguridad(
             Icon(
                 painter = painterResource(R.drawable.ic_info),
                 contentDescription = "Prevención y seguridad",
-                tint = Color(0xFFE65100)
+                tint = AvisoAcento
             )
             Spacer(Modifier.width(8.dp))
             Column {
                 Text(
                     text = titulo,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFE65100),
+                    color = AvisoAcento,
                     style = MaterialTheme.typography.titleSmall
                 )
                 Spacer(Modifier.padding(top = 2.dp))
                 Text(
                     text = cuerpo,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF5D4037)
+                    color = AvisoTexto
                 )
             }
         }
@@ -210,7 +216,7 @@ fun TarjetaDesplegable(
             .fillMaxWidth()
             .padding(bottom = 12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF03141F),
+            containerColor = FondoTarjeta,
             contentColor = Color.White
         )
     ) {
@@ -238,7 +244,7 @@ fun TarjetaDesplegable(
                 Icon(
                     painter = painterResource(R.drawable.ic_info),
                     contentDescription = "Incluye alerta de seguridad",
-                    tint = Color(0xFFFFB74D),
+                    tint = ColorAdvertencia,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(Modifier.width(8.dp))
@@ -291,7 +297,7 @@ private fun ImagenDeTema(imagen: ImagenTema) {
         Text(
             text = imagen.pie,
             style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.75f)
+            color = TextoSecundario
         )
     }
 }

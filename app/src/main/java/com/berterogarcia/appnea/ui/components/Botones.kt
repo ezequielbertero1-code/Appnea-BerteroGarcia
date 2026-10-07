@@ -19,17 +19,17 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.berterogarcia.appnea.ui.condiciones.Acento
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjetaResaltada
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorError
+import com.berterogarcia.appnea.ui.theme.FondoPeligro
+import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
+import com.berterogarcia.appnea.ui.theme.TextoDeshabilitado
+import com.berterogarcia.appnea.ui.theme.VeloMedio
+import com.berterogarcia.appnea.ui.theme.VeloSuave
 
 // Estilo común de los botones de la app (mismo que "Registrar inmersión" de Inicio).
 val FormaBoton = RoundedCornerShape(16.dp)
 private val AltoMinimoBoton = 52.dp
-private val FondoSecundario = Color.White.copy(alpha = 0.08f)
-private val FondoDeshabilitado = Color.White.copy(alpha = 0.06f)
-private val TextoDeshabilitado = Color.White.copy(alpha = 0.38f)
-private val FondoPeligro = Color(0xFF7A1F1F)
-private val BordePeligro = Color(0xFFFF6B6B)
 
 /** Acción principal de la pantalla (Siguiente, Guardar, Iniciar…). */
 @Composable
@@ -58,7 +58,7 @@ fun BotonSecundario(
     icono: Painter? = null
 ) = BotonBase(
     texto, onClick, modifier, enabled, cargando, icono,
-    fondo = FondoSecundario,
+    fondo = VeloMedio,
     borde = null,
     colorIcono = Acento
 )
@@ -74,7 +74,7 @@ fun BotonPeligro(
 ) = BotonBase(
     texto, onClick, modifier, enabled, cargando = false, icono = icono,
     fondo = FondoPeligro,
-    borde = BordePeligro.copy(alpha = 0.5f),
+    borde = ColorError.copy(alpha = 0.5f),
     colorIcono = Color.White
 )
 
@@ -103,7 +103,7 @@ private fun BotonBase(
         colors = ButtonDefaults.buttonColors(
             containerColor = fondo,
             contentColor = Color.White,
-            disabledContainerColor = if (cargando) fondo else FondoDeshabilitado,
+            disabledContainerColor = if (cargando) fondo else VeloSuave,
             disabledContentColor = if (cargando) Color.White else TextoDeshabilitado
         ),
         border = borde?.let { BorderStroke(1.dp, if (enabled) it else it.copy(alpha = 0.15f)) },

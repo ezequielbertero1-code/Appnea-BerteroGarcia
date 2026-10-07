@@ -13,7 +13,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -24,6 +23,8 @@ import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.SelectorOpciones
 import com.berterogarcia.appnea.ui.perfil.comun.CargandoPerfil
 import com.berterogarcia.appnea.ui.perfil.comun.FormularioPerfil
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
 import java.time.LocalDate
 
 @Composable
@@ -131,13 +132,13 @@ fun EquipoFormScreen(
                 Text("En uso")
                 Text(
                     "Desactivalo si lo vendiste o ya no lo usás (queda en el historial).",
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = TextoTerciario
                 )
             }
             Switch(
                 checked = s.enUso,
                 onCheckedChange = viewModel::onEnUsoChange,
-                colors = SwitchDefaults.colors(checkedTrackColor = Color(0xFF16F7FB))
+                colors = SwitchDefaults.colors(checkedTrackColor = Acento)
             )
         }
     }

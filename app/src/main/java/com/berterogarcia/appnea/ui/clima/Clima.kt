@@ -31,15 +31,15 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.data.remote.emojiClima
 import com.berterogarcia.appnea.ui.components.BotonSecundario
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
 import com.berterogarcia.appnea.ui.condiciones.Semaforo
-import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
 import com.berterogarcia.appnea.ui.condiciones.colorAptitud
 import com.berterogarcia.appnea.ui.condiciones.direccion
 import com.berterogarcia.appnea.ui.condiciones.num
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorError
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 
-private val AcentoCian = Color(0xFF16F7FB)
-private val ColorError = Color(0xFFFF6B6B)
 
 /**
  * Resumen chico del clima para Inicio: temperatura, viento, olas y semáforo para entrar
@@ -70,7 +70,7 @@ fun ClimaCompacto(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-                Text("Ver más ›", style = MaterialTheme.typography.labelLarge, color = AcentoCian)
+                Text("Ver más ›", style = MaterialTheme.typography.labelLarge, color = Acento)
             }
             Spacer(Modifier.height(8.dp))
 
@@ -87,7 +87,7 @@ fun ClimaCompacto(
                         style = MaterialTheme.typography.bodySmall
                     )
                     TextButton(onClick = { viewModel.cargarClima() }) {
-                        Text("Reintentar", color = AcentoCian)
+                        Text("Reintentar", color = Acento)
                     }
                 }
                 else -> {

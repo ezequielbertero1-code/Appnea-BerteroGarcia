@@ -33,22 +33,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.data.condiciones.Aptitud
 import com.berterogarcia.appnea.data.remote.direccionCardinal
+import com.berterogarcia.appnea.ui.theme.ColorBueno
+import com.berterogarcia.appnea.ui.theme.ColorMalo
+import com.berterogarcia.appnea.ui.theme.ColorRegular
+import com.berterogarcia.appnea.ui.theme.Divisor
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
-
-// ===================== Colores (mismos de la app) =====================
-val FondoTarjeta = Color(0xFF03141F)
-val FondoTarjetaResaltada = Color(0xFF245E82)
-val Acento = Color(0xFF16F7FB)
-val TextoSecundario = Color.White.copy(alpha = 0.75f)
-val ColorBueno = Color(0xFF4CD787)
-val ColorRegular = Color(0xFFFFC857)
-val ColorMalo = Color(0xFFFF6B6B)
-val ColorBajamar = Color(0xFFFF8A65)
 
 private val LOCALE_AR: Locale = Locale.forLanguageTag("es-AR")
 private val HH_MM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -175,7 +172,7 @@ fun MedioCirculo(progreso: Float, color: Color, modifier: Modifier = Modifier, a
         val arriba = grosor / 2
         val izquierda = grosor / 2
         drawArc(
-            color = Color.White.copy(alpha = 0.15f),
+            color = Divisor,
             startAngle = 180f, sweepAngle = 180f, useCenter = false,
             topLeft = Offset(izquierda, arriba), size = Size(diametro, diametro),
             style = Stroke(width = grosor, cap = StrokeCap.Round)

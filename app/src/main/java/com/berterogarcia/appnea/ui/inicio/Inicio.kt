@@ -41,13 +41,14 @@ import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.ui.clima.ClimaCompacto
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.components.BotonSecundario
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjetaResaltada
-import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.TextoSobreResaltada
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration
 
-private val AcentoCian = Color(0xFF16F7FB)
 private val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy")
 
 /**
@@ -133,7 +134,6 @@ fun InicioScreen(
     }
 }
 
-private val TextoSubtituloCta = Color(0xFFBFE6F2)
 
 @Composable
 private fun TarjetaNuevaInmersion(onClick: () -> Unit) {
@@ -145,7 +145,7 @@ private fun TarjetaNuevaInmersion(onClick: () -> Unit) {
             containerColor = FondoTarjetaResaltada,
             contentColor = Color.White
         ),
-        border = BorderStroke(1.dp, AcentoCian.copy(alpha = 0.45f))
+        border = BorderStroke(1.dp, Acento.copy(alpha = 0.45f))
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             // Círculo cian con el "+": es el único lugar con cian lleno
@@ -165,13 +165,13 @@ private fun TarjetaNuevaInmersion(onClick: () -> Unit) {
                 Text(
                     "Buceo o apnea",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextoSubtituloCta
+                    color = TextoSobreResaltada
                 )
             }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = AcentoCian
+                tint = Acento
             )
         }
     }
@@ -192,7 +192,7 @@ private fun EncabezadoSeccion(titulo: String, accion: String? = null, onAccion: 
             modifier = Modifier.weight(1f)
         )
         if (accion != null) {
-            TextButton(onClick = onAccion) { Text(accion, color = AcentoCian) }
+            TextButton(onClick = onAccion) { Text(accion, color = Acento) }
         }
     }
 }
@@ -231,7 +231,7 @@ private fun FilaInmersion(inmersion: InmersionEntity, onClick: () -> Unit) {
                     text = "%.1f m".format(inmersion.profundidadMetros),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = AcentoCian
+                    color = Acento
                 )
                 Text(
                     text = "⏱ ${formatoDuracion(inmersion.tiempoFondo)}",

@@ -5,9 +5,9 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import kotlin.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
+import kotlin.time.Duration
 
 // [CAMBIO v7] Cada inmersión pertenece a un usuario (FK a usuarios, se borra en cascada).
 @Entity(

@@ -36,13 +36,15 @@ import com.berterogarcia.appnea.data.local.nombreCompleto
 import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.DatoChico
 import com.berterogarcia.appnea.ui.components.formatoLargo
-import com.berterogarcia.appnea.ui.condiciones.Acento
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
-import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
 import com.berterogarcia.appnea.ui.perfil.comun.Insignia
 import com.berterogarcia.appnea.ui.perfil.comun.InsigniaChica
 import com.berterogarcia.appnea.ui.perfil.comun.insigniaMantenimiento
 import com.berterogarcia.appnea.ui.perfil.comun.insigniaVencimiento
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
+import com.berterogarcia.appnea.ui.theme.ColorError
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 
 // Estilo tomado de Clima / Condiciones: tarjetas FondoTarjeta y datos "etiqueta arriba, valor
 // abajo" (DatoChico), así la etiqueta ya no le roba ancho al valor. Los renglones se separan
@@ -89,7 +91,7 @@ fun CuentaScreen(
         if (resumen.error) {
             Text(
                 text = "No se pudieron cargar los datos del perfil.",
-                color = Color(0xFFFF6B6B),
+                color = ColorError,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
         }
@@ -163,7 +165,7 @@ fun CuentaScreen(
                 if (resumen.equiposConServicePendiente > 0) {
                     Text(
                         text = "⚠ ${resumen.equiposConServicePendiente} equipo(s) con service pendiente",
-                        color = Color(0xFFFFB74D),
+                        color = ColorAdvertencia,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 6.dp)
                     )

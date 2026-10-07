@@ -51,12 +51,12 @@ import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.CampoPassword
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.alPresionarEnter
-import com.berterogarcia.appnea.ui.condiciones.Acento
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
-import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
+import com.berterogarcia.appnea.ui.theme.ColorError
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 
-private val RojoError = Color(0xFFFF6B6B)
-private val Naranja = Color(0xFFFFB74D)
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistroClick: () -> Unit) {
@@ -218,8 +218,8 @@ private fun MensajesEstado(s: LoginUiState) {
     val errorGeneral = s.errorGeneral
     val aviso = s.aviso
     val (texto, color) = when {
-        s.bloqueado -> "Demasiados intentos fallidos. Podés volver a intentar en ${formatearEspera(s.bloqueadoSegundos)}." to Naranja
-        errorGeneral != null -> errorGeneral to RojoError
+        s.bloqueado -> "Demasiados intentos fallidos. Podés volver a intentar en ${formatearEspera(s.bloqueadoSegundos)}." to ColorAdvertencia
+        errorGeneral != null -> errorGeneral to ColorError
         else -> return
     }
     Column(
@@ -232,7 +232,7 @@ private fun MensajesEstado(s: LoginUiState) {
     ) {
         Text(texto, color = color, style = MaterialTheme.typography.bodyMedium)
         if (!s.bloqueado && aviso != null) {
-            Text(aviso, color = Naranja, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 2.dp))
+            Text(aviso, color = ColorAdvertencia, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 2.dp))
         }
     }
 }

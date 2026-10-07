@@ -41,6 +41,8 @@ import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.CheckboxGroup
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
 
 @Composable
 fun EntrenamientoApneaScreen(
@@ -138,12 +140,12 @@ private fun TablaOpcionCard(
             .clickable { onClick() },
         colors = if (seleccionada) {
             CardDefaults.cardColors(
-                containerColor = Color(0xFF245E82),
+                containerColor = FondoTarjetaResaltada,
                 contentColor = Color.White
             )
         } else {
             CardDefaults.cardColors(
-                containerColor = Color(0xFF03141F),
+                containerColor = FondoTarjeta,
                 contentColor = Color.White
             )
         }

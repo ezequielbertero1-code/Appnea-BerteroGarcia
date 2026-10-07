@@ -60,11 +60,15 @@ import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.CondicionesRegistro
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.remote.emojiClima
-import com.berterogarcia.appnea.ui.condiciones.Acento
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjetaResaltada
-import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
 import com.berterogarcia.appnea.ui.condiciones.direccion
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.Divisor
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
+import com.berterogarcia.appnea.ui.theme.TextoChip
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.VeloFuerte
+import com.berterogarcia.appnea.ui.theme.VeloMedio
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -72,8 +76,6 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 
-private val TextoChip = Color(0xFFE3F2F7)
-private val FondoTranslucido = Color.White.copy(alpha = 0.08f)
 private val LOCALE_ES: Locale = Locale.forLanguageTag("es-AR")
 private val FORMATO_MES_ANIO: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", LOCALE_ES)
 private val FORMATO_MES_CORTO: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM", LOCALE_ES)
@@ -212,8 +214,8 @@ private fun Buscador(texto: String, onTextoChange: (String) -> Unit) {
         keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
         shape = RoundedCornerShape(50),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = FondoTranslucido,
-            unfocusedContainerColor = FondoTranslucido,
+            focusedContainerColor = VeloMedio,
+            unfocusedContainerColor = VeloMedio,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             cursorColor = Acento,
@@ -252,7 +254,7 @@ private fun FiltrosPeriodo(seleccionado: PeriodoFiltro, onSeleccion: (PeriodoFil
                 border = FilterChipDefaults.filterChipBorder(
                     enabled = true,
                     selected = elegido,
-                    borderColor = Color.White.copy(alpha = 0.18f),
+                    borderColor = Divisor,
                     selectedBorderColor = Acento.copy(alpha = 0.55f),
                     borderWidth = 1.dp,
                     selectedBorderWidth = 1.dp
@@ -382,7 +384,7 @@ private fun ChipDato(texto: String) {
         style = MaterialTheme.typography.labelMedium,
         color = TextoChip,
         modifier = Modifier
-            .background(FondoTranslucido, RoundedCornerShape(50))
+            .background(VeloMedio, RoundedCornerShape(50))
             .padding(horizontal = 9.dp, vertical = 3.dp)
     )
 }
@@ -404,7 +406,7 @@ private fun LineaCondiciones(c: CondicionesRegistro) {
     }
     if (datos.isEmpty()) return
 
-    HorizontalDivider(modifier = Modifier.padding(top = 9.dp), color = Color.White.copy(alpha = 0.1f))
+    HorizontalDivider(modifier = Modifier.padding(top = 9.dp), color = VeloFuerte)
     FlowRow(
         modifier = Modifier.padding(top = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),

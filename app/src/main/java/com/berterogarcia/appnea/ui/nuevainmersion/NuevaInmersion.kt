@@ -36,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -53,6 +52,9 @@ import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.CheckboxGroup
 import com.berterogarcia.appnea.ui.components.DatePickerField
 import com.berterogarcia.appnea.ui.components.TimePickerField
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
 
 private val OPCIONES_AGUA = listOf(
     "Dulce", "Salada", "Orilla", "Bote", "Olas", "Corrientes", "Resaca"
@@ -199,7 +201,7 @@ private fun IndicadorEtapas(actual: Etapa, conErrores: Set<Etapa>, onEtapaClick:
     Text(
         text = "Paso ${actual.ordinal + 1} de ${Etapa.entries.size}",
         style = MaterialTheme.typography.bodyMedium,
-        color = Color.White.copy(alpha = 0.7f),
+        color = TextoTerciario,
         modifier = Modifier.padding(top = 2.dp)
     )
 }
@@ -336,7 +338,7 @@ private fun EtapaNotas(uiState: NuevaInmersionUiState, viewModel: NuevaInmersion
     Text(
         "Al guardar se registran solas las condiciones del momento de entrada: clima, olas, marea y luna.",
         style = MaterialTheme.typography.bodySmall,
-        color = Color.White.copy(alpha = 0.8f),
+        color = TextoSecundario,
         modifier = Modifier.padding(top = 8.dp)
     )
 }
@@ -348,6 +350,6 @@ private fun BotonSigno(onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.semantics { contentDescription = "Cambiar signo" } // para TalkBack
     ) {
-        Text("±", style = MaterialTheme.typography.titleLarge, color = Color(0xFF16F7FB))
+        Text("±", style = MaterialTheme.typography.titleLarge, color = Acento)
     }
 }

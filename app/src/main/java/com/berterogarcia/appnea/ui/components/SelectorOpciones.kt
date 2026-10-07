@@ -28,9 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorError
+import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import com.berterogarcia.appnea.ui.theme.VeloSuave
 
-private val RojoError = Color(0xFFFF6B6B)
-private val Celeste = Color(0xFF16F7FB)
 
 /**
  * Selector de UNA opción con chips (categoría de equipo, tipo de certificado...).
@@ -66,7 +68,7 @@ fun <T> SelectorOpciones(
     Column(modifier = modifier.bringIntoViewRequester(traerAVista)) {
         Text(
             text = titulo,
-            color = if (hayError) RojoError else Color.White,
+            color = if (hayError) ColorError else Color.White,
             fontWeight = FontWeight.SemiBold
         )
 
@@ -78,15 +80,15 @@ fun <T> SelectorOpciones(
                 Icon(
                     Icons.Default.Warning,
                     contentDescription = null,
-                    tint = RojoError,
+                    tint = ColorError,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(Modifier.width(6.dp))
-                Text(mensajeError, color = RojoError, style = MaterialTheme.typography.bodySmall)
+                Text(mensajeError, color = ColorError, style = MaterialTheme.typography.bodySmall)
             }
             seleccionada == null && ayuda != null -> Text(
                 text = ayuda,
-                color = Color.White.copy(alpha = 0.6f),
+                color = TextoTerciario,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 2.dp)
             )
@@ -103,13 +105,13 @@ fun <T> SelectorOpciones(
                     onClick = { onSeleccion(opcion) },
                     label = { Text(etiqueta(opcion)) },
                     colors = FilterChipDefaults.filterChipColors(
-                        containerColor = Color.White.copy(alpha = 0.06f),
+                        containerColor = VeloSuave,
                         labelColor = Color.White,
-                        selectedContainerColor = Celeste.copy(alpha = 0.20f),
-                        selectedLabelColor = Celeste
+                        selectedContainerColor = Acento.copy(alpha = 0.20f),
+                        selectedLabelColor = Acento
                     ),
                     border = if (hayError) {
-                        BorderStroke(1.dp, RojoError)
+                        BorderStroke(1.dp, ColorError)
                     } else {
                         FilterChipDefaults.filterChipBorder(enabled = true, selected = elegida)
                     }

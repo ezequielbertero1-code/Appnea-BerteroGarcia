@@ -39,6 +39,11 @@ import com.berterogarcia.appnea.data.remote.emojiClima
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.clima.SelectorUbicacion
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorBajamar
+import com.berterogarcia.appnea.ui.theme.ColorRegular
+import com.berterogarcia.appnea.ui.theme.Divisor
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import kotlinx.coroutines.launch
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
@@ -263,7 +268,7 @@ private fun PaginaMareas(c: Condiciones) {
                 color = if (siguiente?.esPleamar == true) Acento else ColorBajamar
             )
         }
-        HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color.White.copy(alpha = 0.15f))
+        HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Divisor)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             DatoGrande(
                 anterior?.let { duracion(ChronoUnit.MINUTES.between(it.hora, c.ahora)) } ?: "-",
@@ -348,7 +353,7 @@ private fun PaginaSolLuna(c: Condiciones) {
             MedioCirculo(progreso, ColorRegular, ancho = 110.dp)
             DatoGrande(hora(atardecer), "Puesta", color = ColorRegular)
         }
-        HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color.White.copy(alpha = 0.15f))
+        HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Divisor)
         if (amanecer != null && atardecer != null) {
             if (esDeDia) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
