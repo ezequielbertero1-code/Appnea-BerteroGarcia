@@ -40,6 +40,13 @@ class Converters {
     @TypeConverter
     fun toDuration(value: Long): Duration = value.seconds
 
+    // TipoInmersion <-> nombre ("BUCEO" / "APNEA")
+    @TypeConverter
+    fun fromTipoInmersion(value: TipoInmersion): String = value.name
+
+    @TypeConverter
+    fun toTipoInmersion(value: String): TipoInmersion = TipoInmersion.desdeNombre(value)
+
     // List<Fase> <-> "TIPO:segundos;TIPO:segundos;..." (para las tablas de apnea guardadas)
     @TypeConverter
     fun fromFases(value: List<Fase>): String =

@@ -46,19 +46,22 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.CheckboxGroup
 import com.berterogarcia.appnea.ui.components.DatePickerField
+import com.berterogarcia.appnea.ui.components.SelectorSegmentado
 import com.berterogarcia.appnea.ui.components.TimePickerField
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.theme.TextoTerciario
 
-private val OPCIONES_AGUA = listOf(
-    "Dulce", "Salada", "Orilla", "Bote", "Olas", "Corrientes", "Resaca"
-)
+// Características del agua, en grupos. Se siguen guardando juntas en caracteristicasAgua.
+private val AGUA_TIPO = listOf("Dulce", "Salada")             // una
+private val AGUA_ENTRADA = listOf("Orilla", "Bote")           // una
+private val AGUA_MAR = listOf("Olas", "Corrientes", "Resaca") // varias
 
 private val OPCIONES_EQUIPAMIENTO = listOf(
     "Ninguna", "Corto", "Largo", "Dos piezas", "Semi seco", "Seco",
@@ -218,6 +221,14 @@ private fun rememberFocoInicial(): FocusRequester {
 @Composable
 private fun EtapaGeneral(uiState: NuevaInmersionUiState, viewModel: NuevaInmersionViewModel) {
     val foco = rememberFocoInicial()
+    SelectorSegmentado(
+        titulo = "¿Qué tipo de inmersión fue?",
+        opciones = TipoInmersion.entries,
+        seleccionada = uiState.tipo,
+        etiqueta = { "${it.emoji} ${it.etiqueta}" },
+        onSeleccion = { tipo -> tipo?.let(viewModel::onTipoChange) },
+        modifier = Modifier.padding(bottom = 12.dp)
+    )
     DatePickerField(
         label = "Fecha", valor = uiState.fecha, onValorChange = viewModel::onFechaChange,
         isError = uiState.errores.containsKey(Campo.FECHA), mensajeError = uiState.errores[Campo.FECHA],
@@ -251,26 +262,51 @@ private fun EtapaInmersion(uiState: NuevaInmersionUiState, viewModel: NuevaInmer
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
         modifier = Modifier.fillMaxWidth().focusRequester(foco)
     )
+    val esApnea = uiState.tipo == TipoInmersion.APNEA
     CampoTexto(
         valor = uiState.tiempoFondo, onValorChange = viewModel::onTiempoFondoChange,
-        etiqueta = "Tiempo de fondo (mm:ss)", visualTransformation = tiempoFondoVisualTransformation,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+        etiqueta = if (esApnea) "Tiempo de apnea (mm:ss)" else "Tiempo de fondo (mm:ss)",
+        visualTransformation = tiempoFondoVisualTransformation,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = if (esApnea) ImeAction.Done else ImeAction.Next
+        ),
         esError = uiState.errores.containsKey(Campo.TIEMPO_FONDO), mensajeError = uiState.errores[Campo.TIEMPO_FONDO] ?: "",
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
     )
-    CampoTexto(
-        valor = uiState.paradaSeguridadMin, onValorChange = viewModel::onParadaChange,
-        etiqueta = "Parada de seguridad (min)",
-        esError = uiState.errores.containsKey(Campo.PARADA), mensajeError = uiState.errores[Campo.PARADA] ?: "",
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-    )
+    // En apnea no hay parada de seguridad
+    if (!esApnea) {
+        CampoTexto(
+            valor = uiState.paradaSeguridadMin, onValorChange = viewModel::onParadaChange,
+            etiqueta = "Parada de seguridad (min)",
+            esError = uiState.errores.containsKey(Campo.PARADA), mensajeError = uiState.errores[Campo.PARADA] ?: "",
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        )
+    }
 }
 
 @Composable
 private fun EtapaCondiciones(uiState: NuevaInmersionUiState, viewModel: NuevaInmersionViewModel) {
+    SelectorSegmentado(
+        titulo = "Tipo de agua", ayuda = "una",
+        opciones = AGUA_TIPO,
+        seleccionada = AGUA_TIPO.firstOrNull { it in uiState.caracteristicasAgua },
+        etiqueta = { it },
+        onSeleccion = { viewModel.onAguaUnica(AGUA_TIPO, it) },
+        permitirNinguna = true
+    )
+    SelectorSegmentado(
+        titulo = "Entrada", ayuda = "una",
+        opciones = AGUA_ENTRADA,
+        seleccionada = AGUA_ENTRADA.firstOrNull { it in uiState.caracteristicasAgua },
+        etiqueta = { it },
+        onSeleccion = { viewModel.onAguaUnica(AGUA_ENTRADA, it) },
+        permitirNinguna = true,
+        modifier = Modifier.padding(top = 12.dp)
+    )
     CheckboxGroup(
-        titulo = "Características del agua", opciones = OPCIONES_AGUA,
+        titulo = "Estado del mar", opciones = AGUA_MAR,
         seleccionadas = uiState.caracteristicasAgua, onCambio = viewModel::onAguaToggle
     )
     CampoTexto(

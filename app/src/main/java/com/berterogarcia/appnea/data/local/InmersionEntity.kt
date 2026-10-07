@@ -46,5 +46,10 @@ data class InmersionEntity(
     val condiciones: CondicionesRegistro? = null,
     // [NUEVO v7] Dueño. Lo completa InmersionRepository con el usuario logueado: no hace falta
     // pasarlo desde los ViewModels (por eso tiene valor por defecto y va al final).
-    val nombreUsuario: String = ""
+    val nombreUsuario: String = "",
+    // [NUEVO v9]
+    val tipo: TipoInmersion = TipoInmersion.BUCEO,
+    // Lugar marcado en el mapa (null en las inmersiones viejas o si no se marcó)
+    val latitud: Double? = null,
+    val longitud: Double? = null
 )

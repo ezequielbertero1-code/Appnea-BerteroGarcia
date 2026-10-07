@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
 import com.berterogarcia.appnea.data.local.UbicacionHelper
 import com.berterogarcia.appnea.data.repository.InmersionRepository
@@ -43,6 +44,7 @@ private fun parseTiempoFondo(v: String): Duration {
 
 data class NuevaInmersionUiState(
     val etapa: Etapa = Etapa.GENERAL,
+    val tipo: TipoInmersion = TipoInmersion.BUCEO,
     val fecha: String = "",
     val lugar: String = "",
     val profundidadMetros: String = "",
@@ -135,6 +137,18 @@ class NuevaInmersionViewModel(
             else it.caracteristicasAgua - opcion
         )
     }
+    /** Cambiar a Apnea borra el error de parada: en apnea no se pide. */
+    fun onTipoChange(tipo: TipoInmersion) = _uiState.update {
+        it.copy(tipo = tipo, errores = it.errores - Campo.PARADA)
+    }
+
+    /**
+     * Grupos de una sola opción (Dulce/Salada, Orilla/Bote): saca todas las opciones del
+     * [grupo] y pone la elegida. [opcion] null = ninguna.
+     */
+    fun onAguaUnica(grupo: List<String>, opcion: String?) = _uiState.update {
+        it.copy(caracteristicasAgua = it.caracteristicasAgua - grupo.toSet() + listOfNotNull(opcion))
+    }
 
     fun onEquipamientoToggle(opcion: String, marcado: Boolean) = _uiState.update {
         it.copy(
@@ -167,7 +181,9 @@ class NuevaInmersionViewModel(
                     fecha = LocalDate.parse(s.fecha, FORMATO_FECHA),
                     lugar = s.lugar,
                     profundidadMetros = s.profundidadMetros.toFloat(), // ya validado, no hace falta toFloatOrNull
-                    paradaSeguridadMin = s.paradaSeguridadMin.toFloatOrNull() ?: 0f,
+                    paradaSeguridadMin =
+                        if (s.tipo == TipoInmersion.APNEA) 0f
+                        else s.paradaSeguridadMin.toFloatOrNull() ?: 0f,
                     tiempoFondo = parseTiempoFondo(s.tiempoFondo), // "mm:ss" -> Duration
                     horaEntrada = LocalTime.parse(s.horaEntrada),  // "HH:mm" -> LocalTime
                     horaSalida = LocalTime.parse(s.horaSalida),
@@ -180,7 +196,8 @@ class NuevaInmersionViewModel(
                     visibilidadMetros = s.visibilidadMetros.toFloatOrNull() ?: 0f,
                     actividad = s.actividad,
                     comentarios = s.comentarios,
-                    condiciones = condiciones
+                    condiciones = condiciones,
+                    tipo = s.tipo
                 )
             )
             _uiState.update { it.copy(guardadoOk = true, guardando = false) }
@@ -225,6 +242,11 @@ class NuevaInmersionViewModel(
 
         val visibilidad = s.visibilidadMetros.toFloatOrNull()
         if (visibilidad == null || visibilidad < 0f) errores[Campo.VISIBILIDAD] = "Visibilidad minima 0m."
+
+        if (s.tipo == TipoInmersion.BUCEO) {
+            val parada = s.paradaSeguridadMin.toFloatOrNull()
+            if (parada == null || parada < 3f) errores[Campo.PARADA] = "Mínimo 3 minutos."
+        }
         return errores
     }
 

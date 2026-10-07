@@ -114,6 +114,7 @@ object SeedDatos {
             temperaturaAguaC = 10f,
             visibilidadMetros = 4f,
             actividad = "Apnea",
+            tipo = TipoInmersion.APNEA,
             comentarios = "Series de peso constante con boya y compañero en superficie."
         ),
         InmersionEntity(

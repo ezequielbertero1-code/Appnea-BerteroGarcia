@@ -22,7 +22,8 @@ object Migraciones {
     /** Todas las migraciones, para pasarlas juntas a addMigrations(). */
     fun todas(usuarioSesion: () -> String?): Array<Migration> = arrayOf(
         De6a7(usuarioSesion),
-        De7a8
+        De7a8,
+        De8a9
     )
 
     /**
@@ -143,6 +144,24 @@ object Migraciones {
             db.execSQL("DROP TABLE IF EXISTS `salidas_pesca`")
             db.execSQL("DELETE FROM sqlite_sequence WHERE name = 'salidas_pesca'")
             db.execSQL("UPDATE `certificados` SET `tipo` = 'OTRO' WHERE `tipo` = 'PESCA_SUBMARINA'")
+        }
+    }
+    /**
+     * v8 → v9: formulario de inmersión nuevo.
+     *  - inmersiones.tipo (BUCEO / APNEA). Las existentes quedan en APNEA si la actividad dice
+     *    "apnea"; el resto, en BUCEO.
+     *  - inmersiones.latitud / longitud: lugar marcado en el mapa (null en las viejas).
+     *  - Equipamiento: la categoría ARPON (resto de pesca) pasa a OTRO.
+     * Alcanza con ALTER TABLE ADD COLUMN: no cambian claves ni foreign keys.
+     */
+    object De8a9 : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            // SQLite exige DEFAULT para agregar una columna NOT NULL a una tabla con datos
+            db.execSQL("ALTER TABLE `inmersiones` ADD COLUMN `tipo` TEXT NOT NULL DEFAULT 'BUCEO'")
+            db.execSQL("ALTER TABLE `inmersiones` ADD COLUMN `latitud` REAL")
+            db.execSQL("ALTER TABLE `inmersiones` ADD COLUMN `longitud` REAL")
+            db.execSQL("UPDATE `inmersiones` SET `tipo` = 'APNEA' WHERE LOWER(`actividad`) LIKE '%apnea%'")
+            db.execSQL("UPDATE `equipamiento` SET `categoria` = 'OTRO' WHERE `categoria` = 'ARPON'")
         }
     }
 }

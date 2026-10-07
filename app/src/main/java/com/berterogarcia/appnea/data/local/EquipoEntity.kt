@@ -22,7 +22,6 @@ enum class CategoriaEquipo(val etiqueta: String) {
     REGULADOR("Regulador"),
     CHALECO("Chaleco (BCD)"),
     TUBO("Tubo"),
-    ARPON("Arpón"),
     BOYA("Boya"),
     CUCHILLO("Cuchillo"),
     LINTERNA("Linterna"),
