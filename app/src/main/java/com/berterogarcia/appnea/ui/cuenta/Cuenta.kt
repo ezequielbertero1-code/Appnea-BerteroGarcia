@@ -36,9 +36,9 @@ import com.berterogarcia.appnea.data.local.nombreCompleto
 import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.DatoChico
 import com.berterogarcia.appnea.ui.components.formatoLargo
-import com.berterogarcia.appnea.ui.condiciones.Acento
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
-import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.perfil.comun.Insignia
 import com.berterogarcia.appnea.ui.perfil.comun.InsigniaChica
 import com.berterogarcia.appnea.ui.perfil.comun.insigniaMantenimiento

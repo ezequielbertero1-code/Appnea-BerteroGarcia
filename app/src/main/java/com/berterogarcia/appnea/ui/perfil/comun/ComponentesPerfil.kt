@@ -42,10 +42,10 @@ import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.FormaBoton
-import com.berterogarcia.appnea.ui.condiciones.Acento
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjetaResaltada
-import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 
 // Componentes compartidos por todas las pantallas del perfil.
 // Mismo estilo que el resto de la app: tarjetas FondoTarjeta, acento celeste, texto blanco.

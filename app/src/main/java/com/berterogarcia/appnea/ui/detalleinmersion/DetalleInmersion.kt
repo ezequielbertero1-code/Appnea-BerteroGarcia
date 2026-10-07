@@ -63,11 +63,11 @@ import com.berterogarcia.appnea.ui.components.FilaMosaicos
 import com.berterogarcia.appnea.ui.components.Mosaico
 import com.berterogarcia.appnea.ui.components.TarjetaAviso
 import com.berterogarcia.appnea.ui.components.TarjetaHero
-import com.berterogarcia.appnea.ui.condiciones.Acento
+import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.condiciones.FilaDato
 import com.berterogarcia.appnea.ui.condiciones.Semaforo
 import com.berterogarcia.appnea.ui.condiciones.TarjetaCondicion
-import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.condiciones.colorAptitud
 import com.berterogarcia.appnea.ui.condiciones.direccion
 import com.berterogarcia.appnea.ui.condiciones.duracion

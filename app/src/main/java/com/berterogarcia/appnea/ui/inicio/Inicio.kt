@@ -41,9 +41,9 @@ import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.ui.clima.ClimaCompacto
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.components.BotonSecundario
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjeta
-import com.berterogarcia.appnea.ui.condiciones.FondoTarjetaResaltada
-import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration
 

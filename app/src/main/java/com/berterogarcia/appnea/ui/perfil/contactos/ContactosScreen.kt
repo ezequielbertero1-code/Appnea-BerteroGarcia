@@ -33,7 +33,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
 import com.berterogarcia.appnea.ui.components.BotonSecundario
-import com.berterogarcia.appnea.ui.condiciones.Acento
+import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.perfil.comun.BotonAgregar
 import com.berterogarcia.appnea.ui.perfil.comun.CargandoPerfil
 import com.berterogarcia.appnea.ui.perfil.comun.DialogoConfirmarEliminacion

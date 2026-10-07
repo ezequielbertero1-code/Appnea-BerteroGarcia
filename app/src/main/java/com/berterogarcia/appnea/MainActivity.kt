@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
             // Legibilidad: como el fondo es siempre oscuro, usamos siempre el esquema oscuro
             // (si el teléfono está en modo claro, los textos quedaban oscuros sobre fondo oscuro)
             // y el color de texto por defecto pasa a ser blanco.
-            MyApplicationTheme(darkTheme = true) {
+            MyApplicationTheme {
                 CompositionLocalProvider(LocalContentColor provides Color.White) {
                     Box(
                         modifier = Modifier

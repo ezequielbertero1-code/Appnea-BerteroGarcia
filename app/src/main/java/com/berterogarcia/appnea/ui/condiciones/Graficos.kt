@@ -23,6 +23,9 @@ import com.berterogarcia.appnea.data.condiciones.HoraMar
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorBajamar
+import com.berterogarcia.appnea.ui.theme.ColorRegular
 
 private val estiloEje = TextStyle(color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp)
 

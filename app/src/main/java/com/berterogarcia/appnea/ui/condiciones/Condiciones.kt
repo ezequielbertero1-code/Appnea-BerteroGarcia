@@ -42,6 +42,10 @@ import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import kotlinx.coroutines.launch
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
+import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorBajamar
+import com.berterogarcia.appnea.ui.theme.ColorRegular
+import com.berterogarcia.appnea.ui.theme.TextoSecundario
 
 /**
  * Pantalla completa de condiciones, en pestañas deslizables:
