@@ -21,7 +21,8 @@ object Migraciones {
 
     /** Todas las migraciones, para pasarlas juntas a addMigrations(). */
     fun todas(usuarioSesion: () -> String?): Array<Migration> = arrayOf(
-        De6a7(usuarioSesion)
+        De6a7(usuarioSesion),
+        De7a8
     )
 
     /**
@@ -125,6 +126,23 @@ object Migraciones {
                 db.execSQL("INSERT INTO sqlite_sequence (name, seq) VALUES (?, ?)", arrayOf<Any?>(tabla, ultimoId))
             }
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_${tabla}_nombreUsuario` ON `$tabla` (`nombreUsuario`)")
+        }
+    }
+
+    /**
+     * v7 → v8: se saca pesca submarina.
+     *  - Se borra la tabla `salidas_pesca` (las salidas cargadas se pierden: es intencional).
+     *    DROP TABLE también borra su índice.
+     *  - Los certificados de tipo PESCA_SUBMARINA pasan a OTRO: se conservan título, número,
+     *    fechas, etc. (sin esto también caerían en OTRO al leerlos, pero así queda prolijo en la base).
+     * Las condiciones guardadas en inmersiones (JSON) no se tocan: los campos de pesca que tengan
+     * se ignoran al leerlas.
+     */
+    object De7a8 : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DROP TABLE IF EXISTS `salidas_pesca`")
+            db.execSQL("DELETE FROM sqlite_sequence WHERE name = 'salidas_pesca'")
+            db.execSQL("UPDATE `certificados` SET `tipo` = 'OTRO' WHERE `tipo` = 'PESCA_SUBMARINA'")
         }
     }
 }

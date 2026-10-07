@@ -153,7 +153,7 @@ fun MyApplicationApp(destinoInicial: String = RUTA_LOGIN) { // [CAMBIO] recibe e
 // Ambientes principales de la app (barra de navegación).
 // - INICIO: clima del día + explicación de cada ambiente.
 // - ENTRENAMIENTO: tablas de apnea y cronómetro libre (antes "Cronometro").
-// - INMERSION: bitácora unificada de buceo, apnea y pesca submarina (antes "Apnea" y "Pesca").
+// - INMERSION: bitácora unificada de buceo y apnea.
 // - APRENDER: contenido teórico de apnea y buceo (antes "Información").
 // - CUENTA: perfil del usuario.
 enum class AppDestinations(

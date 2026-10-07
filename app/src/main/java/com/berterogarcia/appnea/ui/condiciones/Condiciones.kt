@@ -15,8 +15,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -36,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.data.condiciones.Condiciones
-import com.berterogarcia.appnea.data.condiciones.DiaAstro
 import com.berterogarcia.appnea.data.remote.descripcionClima
 import com.berterogarcia.appnea.data.remote.emojiClima
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
@@ -48,13 +45,13 @@ import kotlin.math.roundToInt
 
 /**
  * Pantalla completa de condiciones, en pestañas deslizables:
- * Resumen · Mareas · Sol y Luna · Pesca · 7 días.
+ * Resumen · Mareas · Sol y Luna · 7 días.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CondicionesScreen(viewModel: ClimaViewModel, modifier: Modifier = Modifier) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val titulos = listOf("Resumen", "Mareas", "Sol y Luna", "Pesca", "7 días")
+    val titulos = listOf("Resumen", "Mareas", "Sol y Luna", "7 días")
     val pagerState = rememberPagerState(initialPage = 0) { titulos.size }
     val scope = rememberCoroutineScope()
 
@@ -119,7 +116,6 @@ fun CondicionesScreen(viewModel: ClimaViewModel, modifier: Modifier = Modifier) 
                         0 -> PaginaResumen(c)
                         1 -> PaginaMareas(c)
                         2 -> PaginaSolLuna(c)
-                        3 -> PaginaPesca(c)
                         else -> PaginaSemana(c)
                     }
                     Text(
@@ -405,101 +401,6 @@ private fun PaginaSolLuna(c: Condiciones) {
     }
 }
 
-// ============================== PESCA ==============================
-
-@Composable
-private fun PaginaPesca(c: Condiciones) {
-    val actual = c.actividadActual
-    TarjetaCondicion("Actividad de peces ahora", resaltada = true) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(actual.nivel.texto, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = colorNivel(actual.nivel))
-                Text("${actual.puntaje}/100", color = TextoSecundario)
-            }
-            PecesActividad(actual.nivel, tamanio = 26)
-        }
-        Spacer(Modifier.height(6.dp))
-        if (actual.motivos.isEmpty()) {
-            Text("Sin factores destacados en este momento.", style = MaterialTheme.typography.bodySmall)
-        } else {
-            actual.motivos.forEach { Text("• $it", style = MaterialTheme.typography.bodySmall) }
-        }
-    }
-
-    TarjetaCondicion("Actividad hora por hora (hoy)") {
-        GraficoActividad(c.actividadHoy, c.ahora.hour)
-        val mejores = c.actividadHoy.sortedByDescending { it.puntaje }.take(3).sortedBy { it.hora }
-        Text(
-            "Mejores horas: " + mejores.joinToString(", ") { hora(it.hora) },
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 6.dp)
-        )
-    }
-
-    TarjetaCondicion("Períodos solunares de hoy") {
-        PeriodosSolunares(c.astroHoy)
-    }
-
-    TarjetaCondicion("Próximos 7 días") {
-        c.actividadPorDia.forEach { (fecha, nivel) ->
-            val astro = c.astroDias.firstOrNull { it.fecha == fecha }
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(diaCorto(fecha, c.ahora.toLocalDate()), modifier = Modifier.weight(1f))
-                Text(astro?.emojiFase ?: "", modifier = Modifier.padding(end = 8.dp))
-                PecesActividad(nivel, tamanio = 16)
-                Text(
-                    nivel.texto,
-                    color = colorNivel(nivel),
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.widthIn(min = 80.dp)
-                )
-            }
-        }
-    }
-
-    Text(
-        "El índice combina fase lunar, períodos solunares, amanecer/atardecer, cambios de marea, " +
-            "presión, viento y olas. Es orientativo: sirve para comparar horas y días.",
-        style = MaterialTheme.typography.bodySmall,
-        color = TextoSecundario,
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
-}
-
-@Composable
-private fun PeriodosSolunares(astro: DiaAstro) {
-    if (astro.periodos.isEmpty()) {
-        Text("Sin períodos para hoy.")
-        return
-    }
-    astro.periodos.forEach { p ->
-        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = if (p.mayor) Acento else FondoTarjetaResaltada,
-                    contentColor = if (p.mayor) FondoTarjeta else Color.White
-                )
-            ) {
-                Text(
-                    if (p.mayor) "MAYOR" else "MENOR",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                )
-            }
-            Spacer(Modifier.width(10.dp))
-            Text("${hora(p.inicio)} - ${hora(p.fin)}", fontWeight = FontWeight.Bold)
-            Spacer(Modifier.width(10.dp))
-            Text(p.motivo, style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
-        }
-    }
-}
-
 // ============================== 7 DÍAS ==============================
 
 @Composable
@@ -507,7 +408,6 @@ private fun PaginaSemana(c: Condiciones) {
     val hoy = c.ahora.toLocalDate()
     c.dias.forEach { d ->
         val astro = c.astroDias.firstOrNull { it.fecha == d.fecha }
-        val nivel = c.actividadPorDia.firstOrNull { it.first == d.fecha }?.second
         val mareasDia = c.mareas.filter { it.hora.toLocalDate() == d.fecha }
         TarjetaCondicion(resaltada = d.fecha == hoy) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -533,12 +433,6 @@ private fun PaginaSemana(c: Condiciones) {
             }
             if (mareasDia.isNotEmpty()) {
                 FilaDato("Mareas", mareasDia.joinToString("  ") { "${if (it.esPleamar) "▲" else "▼"}${hora(it.hora)}" })
-            }
-            if (nivel != null) {
-                Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Actividad de pesca", color = TextoSecundario, modifier = Modifier.weight(1f))
-                    PecesActividad(nivel, tamanio = 16)
-                }
             }
         }
     }

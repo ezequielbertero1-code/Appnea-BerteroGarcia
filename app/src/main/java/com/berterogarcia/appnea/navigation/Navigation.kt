@@ -47,8 +47,6 @@ import com.berterogarcia.appnea.ui.perfil.equipamiento.EquipamientoScreen
 import com.berterogarcia.appnea.ui.perfil.equipamiento.EquipamientoViewModel
 import com.berterogarcia.appnea.ui.perfil.equipamiento.EquipoFormScreen
 import com.berterogarcia.appnea.ui.perfil.equipamiento.EquipoFormViewModel
-import com.berterogarcia.appnea.ui.pesca.NuevaSalidaPescaScreen
-import com.berterogarcia.appnea.ui.pesca.NuevaSalidaPescaViewModel
 import com.berterogarcia.appnea.ui.registro.RegistroScreen
 import com.berterogarcia.appnea.ui.registro.RegistroViewModel
 
@@ -58,7 +56,6 @@ const val RUTA_LOGIN = "login"
 const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
 const val RUTA_DETALLE_INMERSION = "detalle_inmersion/{id}"
 const val RUTA_CONDICIONES = "condiciones"
-const val RUTA_NUEVA_SALIDA_PESCA = "nueva_salida_pesca"
 
 //  Perfil. Todas empiezan con "perfil/" para que la barra marque "Cuenta" como seleccionada.
 const val PREFIJO_PERFIL = "perfil/"
@@ -99,7 +96,6 @@ private fun NavHostController.volverDesde(entrada: NavBackStackEntry) {
 /** Formularios a pantalla completa: se oculta la barra de navegación (ver MainActivity). */
 val RUTAS_SIN_BARRA = setOf(
     RUTA_NUEVA_INMERSION,
-    RUTA_NUEVA_SALIDA_PESCA,
     RUTA_DATOS_PERSONALES,
     RUTA_FORM_EQUIPO,
     RUTA_FORM_CERTIFICADO,
@@ -232,15 +228,6 @@ fun AppNavHost(
                 onEliminada = { navController.popBackStack() }
             )
         }
-        composable(RUTA_NUEVA_SALIDA_PESCA) {
-            val viewModel: NuevaSalidaPescaViewModel = viewModel(
-                factory = NuevaSalidaPescaViewModel.Factory(app.salidaPescaRepository, app.applicationContext)
-            )
-            NuevaSalidaPescaScreen(
-                viewModel = viewModel,
-                onGuardado = { navController.popBackStack() }
-            )
-        }
 
         //=============================APRENDER (antes Informacion)==========================
         composable(AppDestinations.APRENDER.name) {
@@ -255,7 +242,6 @@ fun AppNavHost(
                     app.perfilRepository, // 
                     app.inmersionRepository,
                     app.sesionApneaRepository,
-                    app.salidaPescaRepository
                 )
             )
             CuentaScreen(

@@ -21,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -33,11 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.data.condiciones.Aptitud
-import com.berterogarcia.appnea.data.condiciones.NivelActividad
-import com.berterogarcia.appnea.data.local.CondicionesRegistro
-import com.berterogarcia.appnea.data.remote.descripcionClima
 import com.berterogarcia.appnea.data.remote.direccionCardinal
-import com.berterogarcia.appnea.data.remote.emojiClima
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -55,7 +50,7 @@ val ColorRegular = Color(0xFFFFC857)
 val ColorMalo = Color(0xFFFF6B6B)
 val ColorBajamar = Color(0xFFFF8A65)
 
-private val LOCALE_AR = Locale("es", "AR")
+private val LOCALE_AR: Locale = Locale.forLanguageTag("es-AR")
 private val HH_MM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 private val DD_MM: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM")
 
@@ -89,16 +84,10 @@ fun colorAptitud(a: Aptitud): Color = when (a) {
     Aptitud.MALA -> ColorMalo
 }
 
-fun colorNivel(n: NivelActividad): Color = when (n) {
-    NivelActividad.BAJA -> ColorMalo
-    NivelActividad.MEDIA -> ColorRegular
-    NivelActividad.BUENA -> ColorBueno
-    NivelActividad.MUY_BUENA -> Acento
-}
-
 // ===================== Componentes =====================
 
 /** Tarjeta con el estilo de la app (fondo oscuro, texto blanco) y un título opcional. */
+@Suppress("ModifierParameter") // título primero para poder llamarla como TarjetaCondicion("Mar") { }
 @Composable
 fun TarjetaCondicion(
     titulo: String? = null,
@@ -160,22 +149,6 @@ fun DatoGrande(valor: String, etiqueta: String, modifier: Modifier = Modifier, c
     }
 }
 
-/** Cuatro peces: se "encienden" según el nivel de actividad. */
-@Composable
-fun PecesActividad(nivel: NivelActividad, tamanio: Int = 22) {
-    Row {
-        (1..4).forEach { i ->
-            // Los peces "apagados" quedan traslúcidos
-            Text(
-                "🐟",
-                fontSize = tamanio.sp,
-                modifier = Modifier
-                    .padding(end = 2.dp)
-                    .alpha(if (i <= nivel.peces) 1f else 0.25f)
-            )
-        }
-    }
-}
 
 /** Punto de color + texto (semáforo). */
 @Composable
@@ -213,49 +186,5 @@ fun MedioCirculo(progreso: Float, color: Color, modifier: Modifier = Modifier, a
             topLeft = Offset(izquierda, arriba), size = Size(diametro, diametro),
             style = Stroke(width = grosor, cap = StrokeCap.Round)
         )
-    }
-}
-
-/**
- * Resumen compacto de las condiciones guardadas en un registro (inmersión / salida de pesca).
- */
-@Composable
-fun ResumenCondicionesRegistro(c: CondicionesRegistro, modifier: Modifier = Modifier) {
-    val linea1 = buildList {
-        c.codigoClima?.let { add("${emojiClima(it)} ${descripcionClima(it)}") }
-        c.temperaturaC?.let { add("${it.roundToInt()}°C") }
-        c.vientoKmh?.let { v ->
-            add("💨 ${v.roundToInt()} km/h ${direccion(c.direccionVientoGrados)}" +
-                (c.rafagasKmh?.let { " (ráf. ${it.roundToInt()})" } ?: ""))
-        }
-        c.presionHpa?.let { add("${it.roundToInt()} hPa") }
-    }
-    val linea2 = buildList {
-        c.olaM?.let { o -> add("🌊 ${"%.1f".format(o)} m" + (c.periodoOlaS?.let { " · ${it.roundToInt()} s" } ?: "")) }
-        c.temperaturaAguaC?.let { add("Agua ${"%.1f".format(it)}°C") }
-        c.estadoMarea?.let { add("Marea: ${it.lowercase()}") }
-    }
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 6.dp)
-            .background(Color.White.copy(alpha = 0.06f), MaterialTheme.shapes.small)
-            .padding(8.dp)
-    ) {
-        Text("Condiciones registradas", style = MaterialTheme.typography.labelMedium, color = Acento)
-        if (linea1.isNotEmpty()) Text(linea1.joinToString("  ·  "), style = MaterialTheme.typography.bodySmall)
-        if (linea2.isNotEmpty()) Text(linea2.joinToString("  ·  "), style = MaterialTheme.typography.bodySmall)
-        Text(
-            "🌙 ${c.faseLunar} (${c.iluminacionLunaPorc}%)  ·  🐟 Actividad ${c.nivelActividad.lowercase()} (${c.actividadPesca}/100)" +
-                (c.aptitudAgua?.let { "  ·  Agua: ${it.lowercase()}" } ?: ""),
-            style = MaterialTheme.typography.bodySmall
-        )
-        if (!c.conDatosOnline) {
-            Text(
-                "Sin conexión al guardar: solo datos astronómicos.",
-                style = MaterialTheme.typography.bodySmall,
-                color = TextoSecundario
-            )
-        }
     }
 }

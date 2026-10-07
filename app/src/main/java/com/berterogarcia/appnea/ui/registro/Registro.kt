@@ -32,7 +32,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -470,10 +469,5 @@ private fun BotonesNavegacion(
             cargando = s.ocupado,
             modifier = Modifier.weight(1f)
         )
-        if (s.ocupado) {
-            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = FondoTarjeta)
-        } else {
-            Text(if (s.esUltimoPaso) stringResource(R.string.registro_button) else "Siguiente")
-        }
     }
 }

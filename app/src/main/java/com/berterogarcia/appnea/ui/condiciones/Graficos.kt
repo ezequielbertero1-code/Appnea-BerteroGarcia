@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -19,7 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.berterogarcia.appnea.data.condiciones.ActividadHora
 import com.berterogarcia.appnea.data.condiciones.ExtremoMarea
 import com.berterogarcia.appnea.data.condiciones.HoraMar
 import java.time.LocalDate
@@ -126,48 +124,6 @@ fun GraficoMarea(
             val estilo = TextStyle(color = color, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             val yTexto = if (e.esPleamar) py - 22.dp.toPx() else py + 8.dp.toPx()
             texto(medidor, etiqueta, px, yTexto, estilo)
-        }
-    }
-}
-
-/**
- * Barras de actividad de pesca hora por hora (0-23 h).
- */
-@Composable
-fun GraficoActividad(
-    actividad: List<ActividadHora>,
-    horaActual: Int?,
-    modifier: Modifier = Modifier
-) {
-    val medidor = rememberTextMeasurer()
-    Canvas(modifier = modifier.fillMaxWidth().height(150.dp)) {
-        if (actividad.isEmpty()) return@Canvas
-        val abajo = size.height - 20.dp.toPx()
-        val separacion = 2.dp.toPx()
-        val anchoBarra = size.width / actividad.size - separacion
-        actividad.forEachIndexed { i, a ->
-            val alto = (a.puntaje / 100f) * (abajo - 8.dp.toPx())
-            val x = i * (anchoBarra + separacion)
-            val esActual = a.hora.hour == horaActual
-            drawRoundRect(
-                color = colorNivel(a.nivel).copy(alpha = if (esActual) 1f else 0.7f),
-                topLeft = Offset(x, abajo - alto),
-                size = Size(anchoBarra, alto),
-                cornerRadius = CornerRadius(3.dp.toPx())
-            )
-            if (esActual) {
-                drawRoundRect(
-                    color = Color.White,
-                    topLeft = Offset(x, abajo - alto),
-                    size = Size(anchoBarra, alto),
-                    cornerRadius = CornerRadius(3.dp.toPx()),
-                    style = Stroke(width = 1.5.dp.toPx())
-                )
-            }
-        }
-        for (h in listOf(0, 6, 12, 18, 23)) {
-            val xh = h * (anchoBarra + separacion) + anchoBarra / 2
-            texto(medidor, "$h h", xh, abajo + 4.dp.toPx(), estiloEje)
         }
     }
 }

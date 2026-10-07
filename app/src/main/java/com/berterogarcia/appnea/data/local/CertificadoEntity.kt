@@ -14,7 +14,6 @@ import java.time.LocalDate
 enum class TipoCertificado(val etiqueta: String) {
     BUCEO("Buceo"),
     APNEA("Apnea"),
-    PESCA_SUBMARINA("Pesca submarina"),
     PRIMEROS_AUXILIOS("Primeros auxilios / RCP"),
     APTO_MEDICO("Apto médico"),
     OTRO("Otro");

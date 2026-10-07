@@ -1,0 +1,692 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 8,
+    "identityHash": "a54fcacae273b5d1796de5467c526e45",
+    "entities": [
+      {
+        "tableName": "inmersiones",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha` INTEGER NOT NULL, `lugar` TEXT NOT NULL, `profundidadMetros` REAL NOT NULL, `paradaSeguridadMin` REAL NOT NULL, `tiempoFondo` INTEGER NOT NULL, `horaEntrada` INTEGER NOT NULL, `horaSalida` INTEGER NOT NULL, `caracteristicasAgua` TEXT NOT NULL, `lastreKg` REAL NOT NULL, `proteccionMm` REAL NOT NULL, `equipamiento` TEXT NOT NULL, `temperaturaAireC` REAL NOT NULL, `temperaturaAguaC` REAL NOT NULL, `visibilidadMetros` REAL NOT NULL, `actividad` TEXT NOT NULL, `comentarios` TEXT NOT NULL, `condiciones` TEXT, `nombreUsuario` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lugar",
+            "columnName": "lugar",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "profundidadMetros",
+            "columnName": "profundidadMetros",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paradaSeguridadMin",
+            "columnName": "paradaSeguridadMin",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tiempoFondo",
+            "columnName": "tiempoFondo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "horaEntrada",
+            "columnName": "horaEntrada",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "horaSalida",
+            "columnName": "horaSalida",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caracteristicasAgua",
+            "columnName": "caracteristicasAgua",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastreKg",
+            "columnName": "lastreKg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "proteccionMm",
+            "columnName": "proteccionMm",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "equipamiento",
+            "columnName": "equipamiento",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "temperaturaAireC",
+            "columnName": "temperaturaAireC",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "temperaturaAguaC",
+            "columnName": "temperaturaAguaC",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "visibilidadMetros",
+            "columnName": "visibilidadMetros",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actividad",
+            "columnName": "actividad",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "comentarios",
+            "columnName": "comentarios",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "condiciones",
+            "columnName": "condiciones",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nombreUsuario",
+            "columnName": "nombreUsuario",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_inmersiones_nombreUsuario",
+            "unique": false,
+            "columnNames": [
+              "nombreUsuario"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_inmersiones_nombreUsuario` ON `${TABLE_NAME}` (`nombreUsuario`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "usuarios",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "nombreUsuario"
+            ],
+            "referencedColumns": [
+              "nombreUsuario"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "usuarios",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nombreUsuario` TEXT NOT NULL, `password` TEXT NOT NULL, PRIMARY KEY(`nombreUsuario`))",
+        "fields": [
+          {
+            "fieldPath": "nombreUsuario",
+            "columnName": "nombreUsuario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "password",
+            "columnName": "password",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "nombreUsuario"
+          ]
+        }
+      },
+      {
+        "tableName": "tablas_personalizadas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombre` TEXT NOT NULL, `fases` TEXT NOT NULL, `nombreUsuario` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fases",
+            "columnName": "fases",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreUsuario",
+            "columnName": "nombreUsuario",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tablas_personalizadas_nombreUsuario",
+            "unique": false,
+            "columnNames": [
+              "nombreUsuario"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tablas_personalizadas_nombreUsuario` ON `${TABLE_NAME}` (`nombreUsuario`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "usuarios",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "nombreUsuario"
+            ],
+            "referencedColumns": [
+              "nombreUsuario"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "sesiones_apnea",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha` INTEGER NOT NULL, `nombreTabla` TEXT NOT NULL, `completada` INTEGER NOT NULL, `faseAlcanzada` INTEGER NOT NULL, `totalFases` INTEGER NOT NULL, `marcaSegundos` INTEGER NOT NULL, `factores` TEXT NOT NULL, `sensaciones` TEXT NOT NULL, `nombreUsuario` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreTabla",
+            "columnName": "nombreTabla",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completada",
+            "columnName": "completada",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "faseAlcanzada",
+            "columnName": "faseAlcanzada",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalFases",
+            "columnName": "totalFases",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "marcaSegundos",
+            "columnName": "marcaSegundos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "factores",
+            "columnName": "factores",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sensaciones",
+            "columnName": "sensaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreUsuario",
+            "columnName": "nombreUsuario",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sesiones_apnea_nombreUsuario",
+            "unique": false,
+            "columnNames": [
+              "nombreUsuario"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sesiones_apnea_nombreUsuario` ON `${TABLE_NAME}` (`nombreUsuario`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "usuarios",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "nombreUsuario"
+            ],
+            "referencedColumns": [
+              "nombreUsuario"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "perfiles_usuario",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nombreUsuario` TEXT NOT NULL, `nombre` TEXT NOT NULL, `apellido` TEXT NOT NULL, `email` TEXT NOT NULL, `telefono` TEXT NOT NULL, `fechaNacimiento` INTEGER, `ciudad` TEXT NOT NULL, `companeroHabitual` TEXT NOT NULL, `actualizadoEn` INTEGER NOT NULL, PRIMARY KEY(`nombreUsuario`), FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "nombreUsuario",
+            "columnName": "nombreUsuario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apellido",
+            "columnName": "apellido",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "telefono",
+            "columnName": "telefono",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaNacimiento",
+            "columnName": "fechaNacimiento",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ciudad",
+            "columnName": "ciudad",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "companeroHabitual",
+            "columnName": "companeroHabitual",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actualizadoEn",
+            "columnName": "actualizadoEn",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "nombreUsuario"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "usuarios",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "nombreUsuario"
+            ],
+            "referencedColumns": [
+              "nombreUsuario"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "equipamiento",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombreUsuario` TEXT NOT NULL, `categoria` TEXT NOT NULL, `marca` TEXT NOT NULL, `modelo` TEXT NOT NULL, `talle` TEXT NOT NULL, `fechaCompra` INTEGER, `proximoMantenimiento` INTEGER, `enUso` INTEGER NOT NULL, `notas` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreUsuario",
+            "columnName": "nombreUsuario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoria",
+            "columnName": "categoria",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "marca",
+            "columnName": "marca",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modelo",
+            "columnName": "modelo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "talle",
+            "columnName": "talle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaCompra",
+            "columnName": "fechaCompra",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "proximoMantenimiento",
+            "columnName": "proximoMantenimiento",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "enUso",
+            "columnName": "enUso",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notas",
+            "columnName": "notas",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_equipamiento_nombreUsuario",
+            "unique": false,
+            "columnNames": [
+              "nombreUsuario"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_equipamiento_nombreUsuario` ON `${TABLE_NAME}` (`nombreUsuario`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "usuarios",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "nombreUsuario"
+            ],
+            "referencedColumns": [
+              "nombreUsuario"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "certificados",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombreUsuario` TEXT NOT NULL, `tipo` TEXT NOT NULL, `titulo` TEXT NOT NULL, `entidad` TEXT NOT NULL, `escuelaInstructor` TEXT NOT NULL, `numero` TEXT NOT NULL, `fechaEmision` INTEGER, `fechaVencimiento` INTEGER, `notas` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreUsuario",
+            "columnName": "nombreUsuario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titulo",
+            "columnName": "titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entidad",
+            "columnName": "entidad",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "escuelaInstructor",
+            "columnName": "escuelaInstructor",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numero",
+            "columnName": "numero",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaEmision",
+            "columnName": "fechaEmision",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fechaVencimiento",
+            "columnName": "fechaVencimiento",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "notas",
+            "columnName": "notas",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_certificados_nombreUsuario",
+            "unique": false,
+            "columnNames": [
+              "nombreUsuario"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_certificados_nombreUsuario` ON `${TABLE_NAME}` (`nombreUsuario`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "usuarios",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "nombreUsuario"
+            ],
+            "referencedColumns": [
+              "nombreUsuario"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "contactos_emergencia",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombreUsuario` TEXT NOT NULL, `nombre` TEXT NOT NULL, `relacion` TEXT NOT NULL, `telefono` TEXT NOT NULL, `telefonoAlternativo` TEXT NOT NULL, `esPrincipal` INTEGER NOT NULL, `notas` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreUsuario",
+            "columnName": "nombreUsuario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "relacion",
+            "columnName": "relacion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "telefono",
+            "columnName": "telefono",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "telefonoAlternativo",
+            "columnName": "telefonoAlternativo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "esPrincipal",
+            "columnName": "esPrincipal",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notas",
+            "columnName": "notas",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_contactos_emergencia_nombreUsuario",
+            "unique": false,
+            "columnNames": [
+              "nombreUsuario"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_contactos_emergencia_nombreUsuario` ON `${TABLE_NAME}` (`nombreUsuario`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "usuarios",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "nombreUsuario"
+            ],
+            "referencedColumns": [
+              "nombreUsuario"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a54fcacae273b5d1796de5467c526e45')"
+    ]
+  }
+}

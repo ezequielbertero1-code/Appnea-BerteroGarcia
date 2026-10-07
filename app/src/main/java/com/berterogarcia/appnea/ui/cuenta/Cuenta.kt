@@ -183,10 +183,7 @@ fun CuentaScreen(
                         "🏋️ Entrenamientos",
                         "${stats.sesionesEntrenamiento} (${stats.sesionesCompletas} completos)",
                         anchoCompleto = true
-                    ),
-                    Dato("🎣 Salidas de pesca", stats.salidasPesca.toString()),
-                    Dato("🐟 Capturas", stats.capturasTotales.toString()),
-                    Dato("🏆 Mayor pieza", stats.mayorPieza, anchoCompleto = true)
+                    )
                 )
             )
         }

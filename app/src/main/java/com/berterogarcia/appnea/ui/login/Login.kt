@@ -205,7 +205,7 @@ private fun Encabezado() {
         color = Color.White
     )
     Text(
-        text = "Tu bitácora de apnea, buceo y pesca submarina",
+        text = "Tu bitácora de apnea y buceo",
         style = MaterialTheme.typography.bodyMedium,
         color = TextoSecundario,
         textAlign = TextAlign.Center

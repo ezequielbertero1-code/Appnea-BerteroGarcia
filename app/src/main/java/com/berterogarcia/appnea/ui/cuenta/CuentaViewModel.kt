@@ -12,7 +12,6 @@ import com.berterogarcia.appnea.data.local.SessionManager
 import com.berterogarcia.appnea.data.local.formatearDuracion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.PerfilRepository
-import com.berterogarcia.appnea.data.repository.SalidaPescaRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.ui.perfil.certificados.ordenarCertificados
 import com.berterogarcia.appnea.ui.perfil.comun.EstadoVencimiento
@@ -53,7 +52,7 @@ data class ResumenPerfil(
 
 /**
  * Estadísticas REALES calculadas a partir de lo que hay cargado en la base
- * (inmersiones, sesiones de entrenamiento y salidas de pesca).
+ * (inmersiones y sesiones de entrenamiento).
  */
 data class EstadisticasCuenta(
     val inmersiones: Int = 0,
@@ -61,22 +60,18 @@ data class EstadisticasCuenta(
     val tiempoTotalFondo: String = "-",
     val sesionesEntrenamiento: Int = 0,
     val sesionesCompletas: Int = 0,
-    val mejorApnea: String = "-",
-    val salidasPesca: Int = 0,
-    val capturasTotales: Int = 0,
-    val mayorPieza: String = "-"
+    val mejorApnea: String = "-"
 )
 
 class CuentaViewModel(
     private val sessionManager: SessionManager,
     perfilRepository: PerfilRepository,
     inmersionRepository: InmersionRepository,
-    sesionApneaRepository: SesionApneaRepository,
-    salidaPescaRepository: SalidaPescaRepository
+    sesionApneaRepository: SesionApneaRepository
 ) : ViewModel() {
     val usuario: String? = sessionManager.obtenerUsuario()
 
-    // [NUEVO] Perfil real, se actualiza solo cuando se edita en las otras pantallas (Flow de Room).
+    // Perfil real, se actualiza solo cuando se edita en las otras pantallas (Flow de Room).
     private val resumenFlow: Flow<ResumenPerfil> =
         if (usuario == null) {
             flowOf(ResumenPerfil(cargando = false))
@@ -105,28 +100,22 @@ class CuentaViewModel(
 
     val estadisticas: StateFlow<EstadisticasCuenta> = combine(
         inmersionRepository.todasLasInmersiones,
-        sesionApneaRepository.todasLasSesiones,
-        salidaPescaRepository.todasLasSalidas
-    ) { inmersiones, sesiones, salidas ->
-        val capturas = salidas.flatMap { it.capturas }
-        val mayor = capturas.filter { it.pesoKg != null }.maxByOrNull { it.pesoKg!! }
+        sesionApneaRepository.todasLasSesiones
+    ) { inmersiones, sesiones ->
         val fondoTotal = inmersiones.fold(Duration.ZERO) { acc, i -> acc + i.tiempoFondo }
         EstadisticasCuenta(
             inmersiones = inmersiones.size,
             profundidadMaxima = inmersiones.maxOfOrNull { it.profundidadMetros }
                 ?.let { "${"%.1f".format(it)} m" } ?: "-",
             tiempoTotalFondo = if (inmersiones.isEmpty()) "-"
-                else "${fondoTotal.inWholeMinutes} min",
+            else "${fondoTotal.inWholeMinutes} min",
             sesionesEntrenamiento = sesiones.size,
             sesionesCompletas = sesiones.count { it.completada },
             mejorApnea = sesiones.maxOfOrNull { it.marcaSegundos }
-                ?.let { formatearDuracion(it) } ?: "-",
-            salidasPesca = salidas.size,
-            capturasTotales = capturas.sumOf { it.cantidad },
-            mayorPieza = mayor?.let { "${it.especie} (${"%.1f".format(it.pesoKg)} kg)" } ?: "-"
+                ?.let { formatearDuracion(it) } ?: "-"
         )
     }
-        .catch { emit(EstadisticasCuenta()) } // [CAMBIO] si falla la base, se muestran guiones en vez de crashear
+        .catch { emit(EstadisticasCuenta()) } // si falla la base, se muestran guiones en vez de crashear
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -142,17 +131,10 @@ class CuentaViewModel(
             sessionManager: SessionManager,
             perfilRepository: PerfilRepository,
             inmersionRepository: InmersionRepository,
-            sesionApneaRepository: SesionApneaRepository,
-            salidaPescaRepository: SalidaPescaRepository
+            sesionApneaRepository: SesionApneaRepository
         ) = viewModelFactory {
             initializer {
-                CuentaViewModel(
-                    sessionManager,
-                    perfilRepository,
-                    inmersionRepository,
-                    sesionApneaRepository,
-                    salidaPescaRepository
-                )
+                CuentaViewModel(sessionManager, perfilRepository, inmersionRepository, sesionApneaRepository)
             }
         }
     }

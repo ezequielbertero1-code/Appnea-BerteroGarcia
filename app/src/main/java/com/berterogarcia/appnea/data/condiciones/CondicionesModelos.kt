@@ -99,36 +99,13 @@ data class DiaAstro(
     val periodos: List<PeriodoSolunar>
 )
 
-enum class NivelActividad(val texto: String, val peces: Int) {
-    BAJA("Baja", 1),
-    MEDIA("Media", 2),
-    BUENA("Buena", 3),
-    MUY_BUENA("Muy buena", 4);
-
-    companion object {
-        fun desde(puntaje: Int): NivelActividad = when {
-            puntaje >= 75 -> MUY_BUENA
-            puntaje >= 50 -> BUENA
-            puntaje >= 25 -> MEDIA
-            else -> BAJA
-        }
-    }
-}
-
-data class ActividadHora(
-    val hora: LocalDateTime,
-    val puntaje: Int,          // 0..100
-    val nivel: NivelActividad,
-    val motivos: List<String>
-)
-
 enum class Aptitud(val texto: String) {
     BUENA("Buenas"),
     REGULAR("Regulares"),
     MALA("Malas")
 }
 
-/** Semáforo de condiciones para entrar al agua (buceo, apnea, pesca submarina). */
+/** Semáforo de condiciones para entrar al agua (buceo y apnea). */
 data class AptitudAgua(
     val nivel: Aptitud,
     val motivos: List<String>
@@ -148,9 +125,6 @@ data class Condiciones(
     val estadoMarea: EstadoMarea?,
     val tendenciaPresionHpa3h: Double?,
     val astroDias: List<DiaAstro>,
-    val actividadHoy: List<ActividadHora>,
-    val actividadActual: ActividadHora,
-    val actividadPorDia: List<Pair<LocalDate, NivelActividad>>,
     val aptitud: AptitudAgua,
     val marDisponible: Boolean
 ) {

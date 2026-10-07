@@ -9,7 +9,6 @@ import com.berterogarcia.appnea.data.local.SonidoManager
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.PerfilRepository
 import com.berterogarcia.appnea.data.repository.RegistroRepository
-import com.berterogarcia.appnea.data.repository.SalidaPescaRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.data.repository.SesionRepository
 import com.berterogarcia.appnea.data.repository.TablaPersonalizadaRepository
@@ -32,7 +31,6 @@ class MyApplication : Application() {
         TablaPersonalizadaRepository(database.tablaPersonalizadaDao(), sessionManager)
     }
     val sesionApneaRepository by lazy { SesionApneaRepository(database.sesionApneaDao(), sessionManager) }
-    val salidaPescaRepository by lazy { SalidaPescaRepository(database.salidaPescaDao(), sessionManager) }
     val registroRepository by lazy { RegistroRepository(database) }
 
     // [NUEVO] Perfil (datos personales, equipamiento, certificados, contactos)
@@ -52,6 +50,11 @@ class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        appScope.launch {
+            // v8: se sacó pesca submarina → se borran las fotos de capturas que hayan quedado.
+            // Si la carpeta no existe no hace nada; si falla, no afecta al resto de la app.
+            runCatching { java.io.File(filesDir, "capturas_pesca").deleteRecursively() }
+        }
         // Carga datos de ejemplo para el usuario de prueba "Franco" (solo la primera vez).
         appScope.launch {
             runCatching { SeedDatos.sembrarSiHaceFalta(this@MyApplication, database) }

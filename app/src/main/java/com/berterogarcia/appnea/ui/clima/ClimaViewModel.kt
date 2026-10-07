@@ -27,7 +27,7 @@ data class ClimaUiState(
 )
 
 /**
- * Carga todas las condiciones (clima, mar, mareas, sol, luna, actividad de pesca).
+ * Carga todas las condiciones (clima, mar, mareas, sol, luna).
  * Lo usan la sección de clima de Inicio y la pantalla completa de Condiciones.
  */
 class ClimaViewModel(private val appContext: Context) : ViewModel() {

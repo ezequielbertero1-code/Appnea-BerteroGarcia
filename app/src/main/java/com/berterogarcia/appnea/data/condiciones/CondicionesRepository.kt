@@ -11,8 +11,8 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 /**
- * Junta todo: pronóstico (Open-Meteo), mar y mareas (Open-Meteo Marine), astronomía
- * (cálculo propio) e índice de actividad de pesca.
+ * Junta toodo: pronóstico (Open-Meteo), mar y mareas (Open-Meteo Marine) y astronomía
+ * (cálculo propio).
  */
 object CondicionesRepository {
 
@@ -52,20 +52,6 @@ object CondicionesRepository {
             Astronomia.calcularDia(hoy.plusDays(it), ubicacion.latitud, ubicacion.longitud, zona)
         }
 
-        fun actividad(momento: LocalDateTime, astro: DiaAstro): ActividadHora {
-            val h = momento.truncatedTo(ChronoUnit.HOURS)
-            return ActividadPesca.calcular(
-                momento, astro, extremos, climaPorHora[h], climaPorHora[h.minusHours(3)], marPorHora[h]
-            )
-        }
-
-        val actividadHoy = (0..23).map { actividad(hoy.atTime(it, 0), astroDias.first()) }
-        val actividadPorDia = astroDias.map { astro ->
-            val mejores = (0..23).map { actividad(astro.fecha.atTime(it, 0), astro).puntaje }
-                .sortedDescending().take(4)
-            astro.fecha to NivelActividad.desde(mejores.average().toInt())
-        }
-
         val olaMaxPorDia = mar.groupBy { it.hora.toLocalDate() }
             .mapValues { (_, horas) -> horas.mapNotNull { it.olaM }.maxOrNull() }
         val dias = pronostico.dias
@@ -85,17 +71,14 @@ object CondicionesRepository {
             estadoMarea = estado,
             tendenciaPresionHpa3h = tendencia,
             astroDias = astroDias,
-            actividadHoy = actividadHoy,
-            actividadActual = actividad(ahora, astroDias.first()),
-            actividadPorDia = actividadPorDia,
-            aptitud = ActividadPesca.aptitudAgua(climaActual, marActual),
+            aptitud = evaluarAptitudAgua(climaActual, marActual),
             marDisponible = marDisponible
         )
     }
 
     /**
-     * Condiciones para guardar junto a un registro (inmersión / salida de pesca).
-     * Nunca falla: si no hay internet guarda solo lo astronómico.
+     * Condiciones para guardar junto a una inmersión.
+     * Nunca falla: si no hay internet guarda solo lo astronómico (luna).
      */
     suspend fun registroPara(latitud: Double, longitud: Double, momento: LocalDateTime): CondicionesRegistro {
         val fecha: LocalDate = momento.toLocalDate()
@@ -105,12 +88,10 @@ object CondicionesRepository {
 
         val hora = momento.truncatedTo(ChronoUnit.HOURS)
         val clima = pronostico?.horas?.firstOrNull { it.hora == hora }
-        val clima3h = pronostico?.horas?.firstOrNull { it.hora == hora.minusHours(3) }
         val marHora = mar.firstOrNull { it.hora == hora }
         val extremos = Mareas.extremos(mar)
         val estado = Mareas.estado(mar, extremos, momento)
         val astro = Astronomia.calcularDia(fecha, latitud, longitud, zona)
-        val actividad = ActividadPesca.calcular(momento, astro, extremos, clima, clima3h, marHora)
 
         val textoMarea = estado?.let { e ->
             val destino = e.siguiente?.let {
@@ -139,9 +120,7 @@ object CondicionesRepository {
             estadoMarea = textoMarea,
             faseLunar = astro.fase,
             iluminacionLunaPorc = astro.iluminacionPorc,
-            actividadPesca = actividad.puntaje,
-            nivelActividad = actividad.nivel.texto,
-            aptitudAgua = if (clima != null || marHora != null) ActividadPesca.aptitudAgua(clima, marHora).nivel.texto else null,
+            aptitudAgua = if (clima != null || marHora != null) evaluarAptitudAgua(clima, marHora).nivel.texto else null,
             conDatosOnline = clima != null
         )
     }
@@ -149,12 +128,9 @@ object CondicionesRepository {
     /** Solo lo astronómico (sin internet). Se usa en los datos de ejemplo. */
     fun registroAstronomico(latitud: Double, longitud: Double, momento: LocalDateTime): CondicionesRegistro {
         val astro = Astronomia.calcularDia(momento.toLocalDate(), latitud, longitud, ZoneId.systemDefault())
-        val actividad = ActividadPesca.calcular(momento, astro, emptyList(), null, null, null)
         return CondicionesRegistro(
             faseLunar = astro.fase,
             iluminacionLunaPorc = astro.iluminacionPorc,
-            actividadPesca = actividad.puntaje,
-            nivelActividad = actividad.nivel.texto,
             conDatosOnline = false
         )
     }

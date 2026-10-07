@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.Aptitud
-import com.berterogarcia.appnea.data.condiciones.NivelActividad
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.formatearDuracion
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado
@@ -66,12 +65,10 @@ import com.berterogarcia.appnea.ui.components.TarjetaAviso
 import com.berterogarcia.appnea.ui.components.TarjetaHero
 import com.berterogarcia.appnea.ui.condiciones.Acento
 import com.berterogarcia.appnea.ui.condiciones.FilaDato
-import com.berterogarcia.appnea.ui.condiciones.PecesActividad
 import com.berterogarcia.appnea.ui.condiciones.Semaforo
 import com.berterogarcia.appnea.ui.condiciones.TarjetaCondicion
 import com.berterogarcia.appnea.ui.condiciones.TextoSecundario
 import com.berterogarcia.appnea.ui.condiciones.colorAptitud
-import com.berterogarcia.appnea.ui.condiciones.colorNivel
 import com.berterogarcia.appnea.ui.condiciones.direccion
 import com.berterogarcia.appnea.ui.condiciones.duracion
 import com.berterogarcia.appnea.ui.condiciones.num
@@ -342,20 +339,14 @@ private fun PestanaCondiciones(i: InmersionEntity) {
         )
     }
 
-    // ---- Mosaicos: marea, luna, pesca, visibilidad ----
+    // ---- Mosaicos: marea, luna, corriente, visibilidad ----
     if (c != null) {
-        val nivel = NivelActividad.entries.firstOrNull { it.texto == c.nivelActividad }
-            ?: NivelActividad.desde(c.actividadPesca)
         FilaMosaicos {
             Mosaico("Marea", c.estadoMarea ?: "Sin datos", c.alturaMareaM?.let { num(it, 2, " m") } ?: "")
             Mosaico("Luna", "${emojiLuna(c.faseLunar)} ${c.iluminacionLunaPorc}%", c.faseLunar)
         }
         FilaMosaicos {
-            Mosaico(
-                "Actividad de pesca", nivel.texto, "${c.actividadPesca}/100",
-                colorValor = colorNivel(nivel),
-                extra = { PecesActividad(nivel, tamanio = 16) }
-            )
+            Mosaico("🌀 Corriente", c.corrienteKmh?.let { num(it, 1, " km/h") } ?: "Sin datos", "al entrar")
             Mosaico("👁️ Visibilidad", "${i.visibilidadMetros.limpio()} m", "cargada por vos")
         }
     } else {
@@ -374,7 +365,7 @@ private fun PestanaCondiciones(i: InmersionEntity) {
 
     if (c != null && !c.conDatosOnline) {
         Text(
-            "Sin conexión al guardar: solo hay datos astronómicos (luna y actividad).",
+            "Sin conexión al guardar: solo hay datos astronómicos (luna).",
             style = MaterialTheme.typography.bodySmall,
             color = TextoSecundario
         )

@@ -39,7 +39,7 @@ fun LocalDate?.formatoLargo(vacio: String = "-"): String = this?.format(FORMATO_
 /**
  * Campo de fecha que trabaja directamente con [LocalDate] (sin parsear Strings).
  *
- * Diferencias con DatePickerField (que se sigue usando en inmersiones/pesca):
+ * Diferencias con DatePickerField (que se sigue usando en inmersiones):
  *  - Permite fechas futuras (vencimientos, próximo service) usando [maxima] = null.
  *  - Permite restringir con [minima] / [maxima].
  *  - Se puede borrar la fecha (campos opcionales).

@@ -3,10 +3,10 @@ package com.berterogarcia.appnea.data.local
 import org.json.JSONObject
 
 /**
- * "Foto" de las condiciones en el momento de una inmersión o salida de pesca.
+ * "Foto" de las condiciones en el momento de una inmersión.
  * Se guarda automáticamente al registrar (como JSON en una columna, ver Converters).
  *
- * Lo astronómico (luna, actividad solunar) se calcula siempre, aunque no haya internet.
+ * Lo astronómico (luna) se calcula siempre, aunque no haya internet.
  * Lo meteorológico/marino viene de Open-Meteo y puede faltar ([conDatosOnline] = false).
  */
 data class CondicionesRegistro(
@@ -29,8 +29,6 @@ data class CondicionesRegistro(
     val estadoMarea: String? = null,
     val faseLunar: String,
     val iluminacionLunaPorc: Int,
-    val actividadPesca: Int,
-    val nivelActividad: String,
     val aptitudAgua: String? = null,
     val conDatosOnline: Boolean
 ) {
@@ -54,8 +52,6 @@ data class CondicionesRegistro(
         putOpt("estadoMarea", estadoMarea)
         put("faseLunar", faseLunar)
         put("iluminacionLunaPorc", iluminacionLunaPorc)
-        put("actividadPesca", actividadPesca)
-        put("nivelActividad", nivelActividad)
         putOpt("aptitudAgua", aptitudAgua)
         put("conDatosOnline", conDatosOnline)
     }.toString()
@@ -86,8 +82,6 @@ data class CondicionesRegistro(
                 estadoMarea = s("estadoMarea"),
                 faseLunar = s("faseLunar") ?: "",
                 iluminacionLunaPorc = i("iluminacionLunaPorc") ?: 0,
-                actividadPesca = i("actividadPesca") ?: 0,
-                nivelActividad = s("nivelActividad") ?: "",
                 aptitudAgua = s("aptitudAgua"),
                 conDatosOnline = j.optBoolean("conDatosOnline", false)
             )

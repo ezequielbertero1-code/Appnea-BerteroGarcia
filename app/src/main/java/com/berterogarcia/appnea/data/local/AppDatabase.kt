@@ -13,7 +13,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         UsuarioEntity::class,
         TablaPersonalizadaEntity::class,
         SesionApneaEntity::class,
-        SalidaPescaEntity::class,
         PerfilUsuarioEntity::class,
         EquipoEntity::class,
         CertificadoEntity::class,
@@ -22,7 +21,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     // v5: condiciones guardadas en inmersiones y salidas de pesca
     // v6: perfil, equipamiento, certificados y contactos de emergencia
     // v7: inmersiones, sesiones, salidas de pesca y tablas pasan a ser de cada usuario
-    version = 7,
+    version = 8,
     // [CAMBIO] Room guarda el esquema de cada versión en app/schemas/ (configurado en
     // app/build.gradle.kts). Hace falta para escribir migraciones y para usar AutoMigration.
     // Esa carpeta SE COMMITEA.
@@ -34,7 +33,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDao
     abstract fun tablaPersonalizadaDao(): TablaPersonalizadaDao
     abstract fun sesionApneaDao(): SesionApneaDao
-    abstract fun salidaPescaDao(): SalidaPescaDao
     abstract fun perfilUsuarioDao(): PerfilUsuarioDao
     abstract fun equipoDao(): EquipoDao
     abstract fun certificadoDao(): CertificadoDao
