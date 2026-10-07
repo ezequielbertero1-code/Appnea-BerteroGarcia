@@ -30,15 +30,6 @@ private val SECCIONES_BUCEO = listOf(
                         "apnea, el buceador respira aire comprimido y puede permanecer bajo el agua " +
                         "por mucho más tiempo, pero eso trae riesgos propios relacionados con la " +
                         "presión que hay que conocer y respetar.",
-                imagenes = listOf(
-                    ImagenTema(
-                        resId = R.drawable.buceo_fisica,
-                        descripcion = "Física básica del buceo: presión con la profundidad",
-                        pie = "Por cada 10 metros de profundidad, la presión aumenta 1 bar (atmósfera) " +
-                                "más. El mayor cambio relativo de volumen del aire ocurre entre 0 y 10 " +
-                                "metros: por eso hay que compensar desde el inicio del descenso."
-                    )
-                )
             ),
             TemaInfo(
                 id = "buceo_flotabilidad",
@@ -81,13 +72,6 @@ private val SECCIONES_BUCEO = listOf(
                                 "linterna, silbato y boya/bandera de señalización para marcar la posición " +
                                 "del buceador en superficie."
                     ),
-                    ImagenTema(
-                        resId = R.drawable.buceo_entrada_agua,
-                        descripcion = "Técnicas de entrada al agua",
-                        pie = "Existen distintas técnicas de entrada al agua (desde la orilla, la " +
-                                "playa, un barco o una embarcación ligera). La elección depende del punto " +
-                                "de partida y de las condiciones del mar, siempre priorizando la seguridad."
-                    )
                 ),
                 avisos = listOf(
                     AvisoSeguridad(
@@ -98,12 +82,47 @@ private val SECCIONES_BUCEO = listOf(
                                 "una duda sobre el equipo sin resolverla antes."
                     )
                 )
+            ),
+            TemaInfo(
+                id = "buceo_entrada",
+                titulo = "Entrar y salir del agua",
+                cuerpo = "Existen varias técnicas para meterse al agua: desde una orilla rocosa, " +
+                        "desde la orilla o la playa, desde un barco o desde una embarcación ligera. " +
+                        "Cuál usar depende del punto de partida y de las condiciones del mar " +
+                        "(olas y corrientes); todas se desarrollaron priorizando la seguridad del buceador.",
+                imagenes = listOf(
+                    ImagenTema(
+                        resId = R.drawable.buceo_entrada_agua,
+                        descripcion = "Técnicas de entrada al agua",
+                        pie = "Entradas desde una orilla rocosa, la orilla, la playa, un barco y una " +
+                                "embarcación ligera."
+                    )
+                )
             )
         )
     ),
     SeccionInfo(
         titulo = "Presión y accidentes: lo esencial",
         temas = listOf(
+            TemaInfo(
+                id = "buceo_presion",
+                titulo = "Presión y profundidad",
+                cuerpo = "Al nivel del mar el aire ejerce una presión de 1 bar (aproximadamente " +
+                        "1 kg por cada cm²). El agua es mucho más densa: cada 10 m de profundidad " +
+                        "suma 1 bar más, así que a 10 m hay 2 bar, a 20 m 3 bar y a 30 m 4 bar. " +
+                        "Además, según la Ley de Charles, a volumen constante la presión de un gas " +
+                        "aumenta con la temperatura: una botella al sol marca más presión en el " +
+                        "manómetro que la misma botella en agua fría.",
+                imagenes = listOf(
+                    ImagenTema(
+                        resId = R.drawable.buceo_fisica,
+                        descripcion = "Física básica del buceo: presión con la profundidad",
+                        pie = "Por cada 10 metros de profundidad, la presión aumenta 1 bar (atmósfera) " +
+                                "más. El mayor cambio relativo de volumen del aire ocurre entre 0 y 10 " +
+                                "metros: por eso hay que compensar desde el inicio del descenso."
+                    )
+                )
+            ),
             TemaInfo(
                 id = "buceo_sobrepresion",
                 titulo = "Sobrepresión pulmonar",

@@ -47,16 +47,7 @@ private val SECCIONES_APNEA = listOf(
                         "periférica (la sangre se retira de brazos y piernas) y el \"blood shift\" " +
                         "(la sangre se concentra en el pecho para proteger los pulmones de la " +
                         "presión). Este reflejo es más fuerte cuanto más frío el agua en contacto " +
-                        "con la cara, y se entrena y mejora con la práctica.",
-                imagenes = listOf(
-                    ImagenTema(
-                        resId = R.drawable.apnea_flotabilidad,
-                        descripcion = "Flotabilidad positiva, negativa y neutra",
-                        pie = "Flotabilidad positiva, negativa y neutra. En apnea se suele lastrar " +
-                                "apenas lo necesario para tener flotabilidad neutra alrededor de los -10 m, " +
-                                "y positiva en superficie."
-                    )
-                )
+                        "con la cara, y se entrena y mejora con la práctica."
             ),
             TemaInfo(
                 id = "apnea_respiracion",
@@ -96,11 +87,28 @@ private val SECCIONES_APNEA = listOf(
                         "respiración ni gastar energía de más.",
                 imagenes = listOf(
                     ImagenTema(
+                        resId = R.drawable.apnea_vision,
+                        descripcion = "Visión y color bajo el agua a través de la máscara",
+                        pie = "Al pasar del agua al aire de la máscara la luz se dobla (refracción): " +
+                                "los objetos se ven un 33 % más grandes y un 25 % más cerca. Además, " +
+                                "con la profundidad los colores cálidos (rojo, naranja, amarillo) " +
+                                "desaparecen primero y quedan solo azules y violetas (absorción)."
+                    )
+                )
+            ),
+            TemaInfo(
+                id = "apnea_aletas",
+                titulo = "Aletas",
+                cuerpo = "Las aletas de apnea tienen pala larga y flexible, distinta a las de " +
+                        "buceo con botellas: transmiten mejor la energía de la pierna y permiten " +
+                        "recorrer grandes distancias durante mucho tiempo sin cansarse. Hay dos " +
+                        "tipos: de pie completo, con forma de zapato y talles estándar, y de talón " +
+                        "abierto, en talles chico a extra grande, que se sujetan con una correa ajustable.",
+                imagenes = listOf(
+                    ImagenTema(
                         resId = R.drawable.apnea_aletas,
-                        descripcion = "Aletas de apnea",
-                        pie = "Las aletas de apnea tienen pala larga y flexible, distinta a las de " +
-                                "buceo con botellas: transmiten mejor la energía de la pierna y reducen el " +
-                                "gasto de energía en cada patada."
+                        descripcion = "Partes de una aleta de apnea",
+                        pie = "1. Pala  2. Rail para estabilizar la pala  3. Espacio para los pies."
                     )
                 )
             ),
@@ -115,10 +123,11 @@ private val SECCIONES_APNEA = listOf(
                         "ante un enganche.",
                 imagenes = listOf(
                     ImagenTema(
-                        resId = R.drawable.apnea_vision,
-                        descripcion = "Visión y color bajo el agua",
-                        pie = "Bajo el agua los objetos se ven más grandes y más cerca (refracción), y " +
-                                "los colores cálidos como el rojo desaparecen primero con la profundidad."
+                        resId = R.drawable.apnea_flotabilidad,
+                        descripcion = "Flotabilidad positiva, negativa y neutra",
+                        pie = "Flotabilidad positiva, negativa y neutra. En apnea se suele lastrar " +
+                                "apenas lo necesario para tener flotabilidad neutra alrededor de los -10 m, " +
+                                "y positiva en superficie."
                     )
                 )
             ),
