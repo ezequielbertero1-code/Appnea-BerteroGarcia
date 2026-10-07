@@ -9,7 +9,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -174,14 +173,7 @@ fun AppNavHost(
                 onNuevaInmersion = { navController.navigate(RUTA_NUEVA_INMERSION) { launchSingleTop = true } },
                 onVerDetalleInmersion = { id -> navController.navigate("detalle_inmersion/$id") { launchSingleTop = true } },
                 onVerCondiciones = { navController.navigate(RUTA_CONDICIONES) { launchSingleTop = true } },
-                onIrA = { destino ->
-                    // Misma navegación que la barra inferior
-                    navController.navigate(destino.name) {
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
+                onIrA = { destino -> navController.irAPestania(destino) }
             )
         }
         //==============================CONDICIONES==============================================
@@ -365,3 +357,43 @@ fun AppNavHost(
         }
     }
 }
+/**
+ * Navegación entre pestañas (barra inferior y accesos de Inicio).
+ *  - Tocar la pestaña en la que ya estás (o una pantalla abierta desde ella, ej. un detalle)
+ *    te devuelve a su pantalla principal.
+ *  - Cambiar de pestaña guarda la que dejás y restaura la que abrís (scroll, detalle abierto…).
+ *  - Inicio siempre vuelve "limpio": nunca restaura lo que estaba abierto arriba suyo.
+ */
+fun NavHostController.irAPestania(destino: AppDestinations) {
+    val inicio = AppDestinations.INICIO.name
+
+    // Pestaña abierta: la que (además de Inicio) está en la pila. Si no hay otra, es Inicio.
+    val pestaniaAbierta = AppDestinations.entries
+        .firstOrNull { it != AppDestinations.INICIO && estaEnLaPila(it.name) }
+        ?: AppDestinations.INICIO
+
+    if (destino == pestaniaAbierta) {
+        // Re-seleccionar la pestaña actual: cierra lo que haya arriba de su raíz
+        popBackStack(destino.name, inclusive = false)
+        return
+    }
+
+    if (!estaEnLaPila(inicio)) {
+        // No debería pasar (Inicio es siempre la raíz después del login), pero si pasa,
+        // se arranca una pila nueva en vez de dejarla rota.
+        navigate(destino.name) { popUpTo(graph.id) { inclusive = true } }
+        return
+    }
+
+    navigate(destino.name) {
+        // Se usa INICIO como raíz y no graph.findStartDestination(): si entraste por el login,
+        // el destino inicial del grafo es "login", que ya no está en la pila.
+        popUpTo(inicio) { saveState = true }
+        launchSingleTop = true
+        restoreState = destino != AppDestinations.INICIO
+    }
+}
+
+/** getBackStackEntry tira excepción si la ruta no está en la pila; acá se convierte en false. */
+private fun NavHostController.estaEnLaPila(ruta: String): Boolean =
+    runCatching { getBackStackEntry(ruta) }.isSuccess

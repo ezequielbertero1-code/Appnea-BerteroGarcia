@@ -35,7 +35,6 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.berterogarcia.appnea.navigation.AppNavHost
@@ -43,6 +42,7 @@ import com.berterogarcia.appnea.navigation.PREFIJO_PERFIL
 import com.berterogarcia.appnea.navigation.RUTAS_SIN_BARRA
 import com.berterogarcia.appnea.navigation.RUTA_LOGIN
 import com.berterogarcia.appnea.navigation.RUTA_REGISTRO
+import com.berterogarcia.appnea.navigation.irAPestania
 import com.berterogarcia.appnea.ui.sesion.EstadoArranque
 import com.berterogarcia.appnea.ui.sesion.SesionViewModel
 import com.berterogarcia.appnea.ui.theme.MyApplicationTheme
@@ -125,11 +125,7 @@ fun MyApplicationApp(destinoInicial: String = RUTA_LOGIN) { // [CAMBIO] recibe e
                             (destination == AppDestinations.CUENTA && currentRoute.startsWith(PREFIJO_PERFIL)),
                         onClick = {
                             if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-                                navController.navigate(destination.name) {
-                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+                                navController.irAPestania(destination)
                             }
                         }
                     )
