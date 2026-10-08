@@ -10,11 +10,13 @@ import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.ui.entrenamiento.FACTORES_DISPONIBLES
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
 import java.time.YearMonth
@@ -104,6 +106,7 @@ class EstadisticasViewModel(
             entrenamiento = resumirEntrenamiento(sesiones, periodo, hoy)
         )
     }
+        .flowOn(Dispatchers.Default) // calcular fuera del hilo principal (no traba la pantalla)
         .catch { emit(EstadisticasUiState(cargando = false, error = true)) } // si falla la base: aviso, sin crashear
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EstadisticasUiState())
 
