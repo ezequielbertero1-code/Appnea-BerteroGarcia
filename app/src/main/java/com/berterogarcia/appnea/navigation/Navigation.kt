@@ -26,6 +26,9 @@ import com.berterogarcia.appnea.ui.entrenamiento.CrearTablaScreen
 import com.berterogarcia.appnea.ui.entrenamiento.CrearTablaViewModel
 import com.berterogarcia.appnea.ui.entrenamiento.CronometroScreen
 import com.berterogarcia.appnea.ui.entrenamiento.EntrenamientoApneaViewModel
+import com.berterogarcia.appnea.ui.estadisticas.EstadisticasScreen
+import com.berterogarcia.appnea.ui.estadisticas.EstadisticasViewModel
+import com.berterogarcia.appnea.ui.estadisticas.PESTANIA_ENTRENAMIENTO
 import com.berterogarcia.appnea.ui.historial.HistorialViewModel
 import com.berterogarcia.appnea.ui.informacion.InformacionScreen
 import com.berterogarcia.appnea.ui.inicio.InicioScreen
@@ -59,6 +62,10 @@ const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
 const val RUTA_DETALLE_INMERSION = "detalle_inmersion/{id}"
 const val RUTA_CONDICIONES = "condiciones"
 const val RUTA_CREAR_TABLA = "entrenamiento/crear_tabla"
+const val RUTA_ESTADISTICAS = "estadisticas?pestania={pestania}"
+private const val ARG_PESTANIA = "pestania"
+/** pestania: 0 = Inmersiones, 1 = Entrenamiento (PESTANIA_ENTRENAMIENTO). */
+fun rutaEstadisticas(pestania: Int = 0) = "estadisticas?pestania=$pestania"
 
 //  Perfil. Todas empiezan con "perfil/" para que la barra marque "Cuenta" como seleccionada.
 const val RUTA_DATOS_PERSONALES = "perfil/datos"
@@ -197,8 +204,11 @@ fun AppNavHost(
             )
             CronometroScreen(
                 entrenamientoViewModel = entrenamientoViewModel,
-                onCrearTabla = { navController.navigate(RUTA_CREAR_TABLA) { launchSingleTop = true } }
-                // onVerEstadisticas / onGuardarIntentos: se conectan cuando exista Estadísticas
+                onCrearTabla = { navController.navigate(RUTA_CREAR_TABLA) { launchSingleTop = true } },
+                onVerEstadisticas = {
+                    navController.navigate(rutaEstadisticas(PESTANIA_ENTRENAMIENTO)) { launchSingleTop = true }
+                }
+                // onGuardarIntentos: se conecta cuando se guarden los intentos del modo Libre
             )
         }
         composable(RUTA_CREAR_TABLA) { entrada ->
@@ -219,7 +229,8 @@ fun AppNavHost(
             InmersionScreen(
                 historialViewModel = historialViewModel,
                 onAgregarInmersion = { navController.navigate(RUTA_NUEVA_INMERSION) { launchSingleTop = true } },
-                onVerDetalleInmersion = { id -> navController.navigate("detalle_inmersion/$id") { launchSingleTop = true } }
+                onVerDetalleInmersion = { id -> navController.navigate("detalle_inmersion/$id") { launchSingleTop = true } },
+                onVerEstadisticas = { navController.navigate(rutaEstadisticas()) { launchSingleTop = true } }
             )
         }
         composable(RUTA_NUEVA_INMERSION) {
@@ -252,6 +263,27 @@ fun AppNavHost(
             )
         }
 
+        //==================================ESTADÍSTICAS=====================================
+        composable(
+            route = RUTA_ESTADISTICAS,
+            arguments = listOf(navArgument(ARG_PESTANIA) {
+                type = NavType.IntType
+                defaultValue = 0
+            })
+        ) { entrada ->
+            val estadisticasViewModel: EstadisticasViewModel = viewModel(
+                factory = EstadisticasViewModel.Factory(app.inmersionRepository, app.sesionApneaRepository)
+            )
+            EstadisticasScreen(
+                viewModel = estadisticasViewModel,
+                pestaniaInicial = entrada.arguments?.getInt(ARG_PESTANIA) ?: 0,
+                onVolver = { navController.volverDesde(entrada) },
+                onVerInmersion = { id -> navController.navigate("detalle_inmersion/$id") { launchSingleTop = true } },
+                onRegistrarInmersion = { navController.navigate(RUTA_NUEVA_INMERSION) { launchSingleTop = true } },
+                onIrAEntrenar = { navController.irAPestania(AppDestinations.ENTRENAMIENTO) }
+            )
+        }
+
         //=============================APRENDER (antes Informacion)==========================
         composable(AppDestinations.APRENDER.name) {
             InformacionScreen()
@@ -278,7 +310,8 @@ fun AppNavHost(
                 onEditarDatos = { navController.navigate(RUTA_DATOS_PERSONALES) },
                 onVerEquipamiento = { navController.navigate(RUTA_EQUIPAMIENTO) },
                 onVerCertificados = { navController.navigate(RUTA_CERTIFICADOS) },
-                onVerContactos = { navController.navigate(RUTA_CONTACTOS) }
+                onVerContactos = { navController.navigate(RUTA_CONTACTOS) },
+                onVerEstadisticas = { navController.navigate(rutaEstadisticas()) { launchSingleTop = true } }
             )
         }
 

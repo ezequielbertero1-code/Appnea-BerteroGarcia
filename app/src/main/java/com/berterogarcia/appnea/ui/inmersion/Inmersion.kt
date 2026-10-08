@@ -14,12 +14,14 @@ fun InmersionScreen(
     historialViewModel: HistorialViewModel,
     onAgregarInmersion: () -> Unit,
     onVerDetalleInmersion: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onVerEstadisticas: () -> Unit = {}
 ) {
     HistorialScreen(
         modifier = modifier.fillMaxSize(),
         viewModel = historialViewModel,
         onAgregarClick = onAgregarInmersion,
-        onVerDetalle = onVerDetalleInmersion
+        onVerDetalle = onVerDetalleInmersion,
+        onVerEstadisticas = onVerEstadisticas
     )
 }

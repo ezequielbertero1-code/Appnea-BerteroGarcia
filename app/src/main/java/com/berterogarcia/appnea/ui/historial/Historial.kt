@@ -1,8 +1,6 @@
 package com.berterogarcia.appnea.ui.historial
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -25,8 +22,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,11 +45,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.TipoInmersion
+import com.berterogarcia.appnea.ui.components.ChipsSeleccionUnica
 import com.berterogarcia.appnea.ui.components.TarjetaInmersion
 import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.Divisor
 import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
-import com.berterogarcia.appnea.ui.theme.TextoChip
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.theme.VeloMedio
 import java.time.YearMonth
@@ -73,7 +67,8 @@ fun HistorialScreen(
     modifier: Modifier = Modifier,
     viewModel: HistorialViewModel,
     onAgregarClick: () -> Unit,
-    onVerDetalle: (Long) -> Unit
+    onVerDetalle: (Long) -> Unit,
+    onVerEstadisticas: () -> Unit = {}
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
     val periodo by viewModel.periodo.collectAsStateWithLifecycle()
@@ -88,18 +83,18 @@ fun HistorialScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             // ---- Fijo arriba: título, buscador y filtros ----
             Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
-                Encabezado(totalGeneral = estado.totalGeneral)
+                Encabezado(totalGeneral = estado.totalGeneral, onVerEstadisticas = onVerEstadisticas)
                 Spacer(Modifier.height(12.dp))
                 Buscador(texto = busqueda, onTextoChange = viewModel::onBusquedaChange)
                 Spacer(Modifier.height(10.dp))
-                FilaFiltros(
+                ChipsSeleccionUnica(
                     opciones = listOf(null) + TipoInmersion.entries,
                     seleccionada = tipo,
                     etiqueta = { t -> t?.let { "${it.emoji} ${it.etiqueta}" } ?: "Todos" },
                     onSeleccion = viewModel::onTipoChange
                 )
                 Spacer(Modifier.height(6.dp))
-                FilaFiltros(
+                ChipsSeleccionUnica(
                     opciones = PeriodoFiltro.entries,
                     seleccionada = periodo,
                     etiqueta = { it.etiqueta },
@@ -175,18 +170,20 @@ fun HistorialScreen(
 // ================================ ENCABEZADO Y FILTROS ================================
 
 @Composable
-private fun Encabezado(totalGeneral: Int) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-        Text(
-            "Inmersiones",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.weight(1f)
-        )
-        if (totalGeneral > 0) {
-            Text("$totalGeneral en total", style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
+private fun Encabezado(totalGeneral: Int, onVerEstadisticas: () -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                "Inmersiones",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            if (totalGeneral > 0) {
+                Text("$totalGeneral en total", style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
+            }
         }
+        TextButton(onClick = onVerEstadisticas) { Text("📈 Estadísticas", color = Acento) }
     }
 }
 
@@ -226,45 +223,6 @@ private fun Buscador(texto: String, onTextoChange: (String) -> Unit) {
             unfocusedTrailingIconColor = TextoSecundario
         )
     )
-}
-
-/** Fila de chips de una sola opción (mismo estilo para tipo y período). */
-@Composable
-private fun <T> FilaFiltros(
-    opciones: List<T>,
-    seleccionada: T,
-    etiqueta: (T) -> String,
-    onSeleccion: (T) -> Unit
-) {
-    // Scroll horizontal por si la pantalla es angosta o la letra está agrandada
-    Row(
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        opciones.forEach { opcion ->
-            val elegido = opcion == seleccionada
-            FilterChip(
-                selected = elegido,
-                onClick = { onSeleccion(opcion) },
-                label = { Text(etiqueta(opcion), fontWeight = if (elegido) FontWeight.Bold else FontWeight.Normal) },
-                shape = RoundedCornerShape(50),
-                colors = FilterChipDefaults.filterChipColors(
-                    containerColor = Color.Transparent,
-                    labelColor = TextoChip,
-                    selectedContainerColor = FondoTarjetaResaltada,
-                    selectedLabelColor = Color.White
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = elegido,
-                    borderColor = Divisor,
-                    selectedBorderColor = Acento.copy(alpha = 0.55f),
-                    borderWidth = 1.dp,
-                    selectedBorderWidth = 1.dp
-                )
-            )
-        }
-    }
 }
 
 @Composable

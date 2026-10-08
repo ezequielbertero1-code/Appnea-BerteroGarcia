@@ -76,6 +76,7 @@ fun CronometroScreen(
             cronometroViewModel = cronometroViewModel,
             onCrearTabla = onCrearTabla,
             onGuardarIntentos = onGuardarIntentos,
+            onVerEstadisticas = onVerEstadisticas,
             modifier = modifier
         )
     }
@@ -88,6 +89,7 @@ private fun PestaniasEntrenar(
     cronometroViewModel: CronometroViewModel,
     onCrearTabla: () -> Unit,
     onGuardarIntentos: ((List<IntentoApnea>) -> Unit)?,
+    onVerEstadisticas: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     val titulos = listOf("Tablas", "Libre")
@@ -95,12 +97,20 @@ private fun PestaniasEntrenar(
     val scope = rememberCoroutineScope()
 
     Column(modifier = modifier.fillMaxSize()) {
-        Text(
-            "Entrenar",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Entrenar",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            if (onVerEstadisticas != null) {
+                TextButton(onClick = onVerEstadisticas) { Text("📈 Estadísticas", color = Acento) }
+            }
+        }
         SecondaryTabRow(
             selectedTabIndex = pagerState.currentPage,
             containerColor = Color.Transparent

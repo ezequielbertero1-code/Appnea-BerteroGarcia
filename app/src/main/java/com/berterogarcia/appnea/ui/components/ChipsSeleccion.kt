@@ -1,9 +1,12 @@
 package com.berterogarcia.appnea.ui.components
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -59,6 +62,49 @@ fun ChipsSeleccionMultiple(
                 border = FilterChipDefaults.filterChipBorder(
                     enabled = true,
                     selected = elegida,
+                    borderColor = Divisor,
+                    selectedBorderColor = Acento.copy(alpha = 0.55f),
+                    borderWidth = 1.dp,
+                    selectedBorderWidth = 1.dp
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Chips de selección ÚNICA en una fila con scroll horizontal (filtros de período, tipo...).
+ * Mismo estilo que [ChipsSeleccionMultiple]. Lo usan Inmersiones y Estadísticas.
+ */
+@Composable
+fun <T> ChipsSeleccionUnica(
+    opciones: List<T>,
+    seleccionada: T,
+    etiqueta: (T) -> String,
+    onSeleccion: (T) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // Scroll horizontal por si la pantalla es angosta o la letra está agrandada
+    Row(
+        modifier = modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        opciones.forEach { opcion ->
+            val elegido = opcion == seleccionada
+            FilterChip(
+                selected = elegido,
+                onClick = { onSeleccion(opcion) },
+                label = { Text(etiqueta(opcion), fontWeight = if (elegido) FontWeight.Bold else FontWeight.Normal) },
+                shape = RoundedCornerShape(50),
+                colors = FilterChipDefaults.filterChipColors(
+                    containerColor = Color.Transparent,
+                    labelColor = TextoChip,
+                    selectedContainerColor = FondoTarjetaResaltada,
+                    selectedLabelColor = Color.White
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = elegido,
                     borderColor = Divisor,
                     selectedBorderColor = Acento.copy(alpha = 0.55f),
                     borderWidth = 1.dp,

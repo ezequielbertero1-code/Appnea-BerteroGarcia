@@ -66,7 +66,8 @@ fun CuentaScreen(
     onEditarDatos: () -> Unit,
     onVerEquipamiento: () -> Unit,
     onVerCertificados: () -> Unit,
-    onVerContactos: () -> Unit
+    onVerContactos: () -> Unit,
+    onVerEstadisticas: () -> Unit = {}
 ) {
     val resumen by viewModel.resumen.collectAsStateWithLifecycle()
     val stats by viewModel.estadisticas.collectAsStateWithLifecycle()
@@ -174,7 +175,11 @@ fun CuentaScreen(
         }
 
         // --------------------------------- Estadísticas ---------------------------------
-        TarjetaSeccion(titulo = "📊 Estadísticas") {
+        TarjetaSeccion(
+            titulo = "📊 Estadísticas",
+            textoAccion = "Ver todas",
+            onAccion = onVerEstadisticas
+        ) {
             GrillaDatos(
                 listOf(
                     Dato("🤿 Inmersiones", stats.inmersiones.toString()),
