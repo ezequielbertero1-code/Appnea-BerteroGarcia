@@ -13,7 +13,7 @@ import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Coordenadas → nombre legible ("Punta Marqués, Rada Tilly") con el Geocoder de Android.
+ * Coordenadas → nombre general de la zona ("Rada Tilly") con el Geocoder de Android.
  * No usa API key. Devuelve null si no hay servicio de geocodificación en el teléfono,
  * si no hay internet o si tarda más de 5 s. Nunca lanza excepciones.
  */
@@ -50,19 +50,12 @@ object Geocodificador {
     }
 
     /**
-     * Arma "lugar, zona". featureName a veces es solo un número de calle o un Plus Code
-     * ("8GQ4+2X"): en esos casos se usa la calle.
+     * Nombre GENERAL de la zona: la localidad ("Rada Tilly", "Comodoro Rivadavia").
+     * No se usa la calle ni el número: para un punto de buceo no sirven.
+     * Si el punto cae lejos de una localidad, se usa el departamento o la provincia.
      */
-    private fun nombreDesde(a: Address): String? {
-        val feature = a.featureName?.trim()
-            ?.takeUnless { it.isBlank() || it.any(Char::isDigit) || it.contains('+') }
-        val principal = feature ?: a.thoroughfare
-        val zona = a.subLocality ?: a.locality ?: a.subAdminArea ?: a.adminArea
-        return listOfNotNull(principal, zona)
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .distinct()
-            .joinToString(", ")
-            .ifBlank { null }
-    }
+    private fun nombreDesde(a: Address): String? =
+        listOf(a.locality, a.subAdminArea, a.adminArea)
+            .firstOrNull { !it.isNullOrBlank() }
+            ?.trim()
 }

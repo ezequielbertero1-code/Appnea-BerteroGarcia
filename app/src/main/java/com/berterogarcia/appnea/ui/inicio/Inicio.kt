@@ -117,7 +117,11 @@ fun InicioScreen(
                 "Todavía no registraste inmersiones.\nTocá \"Registrar inmersión\" para cargar la primera."
             )
             else -> e.ultimas.forEach { inmersion ->
-                TarjetaInmersion(inmersion = inmersion, onClick = { onVerDetalleInmersion(inmersion.id) })
+                TarjetaInmersion(
+                    inmersion = inmersion,
+                    onClick = { onVerDetalleInmersion(inmersion.id) },
+                    compacta = true
+                )
             }
         }
 

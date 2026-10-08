@@ -45,10 +45,19 @@ import kotlin.time.Duration
 private val LOCALE_ES: Locale = Locale.forLanguageTag("es-AR")
 private val FORMATO_MES_CORTO: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM", LOCALE_ES)
 
-/** Tarjeta de una inmersión (pantalla Inmersiones e Inicio). Toda la tarjeta abre el detalle. */
+/**
+ * Tarjeta de una inmersión. Toda la tarjeta abre el detalle.
+ * - Normal (Inmersiones): con chips de datos y línea de condiciones.
+ * - [compacta] (Inicio): solo fecha, lugar, tipo, profundidad y tiempo de fondo.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TarjetaInmersion(inmersion: InmersionEntity, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun TarjetaInmersion(
+    inmersion: InmersionEntity,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    compacta: Boolean = false
+) {
     Card(
         onClick = onClick,
         modifier = modifier
@@ -95,29 +104,42 @@ fun TarjetaInmersion(inmersion: InmersionEntity, onClick: () -> Unit, modifier: 
                     )
                 }
                 Spacer(Modifier.width(8.dp))
-                Text(
-                    "%.1f m".format(inmersion.profundidadMetros),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Acento
-                )
-            }
-
-            // Datos de la inmersión
-            FlowRow(
-                modifier = Modifier.padding(top = 9.dp),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                ChipDato("⏱ Fondo ${formatoDuracion(inmersion.tiempoFondo)}")
-                ChipDato("🌡️ Agua ${numeroCorto(inmersion.temperaturaAguaC)} °C")
-                if (inmersion.visibilidadMetros > 0f) {
-                    ChipDato("👁 Visib. ${numeroCorto(inmersion.visibilidadMetros)} m")
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        "%.1f m".format(inmersion.profundidadMetros),
+                        style = if (compacta) MaterialTheme.typography.titleMedium
+                        else MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Acento
+                    )
+                    // En la compacta no hay chips: el tiempo de fondo va acá abajo
+                    if (compacta) {
+                        Text(
+                            "⏱ ${formatoDuracion(inmersion.tiempoFondo)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextoSecundario
+                        )
+                    }
                 }
             }
 
-            // Condiciones guardadas al registrar (las inmersiones viejas no tienen: no se muestra nada)
-            inmersion.condiciones?.let { LineaCondiciones(it) }
+            if (!compacta) {
+                // Datos de la inmersión
+                FlowRow(
+                    modifier = Modifier.padding(top = 9.dp),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    ChipDato("⏱ Fondo ${formatoDuracion(inmersion.tiempoFondo)}")
+                    ChipDato("🌡️ Agua ${numeroCorto(inmersion.temperaturaAguaC)} °C")
+                    if (inmersion.visibilidadMetros > 0f) {
+                        ChipDato("👁 Visib. ${numeroCorto(inmersion.visibilidadMetros)} m")
+                    }
+                }
+
+                // Condiciones guardadas al registrar (las inmersiones viejas no tienen: no se muestra nada)
+                inmersion.condiciones?.let { LineaCondiciones(it) }
+            }
         }
     }
 }

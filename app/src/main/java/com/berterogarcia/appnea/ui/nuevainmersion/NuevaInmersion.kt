@@ -41,8 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -235,21 +233,12 @@ private fun IndicadorEtapas(actual: Etapa, conErrores: Set<Etapa>, onEtapaClick:
 }
 
 
-// Crea un FocusRequester y pide el foco apenas la etapa entra en pantalla
-@Composable
-private fun rememberFocoInicial(): FocusRequester {
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
-    return focusRequester
-}
-
 @Composable
 private fun EtapaGeneral(
     uiState: NuevaInmersionUiState,
     viewModel: NuevaInmersionViewModel,
     onAbrirMapa: () -> Unit
 ) {
-    val foco = rememberFocoInicial()
     SelectorSegmentado(
         titulo = "¿Qué tipo de inmersión fue?",
         opciones = TipoInmersion.entries,
@@ -267,7 +256,7 @@ private fun EtapaGeneral(
         valor = uiState.lugar, onValorChange = viewModel::onLugarChange, etiqueta = "Lugar",
         esError = uiState.errores.containsKey(Campo.LUGAR), mensajeError = uiState.errores[Campo.LUGAR] ?: "",
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp).focusRequester(foco),
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
     )
     TarjetaLugar(
         latitud = uiState.latitud,
@@ -294,13 +283,12 @@ private fun EtapaGeneral(
 
 @Composable
 private fun EtapaInmersion(uiState: NuevaInmersionUiState, viewModel: NuevaInmersionViewModel) {
-    val foco = rememberFocoInicial()
     CampoTexto(
         valor = uiState.profundidadMetros, onValorChange = viewModel::onProfundidadChange,
         etiqueta = "Profundidad máxima (m)",
         esError = uiState.errores.containsKey(Campo.PROFUNDIDAD), mensajeError = uiState.errores[Campo.PROFUNDIDAD] ?: "",
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-        modifier = Modifier.fillMaxWidth().focusRequester(foco)
+        modifier = Modifier.fillMaxWidth()
     )
     val esApnea = uiState.tipo == TipoInmersion.APNEA
     CampoTexto(
@@ -490,12 +478,11 @@ private fun SinEquipo(perfilVacio: Boolean, onCargarEquipo: () -> Unit) {
 
 @Composable
 private fun EtapaNotas(uiState: NuevaInmersionUiState, viewModel: NuevaInmersionViewModel) {
-    val foco = rememberFocoInicial()
     CampoTexto(
         valor = uiState.actividad,
         onValorChange = viewModel::onActividadChange,
         etiqueta = "Actividad", minLines = 3,
-        modifier = Modifier.fillMaxWidth().focusRequester(foco)
+        modifier = Modifier.fillMaxWidth()
     )
     CampoTexto(
         valor = uiState.comentarios,
