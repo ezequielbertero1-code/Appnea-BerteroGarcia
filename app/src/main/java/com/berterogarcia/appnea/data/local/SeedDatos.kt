@@ -32,6 +32,10 @@ object SeedDatos {
         // antes de que leamos la marca.
         val existeFranco = db.usuarioDao().existeUsuario(USUARIO_PRUEBA)
 
+        // Usuario Demo con muchos datos (independiente de la marca de Franco: se siembra
+        // solo si el usuario Demo no existe, así también aparece en instalaciones viejas).
+        runCatching { SeedDemo.sembrarSiHaceFalta(db) }
+
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         if (prefs.getBoolean(CLAVE_SEMBRADO, false)) return
 
