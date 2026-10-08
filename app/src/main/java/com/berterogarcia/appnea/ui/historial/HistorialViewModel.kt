@@ -7,12 +7,14 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import java.text.Normalizer
 import java.time.LocalDate
@@ -61,6 +63,7 @@ class HistorialViewModel(repository: InmersionRepository) : ViewModel() {
         combine(repository.todasLasInmersiones, _periodo, _busqueda, _tipo) { lista, periodo, busqueda, tipo ->
             armarEstado(lista, periodo, busqueda, hoy = LocalDate.now(), tipo = tipo)
         }
+            .flowOn(Dispatchers.Default) // filtrar y agrupar fuera del hilo principal (no traba la pantalla)
             .catch { emit(HistorialUiState(cargando = false, error = true)) } // Room falló: se avisa, no crashea
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HistorialUiState())
 
