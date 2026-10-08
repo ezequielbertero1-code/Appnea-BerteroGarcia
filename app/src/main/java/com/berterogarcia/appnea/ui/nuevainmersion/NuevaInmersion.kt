@@ -69,6 +69,8 @@ import com.berterogarcia.appnea.ui.theme.FondoTarjeta
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.theme.TextoSobreAcento
 import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import androidx.compose.material3.CircularProgressIndicator
+import com.berterogarcia.appnea.ui.theme.ColorError
 
 // Características del agua, en grupos. Se siguen guardando juntas en caracteristicasAgua.
 private val AGUA_TIPO = listOf("Dulce", "Salada")             // una
@@ -123,6 +125,23 @@ fun NuevaInmersionScreen(
         )
         return
     }
+    // Editando: mientras se lee la inmersión (o si no se encontró) no se muestra el formulario
+    if (uiState.cargandoEdicion || uiState.errorCarga != null) {
+        Column(
+            modifier = modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (uiState.cargandoEdicion) {
+                CircularProgressIndicator(color = Acento)
+            } else {
+                Text(uiState.errorCarga.orEmpty(), color = TextoSecundario)
+                BotonSecundario(texto = "Volver", onClick = onGuardado, modifier = Modifier.padding(top = 12.dp))
+            }
+        }
+        return
+    }
+
     // Botón atrás del sistema: vuelve a la etapa anterior en vez de salir
     BackHandler(enabled = !esPrimera) { viewModel.anterior() }
 
@@ -133,6 +152,14 @@ fun NuevaInmersionScreen(
             .padding(horizontal = 16.dp)
             .padding(top = 24.dp, bottom = 16.dp)
     ) {
+        if (uiState.editando) {
+            Text(
+                "Editar inmersión",
+                style = MaterialTheme.typography.titleMedium,
+                color = TextoSecundario,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
         IndicadorEtapas(
             actual = uiState.etapa,
             conErrores = Etapa.entries.filter { e -> uiState.errores.keys.any { it in e.campos } }.toSet(),
@@ -164,6 +191,9 @@ fun NuevaInmersionScreen(
             }
         }
 
+        uiState.errorGuardado?.let {
+            Text(it, color = ColorError, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 8.dp))
+        }
         Row(
             Modifier.fillMaxWidth().padding(top = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -176,7 +206,11 @@ fun NuevaInmersionScreen(
                 modifier = Modifier.weight(1f)
             )
             if (esUltima) BotonPrincipal(
-                texto = if (uiState.guardando) "Guardando…" else "Guardar",
+                texto = when {
+                    uiState.guardando -> "Guardando…"
+                    uiState.editando -> "Guardar cambios"
+                    else -> "Guardar"
+                },
                 onClick = viewModel::guardar,
                 cargando = uiState.guardando,
                 modifier = Modifier.weight(1f)

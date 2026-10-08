@@ -1,6 +1,7 @@
 package com.berterogarcia.appnea.data.export
 
 import android.util.Xml
+import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.formatearDuracion
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado
@@ -34,6 +35,19 @@ object UddfExporter {
             dato("datetime", LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(ISO))
         }
 
+        // Equipo: se define en <diver>/<owner>/<equipment> y la inmersión lo referencia con <link>
+        val equipo = piezasDeEquipo(i)
+        if (equipo.isNotEmpty()) xml.bloque("diver") {
+            bloque("owner", "id" to "owner") {
+                bloque("personal") { dato("firstname", i.nombreUsuario.ifBlank { "Appnea" }) }
+                bloque("equipment") {
+                    equipo.forEach { pieza ->
+                        bloque(pieza.elemento, "id" to pieza.id) { dato("name", pieza.nombre) }
+                    }
+                }
+            }
+        }
+
         val siteId = "site_${i.id}"
         xml.bloque("divesite") {
             bloque("site", "id" to siteId) { dato("name", i.lugar) }
@@ -63,7 +77,10 @@ object UddfExporter {
                         dato("greatestdepth", numero(i.profundidadMetros))
                         dato("visibility", numero(i.visibilidadMetros))
                         dato("diveduration", duracionSegundos(i).toString())
-                        bloque("equipmentused") { dato("leadquantity", numero(i.lastreKg)) }
+                        bloque("equipmentused") {
+                            dato("leadquantity", numero(i.lastreKg))
+                            equipo.forEach { vacio("link", "ref" to it.id) }
+                        }
                         bloque("notes") { notas(i).forEach { dato("para", it) } }
                     }
                 }
@@ -86,6 +103,64 @@ object UddfExporter {
         if (PerfilSimulado.generar(i).isNotEmpty())
             add("Perfil simulado a partir del resumen (no registrado por computadora de buceo)")
         if (i.comentarios.isNotBlank()) add("Comentarios: ${i.comentarios}")
+    }
+
+    // ---------------------------- Equipo ----------------------------
+
+    /** Una pieza de equipo en UDDF: [elemento] es la etiqueta del tipo (fins, mask, suit...). */
+    private data class PiezaUddf(val id: String, val elemento: String, val nombre: String)
+
+    /** Categoría de la app → elemento de UDDF 3.2.1 (lo que no tiene equivalente va como variouspieces). */
+    private val ELEMENTO_POR_CATEGORIA = mapOf(
+        CategoriaEquipo.MASCARA to "mask",
+        CategoriaEquipo.SNORKEL to "variouspieces",
+        CategoriaEquipo.ALETAS to "fins",
+        CategoriaEquipo.TRAJE to "suit",
+        CategoriaEquipo.GUANTES_ESCARPINES to "gloves",
+        CategoriaEquipo.LASTRE to "lead",
+        CategoriaEquipo.COMPUTADORA to "divecomputer",
+        CategoriaEquipo.REGULADOR to "regulator",
+        CategoriaEquipo.CHALECO to "buoyancycontroldevice",
+        CategoriaEquipo.TUBO to "tank",
+        CategoriaEquipo.BOYA to "variouspieces",
+        CategoriaEquipo.CUCHILLO to "knife",
+        CategoriaEquipo.LINTERNA to "light",
+        CategoriaEquipo.OTRO to "variouspieces"
+    )
+
+    /**
+     * El equipo de la inmersión se guarda como texto ("Aletas · Mares Avanti (42-43)").
+     * La categoría sale de lo que está antes del " · ". Las inmersiones viejas tienen texto
+     * libre ("Semi seco", "Guantes"): ahí se adivina por palabras clave.
+     */
+    private fun piezasDeEquipo(i: InmersionEntity): List<PiezaUddf> =
+        i.equipamiento.filter { it.isNotBlank() }.sorted().mapIndexed { n, etiqueta ->
+            val prefijo = etiqueta.substringBefore(" · ").trim()
+            val categoria = CategoriaEquipo.entries.firstOrNull { it.etiqueta.equals(prefijo, ignoreCase = true) }
+            PiezaUddf(
+                id = "eq_${i.id}_${n + 1}",
+                elemento = categoria?.let { ELEMENTO_POR_CATEGORIA[it] } ?: elementoPorPalabra(etiqueta),
+                nombre = etiqueta.trim()
+            )
+        }
+
+    private fun elementoPorPalabra(texto: String): String {
+        val t = texto.lowercase(Locale.ROOT)
+        return when {
+            "aleta" in t -> "fins"
+            "máscara" in t || "mascara" in t -> "mask"
+            "guante" in t -> "gloves"
+            "bota" in t || "escarpin" in t || "escarpín" in t -> "boots"
+            "traje" in t || "seco" in t || "dos piezas" in t || "neoprene" in t -> "suit"
+            "lastre" in t || "cinturón" in t || "plomo" in t -> "lead"
+            "computadora" in t || "reloj" in t -> "divecomputer"
+            "regulador" in t -> "regulator"
+            "chaleco" in t || "bcd" in t -> "buoyancycontroldevice"
+            "tubo" in t || "tanque" in t -> "tank"
+            "cuchillo" in t -> "knife"
+            "linterna" in t -> "light"
+            else -> "variouspieces"
+        }
     }
 
     // Duración total en el agua = salida - entrada (si cruza la medianoche, suma 24 h)
@@ -144,6 +219,8 @@ object UddfExporter {
  *  visibilidadMetros        <informationafterdive>/<visibility>         m
  *  lastreKg                 <informationafterdive>/<equipmentused>/
  *                             <leadquantity>                            kg
+ *  equipamiento             <diver>/<owner>/<equipment>/<fins|mask|suit|...>
+ *                           (la dive lo referencia con <equipmentused>/<link ref="eq_..."/>)
  *
  * ── Campos sin equivalente estándar en UDDF → van como líneas de <notes>/<para> ──
  *
@@ -151,7 +228,8 @@ object UddfExporter {
  *  tiempoFondo              "Tiempo de fondo: mm:ss"
  *  paradaSeguridadMin       "Parada de seguridad: x min"
  *  proteccionMm             "Protección: x mm"
- *  equipamiento             "Equipamiento: a, b, c"
+ *  equipamiento             "Equipamiento: a, b, c" (además del bloque <equipment>,
+ *                           para los viewers que no muestran equipo)
  *  caracteristicasAgua      "Agua: a, b, c"
  *  comentarios              "Comentarios: ..."
  *

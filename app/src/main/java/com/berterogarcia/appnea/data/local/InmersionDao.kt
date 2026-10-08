@@ -4,12 +4,17 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import androidx.room.Update
 
 // [CAMBIO v7] Todas las consultas filtran por usuario: nadie lee ni borra datos de otro.
 @Dao
 interface InmersionDao {
     @Insert
     suspend fun insertar(inmersion: InmersionEntity)
+
+    /** Actualiza por id. Devuelve cuántas filas cambió (0 si no existía). */
+    @Update
+    suspend fun actualizar(inmersion: InmersionEntity): Int
 
     /** Devuelve la cantidad de filas borradas (0 si no existía o era de otro usuario). */
     @Query("DELETE FROM inmersiones WHERE id = :id AND nombreUsuario = :nombreUsuario")
