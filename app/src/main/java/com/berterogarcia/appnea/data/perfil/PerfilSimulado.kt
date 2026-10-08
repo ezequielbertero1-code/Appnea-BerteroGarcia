@@ -1,6 +1,7 @@
 package com.berterogarcia.appnea.data.perfil
 
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado.ASCENSO_BUCEO
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado.DESCENSO_BUCEO
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado.MAX_PUNTOS
@@ -137,8 +138,7 @@ object PerfilSimulado {
 
     private class Tramo(val desde: Double, val hasta: Double, val duracion: Double)
 
-    fun esApnea(i: InmersionEntity): Boolean =
-        i.actividad.contains("apnea", ignoreCase = true) || i.paradaSeguridadMin <= 0f
+    fun esApnea(i: InmersionEntity): Boolean = i.tipo == TipoInmersion.APNEA
 
     /** Nunca crashea: si los datos no alcanzan, devuelve lista vacía. */
     fun generar(i: InmersionEntity): List<PuntoPerfil> = runCatching {

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,7 +41,7 @@ data class HistorialUiState(
     val cargando: Boolean = true,
     val error: Boolean = false,
     val totalGeneral: Int = 0,        // todas las del usuario, sin filtrar
-    val cantidadFiltrada: Int = 0,    // las que pasan período + búsqueda
+    val cantidadFiltrada: Int = 0,    // las que pasan tipo + período + búsqueda
     val grupos: List<GrupoMes> = emptyList()
 )
 
@@ -52,9 +53,13 @@ class HistorialViewModel(repository: InmersionRepository) : ViewModel() {
     private val _busqueda = MutableStateFlow("")
     val busqueda: StateFlow<String> = _busqueda.asStateFlow()
 
+    /** null = Todos */
+    private val _tipo = MutableStateFlow<TipoInmersion?>(null)
+    val tipo: StateFlow<TipoInmersion?> = _tipo.asStateFlow()
+
     val uiState: StateFlow<HistorialUiState> =
-        combine(repository.todasLasInmersiones, _periodo, _busqueda) { lista, periodo, busqueda ->
-            armarEstado(lista, periodo, busqueda, hoy = LocalDate.now())
+        combine(repository.todasLasInmersiones, _periodo, _busqueda, _tipo) { lista, periodo, busqueda, tipo ->
+            armarEstado(lista, periodo, busqueda, hoy = LocalDate.now(), tipo = tipo)
         }
             .catch { emit(HistorialUiState(cargando = false, error = true)) } // Room falló: se avisa, no crashea
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HistorialUiState())
@@ -67,9 +72,14 @@ class HistorialViewModel(repository: InmersionRepository) : ViewModel() {
         _busqueda.value = texto.take(MAX_BUSQUEDA)
     }
 
+    fun onTipoChange(tipo: TipoInmersion?) {
+        _tipo.value = tipo
+    }
+
     fun limpiarFiltros() {
         _periodo.value = PeriodoFiltro.TODAS
         _busqueda.value = ""
+        _tipo.value = null
     }
 
     companion object {
@@ -89,13 +99,15 @@ internal fun armarEstado(
     lista: List<InmersionEntity>,
     periodo: PeriodoFiltro,
     busqueda: String,
-    hoy: LocalDate
+    hoy: LocalDate,
+    tipo: TipoInmersion? = null
 ): HistorialUiState {
     val desde = periodo.desde(hoy)
     val termino = normalizar(busqueda.trim())
 
     val filtradas = lista
         .asSequence()
+        .filter { tipo == null || it.tipo == tipo }
         .filter { desde == null || !it.fecha.isBefore(desde) }
         .filter { termino.isEmpty() || normalizar(it.lugar).contains(termino) }
         .sortedWith(compareByDescending<InmersionEntity> { it.fecha }.thenByDescending { it.horaEntrada })

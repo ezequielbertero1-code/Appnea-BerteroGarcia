@@ -6,12 +6,21 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
+import com.berterogarcia.appnea.data.local.CategoriaEquipo
+import com.berterogarcia.appnea.data.local.EquipoEntity
+import com.berterogarcia.appnea.data.local.Geocodificador
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
+import com.berterogarcia.appnea.data.local.Ubicacion
 import com.berterogarcia.appnea.data.local.UbicacionHelper
+import com.berterogarcia.appnea.data.local.descripcion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
+import com.berterogarcia.appnea.data.repository.PerfilRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -34,6 +43,9 @@ enum class Etapa(val titulo: String, val campos: Set<Campo>) {
 private val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy", Locale.US)
 private val REGEX_TIEMPO_FONDO = Regex("^\\d{2}[0-5]\\d\$") // 4 dígitos, segundos 00-59
 
+/** Categorías que solo tienen sentido en buceo con tanque: en Apnea no se ofrecen. */
+private val SOLO_BUCEO = setOf(CategoriaEquipo.REGULADOR, CategoriaEquipo.CHALECO, CategoriaEquipo.TUBO)
+
 private fun parseTiempoFondo(v: String): Duration {
     val digitos = v.padStart(4, '0')
     val minutos = digitos.substring(0, 2).toInt()
@@ -41,10 +53,24 @@ private fun parseTiempoFondo(v: String): Duration {
     return (minutos * 60 + segundos).seconds
 }
 
+/**
+ * Texto con el que un equipo del perfil queda guardado en la inmersión:
+ * "Aletas · Mares Razor (42-43)". Se guarda TEXTO y no el id, así si después se borra o
+ * edita el equipo, la inmersión vieja sigue mostrando lo que se usó.
+ * Sin comas: el Set<String> se guarda separado por "," (ver Converters.fromSet).
+ */
+val EquipoEntity.etiquetaInmersion: String
+    get() = (if (talle.isBlank()) descripcion else "$descripcion ($talle)").replace(',', ' ')
+
 data class NuevaInmersionUiState(
     val etapa: Etapa = Etapa.GENERAL,
+    val tipo: TipoInmersion = TipoInmersion.BUCEO,
     val fecha: String = "",
     val lugar: String = "",
+    val latitud: Double? = null,          // lugar marcado (mapa o GPS); null = sin marcar
+    val longitud: Double? = null,
+    val buscandoUbicacion: Boolean = false,
+    val avisoUbicacion: String? = null,
     val profundidadMetros: String = "",
     val paradaSeguridadMin: String = "",
     val tiempoFondo: String = "",
@@ -53,7 +79,9 @@ data class NuevaInmersionUiState(
     val caracteristicasAgua: Set<String> = emptySet(),
     val lastreKg: String = "",
     val proteccionMm: String = "",
-    val equipamiento: Set<String> = emptySet(),
+    val equipamiento: Set<String> = emptySet(),          // etiquetas (etiquetaInmersion) marcadas
+    val equipoPerfil: List<EquipoEntity> = emptyList(),  // equipo EN USO del usuario
+    val equipoCargado: Boolean = false,                  // false mientras se lee de la base
     val temperaturaAireC: String = "",
     val temperaturaAguaC: String = "",
     val visibilidadMetros: String = "",
@@ -62,16 +90,69 @@ data class NuevaInmersionUiState(
     val guardadoOk: Boolean = false,
     val guardando: Boolean = false,
     val errores: Map<Campo, String> = emptyMap(),
-)
+) {
+    /** Equipo que se ofrece según el tipo (en Apnea sin regulador, chaleco ni tubo). */
+    val equipoVisible: List<EquipoEntity>
+        get() = equipoPerfil.filter { tipo == TipoInmersion.BUCEO || it.categoria !in SOLO_BUCEO }
+}
 
 class NuevaInmersionViewModel(
     private val repository: InmersionRepository,
+    perfilRepository: PerfilRepository,
+    nombreUsuario: String?,
     private val appContext: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         NuevaInmersionUiState(fecha = LocalDate.now().format(FORMATO_FECHA)))
     val uiState: StateFlow<NuevaInmersionUiState> = _uiState
+
+    /** Inmersiones anteriores, para pre-marcar el equipo de la última del mismo tipo. */
+    private var inmersionesPrevias: List<InmersionEntity> = emptyList()
+
+    /** true cuando el usuario tocó algún equipo: desde ahí no se pre-marca nada solo. */
+    private var equipoTocado = false
+
+    init {
+        viewModelScope.launch {
+            inmersionesPrevias = runCatching { repository.todasLasInmersiones.first() }
+                .getOrDefault(emptyList())
+            preseleccionarEquipo()
+        }
+        if (nombreUsuario == null) {
+            _uiState.update { it.copy(equipoCargado = true) } // sin sesión: lista vacía, no ruedita eterna
+        } else {
+            viewModelScope.launch {
+                perfilRepository.observarEquipamiento(nombreUsuario)
+                    .catch { emit(emptyList()) } // si falla la base: lista vacía en vez de crashear
+                    .collect { lista ->
+                        _uiState.update {
+                            it.copy(equipoPerfil = lista.filter { e -> e.enUso }, equipoCargado = true)
+                        }
+                        preseleccionarEquipo()
+                    }
+            }
+        }
+    }
+
+    /**
+     * Sin tocar: marca el equipo de la última inmersión del mismo tipo.
+     * Tocado: respeta lo elegido. En los dos casos se descarta lo que ya no se ofrece
+     * (equipo que se pasó a "no en uso", o regulador al cambiar a Apnea).
+     */
+    private fun preseleccionarEquipo() {
+        _uiState.update { s ->
+            val visibles = s.equipoVisible.map { it.etiquetaInmersion }.toSet()
+            val base = if (equipoTocado) s.equipamiento else {
+                inmersionesPrevias
+                    .filter { it.tipo == s.tipo }
+                    .maxWithOrNull(compareBy<InmersionEntity> { it.fecha }.thenBy { it.horaEntrada })
+                    ?.equipamiento
+                    .orEmpty()
+            }
+            s.copy(equipamiento = base intersect visibles)
+        }
+    }
 
     fun siguiente() {
         val s = _uiState.value
@@ -95,6 +176,53 @@ class NuevaInmersionViewModel(
 
     fun onFechaChange(v: String) = _uiState.update { it.copy(fecha = v) }
     fun onLugarChange(v: String) = _uiState.update { it.copy(lugar = v) }
+    /** Centro con el que abre el mapa: lo ya marcado → última ubicación del teléfono → Comodoro. */
+    fun centroInicialMapa(): Ubicacion {
+        val s = _uiState.value
+        return if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
+        else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
+    }
+
+    /** Viene del mapa. Si el nombre quedó vacío, se mantiene el que ya estaba escrito. */
+    fun onUbicacionElegida(latitud: Double, longitud: Double, nombre: String) = _uiState.update {
+        val nuevoLugar = nombre.trim().ifBlank { it.lugar }
+        it.copy(
+            latitud = latitud, longitud = longitud, lugar = nuevoLugar, avisoUbicacion = null,
+            errores = if (nuevoLugar.isBlank()) it.errores else it.errores - Campo.LUGAR
+        )
+    }
+
+    fun quitarUbicacion() = _uiState.update { it.copy(latitud = null, longitud = null) }
+
+    /** Botón "Mi ubicación" de la tarjeta (la pantalla ya pidió el permiso). */
+    fun usarMiUbicacion() {
+        if (_uiState.value.buscandoUbicacion) return
+        _uiState.update { it.copy(buscandoUbicacion = true, avisoUbicacion = null) }
+        viewModelScope.launch {
+            val u = runCatching { UbicacionHelper.obtenerUbicacionActual(appContext, 15.seconds) }.getOrNull()
+            _uiState.update {
+                if (u != null) it.copy(latitud = u.latitud, longitud = u.longitud, buscandoUbicacion = false)
+                else it.copy(
+                    buscandoUbicacion = false,
+                    avisoUbicacion = if (!UbicacionHelper.ubicacionActivada(appContext))
+                        "Activá la ubicación del teléfono y probá de nuevo."
+                    else "No se pudo obtener tu ubicación. Probá marcándola en el mapa."
+                )
+            }
+            // Si el campo Lugar está vacío, se completa con el nombre encontrado
+            if (u != null && _uiState.value.lugar.isBlank()) {
+                Geocodificador.nombrePara(appContext, u.latitud, u.longitud)?.let { nombre ->
+                    _uiState.update { s ->
+                        if (s.lugar.isBlank()) s.copy(lugar = nombre, errores = s.errores - Campo.LUGAR) else s
+                    }
+                }
+            }
+        }
+    }
+
+    fun permisoUbicacionDenegado() = _uiState.update {
+        it.copy(avisoUbicacion = "Sin permiso de ubicación. Podés marcar el lugar en el mapa.")
+    }
     fun onProfundidadChange(v: String) = _uiState.update { it.copy(profundidadMetros = v) }
     fun onParadaChange(v: String) = _uiState.update { it.copy(paradaSeguridadMin = v.filter { c -> c.isDigit() || c == '.'}) }
     fun onTiempoFondoChange(v: String) = _uiState.update { it.copy(tiempoFondo = v.filter { c -> c.isDigit() }.take(4)) }
@@ -136,11 +264,25 @@ class NuevaInmersionViewModel(
         )
     }
 
-    fun onEquipamientoToggle(opcion: String, marcado: Boolean) = _uiState.update {
-        it.copy(
-            equipamiento = if (marcado) it.equipamiento + opcion
-            else it.equipamiento - opcion
-        )
+    /** Cambiar a Apnea borra el error de parada (en apnea no se pide) y recalcula el equipo. */
+    fun onTipoChange(tipo: TipoInmersion) {
+        _uiState.update { it.copy(tipo = tipo, errores = it.errores - Campo.PARADA) }
+        preseleccionarEquipo()
+    }
+
+    /**
+     * Grupos de una sola opción (Dulce/Salada, Orilla/Bote): saca todas las opciones del
+     * [grupo] y pone la elegida. [opcion] null = ninguna.
+     */
+    fun onAguaUnica(grupo: List<String>, opcion: String?) = _uiState.update {
+        it.copy(caracteristicasAgua = it.caracteristicasAgua - grupo.toSet() + listOfNotNull(opcion))
+    }
+
+    fun onEquipamientoToggle(etiqueta: String, marcado: Boolean) {
+        equipoTocado = true
+        _uiState.update {
+            it.copy(equipamiento = if (marcado) it.equipamiento + etiqueta else it.equipamiento - etiqueta)
+        }
     }
 
     fun guardar() {
@@ -157,19 +299,23 @@ class NuevaInmersionViewModel(
         viewModelScope.launch {
             val fecha = LocalDate.parse(s.fecha, FORMATO_FECHA)
             val horaEntrada = LocalTime.parse(s.horaEntrada)
-            // Ubicación del teléfono si hay permiso; si no, Comodoro. Sin internet guarda solo luna/actividad.
-            val ubicacion = UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
+            // Condiciones del LUGAR marcado. Sin marcar: ubicación del teléfono → Comodoro.
+            // Sin internet guarda solo la luna.
+            val ubicacion = if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
+            else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
             val condiciones = runCatching {
                 CondicionesRepository.registroPara(ubicacion.latitud, ubicacion.longitud, fecha.atTime(horaEntrada))
             }.getOrNull()
             repository.guardar(
                 InmersionEntity(
-                    fecha = LocalDate.parse(s.fecha, FORMATO_FECHA),
+                    fecha = fecha,
                     lugar = s.lugar,
                     profundidadMetros = s.profundidadMetros.toFloat(), // ya validado, no hace falta toFloatOrNull
-                    paradaSeguridadMin = s.paradaSeguridadMin.toFloatOrNull() ?: 0f,
+                    paradaSeguridadMin =
+                        if (s.tipo == TipoInmersion.APNEA) 0f
+                        else s.paradaSeguridadMin.toFloatOrNull() ?: 0f,
                     tiempoFondo = parseTiempoFondo(s.tiempoFondo), // "mm:ss" -> Duration
-                    horaEntrada = LocalTime.parse(s.horaEntrada),  // "HH:mm" -> LocalTime
+                    horaEntrada = horaEntrada,                      // "HH:mm" -> LocalTime
                     horaSalida = LocalTime.parse(s.horaSalida),
                     caracteristicasAgua = s.caracteristicasAgua,
                     lastreKg = s.lastreKg.toFloatOrNull() ?: 0f,
@@ -180,7 +326,10 @@ class NuevaInmersionViewModel(
                     visibilidadMetros = s.visibilidadMetros.toFloatOrNull() ?: 0f,
                     actividad = s.actividad,
                     comentarios = s.comentarios,
-                    condiciones = condiciones
+                    condiciones = condiciones,
+                    tipo = s.tipo,
+                    latitud = s.latitud,   // solo lo marcado; null si no se marcó nada
+                    longitud = s.longitud
                 )
             )
             _uiState.update { it.copy(guardadoOk = true, guardando = false) }
@@ -193,8 +342,11 @@ class NuevaInmersionViewModel(
         if (s.lugar.isBlank()) errores[Campo.LUGAR] = "Ingresá un lugar."
         if (s.profundidadMetros.toFloatOrNull() == null) errores[Campo.PROFUNDIDAD] = "Profundidad inválida."
 
-        val parada = s.paradaSeguridadMin.toFloatOrNull()
-        if (parada == null || parada < 3f) errores[Campo.PARADA] = "Mínimo 3 minutos."
+        // La parada de seguridad solo existe en buceo con tanque
+        if (s.tipo == TipoInmersion.BUCEO) {
+            val parada = s.paradaSeguridadMin.toFloatOrNull()
+            if (parada == null || parada < 3f) errores[Campo.PARADA] = "Mínimo 3 minutos."
+        }
 
         if (!REGEX_TIEMPO_FONDO.matches(s.tiempoFondo)) errores[Campo.TIEMPO_FONDO] = "Formato esperado mm:ss."
 
@@ -229,8 +381,13 @@ class NuevaInmersionViewModel(
     }
 
     companion object {
-        fun Factory(repository: InmersionRepository, appContext: Context) = viewModelFactory {
-            initializer { NuevaInmersionViewModel(repository, appContext) }
+        fun Factory(
+            repository: InmersionRepository,
+            perfilRepository: PerfilRepository,
+            nombreUsuario: String?,
+            appContext: Context
+        ) = viewModelFactory {
+            initializer { NuevaInmersionViewModel(repository, perfilRepository, nombreUsuario, appContext) }
         }
     }
 }
