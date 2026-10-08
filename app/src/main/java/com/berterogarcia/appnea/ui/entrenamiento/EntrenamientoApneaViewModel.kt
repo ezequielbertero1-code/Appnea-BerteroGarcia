@@ -18,6 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -25,34 +26,56 @@ import kotlin.time.Duration.Companion.milliseconds
 
 enum class EtapaEntrenamiento { SELECCION, EN_CURSO, GUARDANDO }
 
+/** Factor que se pre-marca en el resultado si al iniciar se tildó "Estoy acompañado". */
+const val FACTOR_ACOMPANADO = "Entrené acompañado"
+
 val FACTORES_DISPONIBLES = listOf(
     "Dormí bien",
     "Comí liviano",
     "Buena hidratación",
     "Estrés / ansiedad",
     "Cansancio físico",
-    "Entrené acompañado"
+    FACTOR_ACOMPANADO
 )
 
 data class EntrenamientoUiState(
     val tablasPredefinidas: List<TablaApnea> = TablasPredefinidas.listaBase(),
     val tablasPersonalizadas: List<TablaPersonalizadaEntity> = emptyList(),
     val tablaSeleccionada: TablaApnea? = null,
+    /**
+     * "Estoy acompañado": si está tildado no se muestra el aviso de seguridad.
+     * Vive solo en memoria (no se guarda): al volver a abrir la app arranca destildado.
+     */
+    val acompanado: Boolean = false,
     val etapa: EtapaEntrenamiento = EtapaEntrenamiento.SELECCION,
     val indiceFase: Int = 0,
     val segundosRestantes: Int = 0,
+    /** Instante (SystemClock.elapsedRealtime) en que termina la fase actual: para dibujar el anillo continuo. */
+    val finFaseMs: Long = 0L,
     val corriendo: Boolean = false,
     val completada: Boolean = false,
     val faseAlcanzada: Int = 0,
+    // La marca se sigue calculando y guardando: la va a usar la pantalla de Estadísticas
     val marcaSegundos: Int = 0,
+    val duracionSesionSegundos: Int = 0,
     val factoresSeleccionados: Set<String> = emptySet(),
     val sensaciones: String = "",
+    val guardando: Boolean = false,
     val guardadoOk: Boolean = false,
-    val sesiones: List<SesionApneaEntity> = emptyList(),
-    val mostrarHistorial: Boolean = false
+    val errorGuardado: String? = null
 ) {
     val faseActual: Fase? get() = tablaSeleccionada?.fases?.getOrNull(indiceFase)
     val totalFases: Int get() = tablaSeleccionada?.fases?.size ?: 0
+    val duracionTabla: Int get() = tablaSeleccionada?.fases?.sumOf { it.duracionSegundos } ?: 0
+
+    /** Segundos desde que arrancó la tabla (fases terminadas + lo que va de la actual). */
+    val segundosTranscurridos: Int
+        get() {
+            val fases = tablaSeleccionada?.fases ?: return 0
+            val previas = fases.take(indiceFase).sumOf { it.duracionSegundos }
+            val actual = fases.getOrNull(indiceFase)?.duracionSegundos ?: 0
+            return previas + (actual - segundosRestantes).coerceAtLeast(0)
+        }
 }
 
 class EntrenamientoApneaViewModel(
@@ -66,71 +89,74 @@ class EntrenamientoApneaViewModel(
 
     private var job: Job? = null
     private var mejorApneaSegundos = 0
+    private var inicioTablaMs = 0L
     // Momento (reloj monotónico) en que se tocó "Abortar": para medir exacto la apnea interrumpida
     private var momentoAbortoMs: Long? = null
 
     init {
         viewModelScope.launch {
-            tablaRepository.todasLasTablas.collect { tablas ->
-                _uiState.update { it.copy(tablasPersonalizadas = tablas) }
-            }
-        }
-        viewModelScope.launch {
-            sesionRepository.todasLasSesiones.collect { sesiones ->
-                _uiState.update { it.copy(sesiones = sesiones) }
-            }
+            tablaRepository.todasLasTablas
+                .catch { emit(emptyList()) } // si falla la base: sin tablas propias, sin crashear
+                .collect { tablas -> _uiState.update { it.copy(tablasPersonalizadas = tablas) } }
         }
     }
 
     fun onSeleccionarTabla(tabla: TablaApnea) {
         if (_uiState.value.corriendo) return
-        mejorApneaSegundos = 0
-        _uiState.update {
-            it.copy(
-                tablaSeleccionada = tabla,
-                etapa = EtapaEntrenamiento.SELECCION,
-                indiceFase = 0,
-                segundosRestantes = tabla.fases.first().duracionSegundos,
-                completada = false,
-                faseAlcanzada = 0,
-                marcaSegundos = 0,
-                factoresSeleccionados = emptySet(),
-                sensaciones = "",
-                guardadoOk = false
-            )
-        }
+        _uiState.update { it.copy(tablaSeleccionada = tabla) }
     }
 
-    fun onGuardarTablaPersonalizada(tabla: TablaApnea) {
-        viewModelScope.launch {
-            tablaRepository.guardar(TablaPersonalizadaEntity(nombre = tabla.nombre, fases = tabla.fases))
-        }
-    }
+    fun onAcompanadoChange(acompanado: Boolean) = _uiState.update { it.copy(acompanado = acompanado) }
 
     fun onEliminarTablaPersonalizada(tabla: TablaPersonalizadaEntity) {
-        viewModelScope.launch { tablaRepository.eliminar(tabla) }
+        // Si era la elegida, se deselecciona para no iniciar una tabla que ya no existe
+        if (_uiState.value.tablaSeleccionada == tabla.aTablaApnea()) {
+            _uiState.update { it.copy(tablaSeleccionada = null) }
+        }
+        viewModelScope.launch { runCatching { tablaRepository.eliminar(tabla) } }
     }
 
     fun onIniciar() {
-        val tabla = _uiState.value.tablaSeleccionada ?: return
-        if (_uiState.value.corriendo) return
+        val s = _uiState.value
+        val tabla = s.tablaSeleccionada ?: return
+        if (s.corriendo || tabla.fases.isEmpty()) return
 
         mejorApneaSegundos = 0
         momentoAbortoMs = null
-        _uiState.update { it.copy(etapa = EtapaEntrenamiento.EN_CURSO, corriendo = true) }
+        inicioTablaMs = SystemClock.elapsedRealtime()
+        _uiState.update {
+            it.copy(
+                etapa = EtapaEntrenamiento.EN_CURSO,
+                corriendo = true,
+                indiceFase = 0,
+                segundosRestantes = tabla.fases.first().duracionSegundos,
+                finFaseMs = inicioTablaMs + tabla.fases.first().duracionSegundos * 1000L,
+                completada = false,
+                faseAlcanzada = 0,
+                marcaSegundos = 0,
+                duracionSesionSegundos = 0,
+                factoresSeleccionados = if (it.acompanado) setOf(FACTOR_ACOMPANADO) else emptySet(),
+                sensaciones = "",
+                guardando = false,
+                guardadoOk = false,
+                errorGuardado = null
+            )
+        }
 
         job?.cancel() // por si quedó una corrida vieja
         job = viewModelScope.launch {
             // Cada fase termina en un instante FIJO calculado desde el inicio de la tabla.
             // Lo que tarden los sonidos o la UI en cada vuelta no se acumula: el tiempo restante
             // siempre se calcula contra el reloj, no contando vueltas.
-            var finFaseMs = SystemClock.elapsedRealtime()
+            var finFaseMs = inicioTablaMs
 
             for ((indice, fase) in tabla.fases.withIndex()) {
                 val inicioFaseMs = finFaseMs
                 finFaseMs = inicioFaseMs + fase.duracionSegundos * 1000L
 
-                _uiState.update { it.copy(indiceFase = indice, segundosRestantes = fase.duracionSegundos) }
+                _uiState.update {
+                    it.copy(indiceFase = indice, segundosRestantes = fase.duracionSegundos, finFaseMs = finFaseMs)
+                }
                 sonido.avisarInicioFase(fase.tipo)
 
                 val mitad = fase.duracionSegundos / 2
@@ -169,7 +195,7 @@ class EntrenamientoApneaViewModel(
                     if (fase.tipo == TipoFase.APNEA) {
                         mejorApneaSegundos = maxOf(mejorApneaSegundos, transcurridos)
                     }
-                    finalizarSesion(completada = false, faseAlcanzada = indice + 1)
+                    finalizarSesion(completada = false, faseAlcanzada = indice + 1, finMs = hasta)
                     return@launch
                 }
 
@@ -178,7 +204,7 @@ class EntrenamientoApneaViewModel(
                 }
             }
             sonido.avisarFinTabla()
-            finalizarSesion(completada = true, faseAlcanzada = tabla.fases.size)
+            finalizarSesion(completada = true, faseAlcanzada = tabla.fases.size, finMs = finFaseMs)
         }
     }
 
@@ -192,14 +218,16 @@ class EntrenamientoApneaViewModel(
     private fun segundosRestantes(finMs: Long): Int =
         ((finMs - SystemClock.elapsedRealtime() + 999L) / 1000L).toInt().coerceAtLeast(0)
 
-    private fun finalizarSesion(completada: Boolean, faseAlcanzada: Int) {
+    private fun finalizarSesion(completada: Boolean, faseAlcanzada: Int, finMs: Long) {
+        val duracion = ((finMs - inicioTablaMs) / 1000L).toInt().coerceAtLeast(0)
         _uiState.update {
             it.copy(
                 corriendo = false,
                 etapa = EtapaEntrenamiento.GUARDANDO,
                 completada = completada,
                 faseAlcanzada = faseAlcanzada,
-                marcaSegundos = mejorApneaSegundos
+                marcaSegundos = mejorApneaSegundos,
+                duracionSesionSegundos = duracion
             )
         }
     }
@@ -216,41 +244,53 @@ class EntrenamientoApneaViewModel(
     fun onGuardarSesion() {
         val s = _uiState.value
         val tabla = s.tablaSeleccionada ?: return
+        if (s.guardando || s.guardadoOk) return // que un doble toque no guarde dos veces
+        _uiState.update { it.copy(guardando = true, errorGuardado = null) }
+
         viewModelScope.launch {
-            sesionRepository.guardar(
-                SesionApneaEntity(
-                    fecha = LocalDate.now(),
-                    nombreTabla = tabla.nombre,
-                    completada = s.completada,
-                    faseAlcanzada = s.faseAlcanzada,
-                    totalFases = tabla.fases.size,
-                    marcaSegundos = s.marcaSegundos,
-                    factores = s.factoresSeleccionados,
-                    sensaciones = s.sensaciones
+            // guardar() devuelve false si no hay sesión iniciada; si la base falla, runCatching da false
+            val ok = runCatching {
+                sesionRepository.guardar(
+                    SesionApneaEntity(
+                        fecha = LocalDate.now(),
+                        nombreTabla = tabla.nombre,
+                        completada = s.completada,
+                        faseAlcanzada = s.faseAlcanzada,
+                        totalFases = tabla.fases.size,
+                        marcaSegundos = s.marcaSegundos,
+                        factores = s.factoresSeleccionados,
+                        sensaciones = s.sensaciones.trim()
+                    )
                 )
-            )
-            _uiState.update { it.copy(guardadoOk = true) }
+            }.getOrDefault(false)
+            _uiState.update {
+                if (ok) it.copy(guardando = false, guardadoOk = true)
+                else it.copy(guardando = false, errorGuardado = "No se pudo guardar la sesión. Probá de nuevo.")
+            }
         }
     }
 
+    /** Vuelve a la lista de tablas. Mantiene la tabla elegida y el tilde de "Estoy acompañado". */
     fun onVolverASeleccion() {
+        job?.cancel()
         _uiState.update {
             it.copy(
                 etapa = EtapaEntrenamiento.SELECCION,
-                tablaSeleccionada = null,
+                corriendo = false,
                 indiceFase = 0,
                 segundosRestantes = 0,
                 completada = false,
                 faseAlcanzada = 0,
                 marcaSegundos = 0,
+                duracionSesionSegundos = 0,
                 factoresSeleccionados = emptySet(),
                 sensaciones = "",
-                guardadoOk = false
+                guardando = false,
+                guardadoOk = false,
+                errorGuardado = null
             )
         }
     }
-
-    fun onMostrarHistorial(mostrar: Boolean) = _uiState.update { it.copy(mostrarHistorial = mostrar) }
 
     companion object {
         fun Factory(

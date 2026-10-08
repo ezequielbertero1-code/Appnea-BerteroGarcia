@@ -22,6 +22,8 @@ import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
 import com.berterogarcia.appnea.ui.cuenta.CuentaViewModel
 import com.berterogarcia.appnea.ui.detalleinmersion.DetalleInmersionScreen
 import com.berterogarcia.appnea.ui.detalleinmersion.DetalleInmersionViewModel
+import com.berterogarcia.appnea.ui.entrenamiento.CrearTablaScreen
+import com.berterogarcia.appnea.ui.entrenamiento.CrearTablaViewModel
 import com.berterogarcia.appnea.ui.entrenamiento.CronometroScreen
 import com.berterogarcia.appnea.ui.entrenamiento.EntrenamientoApneaViewModel
 import com.berterogarcia.appnea.ui.historial.HistorialViewModel
@@ -56,6 +58,7 @@ const val RUTA_LOGIN = "login"
 const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
 const val RUTA_DETALLE_INMERSION = "detalle_inmersion/{id}"
 const val RUTA_CONDICIONES = "condiciones"
+const val RUTA_CREAR_TABLA = "entrenamiento/crear_tabla"
 
 //  Perfil. Todas empiezan con "perfil/" para que la barra marque "Cuenta" como seleccionada.
 const val RUTA_DATOS_PERSONALES = "perfil/datos"
@@ -95,6 +98,7 @@ private fun NavHostController.volverDesde(entrada: NavBackStackEntry) {
 /** Formularios a pantalla completa: se oculta la barra de navegación (ver MainActivity). */
 val RUTAS_SIN_BARRA = setOf(
     RUTA_NUEVA_INMERSION,
+    RUTA_CREAR_TABLA,
     RUTA_DATOS_PERSONALES,
     RUTA_FORM_EQUIPO,
     RUTA_FORM_CERTIFICADO,
@@ -191,7 +195,20 @@ fun AppNavHost(
                     app.sonidoManager
                 )
             )
-            CronometroScreen(entrenamientoViewModel = entrenamientoViewModel)
+            CronometroScreen(
+                entrenamientoViewModel = entrenamientoViewModel,
+                onCrearTabla = { navController.navigate(RUTA_CREAR_TABLA) { launchSingleTop = true } }
+                // onVerEstadisticas / onGuardarIntentos: se conectan cuando exista Estadísticas
+            )
+        }
+        composable(RUTA_CREAR_TABLA) { entrada ->
+            val crearTablaViewModel: CrearTablaViewModel = viewModel(
+                factory = CrearTablaViewModel.Factory(app.tablaPersonalizadaRepository)
+            )
+            CrearTablaScreen(
+                viewModel = crearTablaViewModel,
+                onCerrar = { navController.volverDesde(entrada) }
+            )
         }
 
         //==============================INMERSION (buceo y apnea)=============================

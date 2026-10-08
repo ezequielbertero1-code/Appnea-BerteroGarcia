@@ -25,6 +25,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +45,7 @@ import com.berterogarcia.appnea.navigation.RUTA_LOGIN
 import com.berterogarcia.appnea.navigation.RUTA_REGISTRO
 import com.berterogarcia.appnea.navigation.irAPestania
 import com.berterogarcia.appnea.navigation.pestaniaAbierta
+import com.berterogarcia.appnea.ui.components.LocalOcultarBarra
 import com.berterogarcia.appnea.ui.sesion.EstadoArranque
 import com.berterogarcia.appnea.ui.sesion.SesionViewModel
 import com.berterogarcia.appnea.ui.theme.Acento
@@ -108,34 +110,47 @@ fun MyApplicationApp(destinoInicial: String = RUTA_LOGIN) { // [CAMBIO] recibe e
     val pestaniaSeleccionada = remember(backStackEntry) { navController.pestaniaAbierta() }
 
     val mostrarMenu = currentRoute != RUTA_LOGIN && currentRoute != RUTA_REGISTRO
-    val esFormulario = currentRoute in RUTAS_SIN_BARRA // [CAMBIO] incluye los formularios del perfil
+    val ocultarBarra = remember { mutableStateOf(false) }
+    // Sin barra: formularios (RUTAS_SIN_BARRA) o una pantalla que la pidió ocultar
+    val esFormulario = currentRoute in RUTAS_SIN_BARRA || ocultarBarra.value
 
-    if (mostrarMenu) {
-        NavigationSuiteScaffold(
-            layoutType = if (esFormulario) NavigationSuiteType.None
-                        else NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()),
-            containerColor = Color.Transparent,
-            navigationSuiteColors = NavigationSuiteDefaults.colors(
-                navigationBarContainerColor = Color.Transparent,
-                navigationRailContainerColor = Color.Transparent,
-                navigationDrawerContainerColor = Color.Transparent
-            ),
-            navigationSuiteItems = {
-                AppDestinations.entries.forEach { destination ->
-                    item(
-                        icon = { Icon(painterResource(destination.icon), contentDescription = destination.label, modifier = Modifier.size(28.dp)) },
-                        label = { Text(destination.label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        // [CAMBIO] Las pantallas "perfil/..." cuentan como parte de Cuenta.
-                        selected = destination == pestaniaSeleccionada,
-                        onClick = {
-                            if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-                                navController.irAPestania(destination)
+    // Las pantallas pueden ocultar la barra (ej. entrenamiento en curso): ver OcultarBarraNavegacion()
+    CompositionLocalProvider(LocalOcultarBarra provides ocultarBarra) {
+        if (mostrarMenu) {
+            NavigationSuiteScaffold(
+                layoutType = if (esFormulario) NavigationSuiteType.None
+                            else NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()),
+                containerColor = Color.Transparent,
+                navigationSuiteColors = NavigationSuiteDefaults.colors(
+                    navigationBarContainerColor = Color.Transparent,
+                    navigationRailContainerColor = Color.Transparent,
+                    navigationDrawerContainerColor = Color.Transparent
+                ),
+                navigationSuiteItems = {
+                    AppDestinations.entries.forEach { destination ->
+                        item(
+                            icon = { Icon(painterResource(destination.icon), contentDescription = destination.label, modifier = Modifier.size(28.dp)) },
+                            label = { Text(destination.label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            // [CAMBIO] Las pantallas "perfil/..." cuentan como parte de Cuenta.
+                            selected = destination == pestaniaSeleccionada,
+                            onClick = {
+                                if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                                    navController.irAPestania(destination)
+                                }
                             }
-                        }
+                        )
+                    }
+                }
+            ) {
+                Scaffold(modifier = Modifier.fillMaxSize(), containerColor = Color.Transparent) { innerPadding ->
+                    AppNavHost(
+                        navController = navController,
+                        startDestination = destinoInicial,
+                        modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding)
                     )
                 }
             }
-        ) {
+        } else {
             Scaffold(modifier = Modifier.fillMaxSize(), containerColor = Color.Transparent) { innerPadding ->
                 AppNavHost(
                     navController = navController,
@@ -143,14 +158,6 @@ fun MyApplicationApp(destinoInicial: String = RUTA_LOGIN) { // [CAMBIO] recibe e
                     modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding)
                 )
             }
-        }
-    } else {
-        Scaffold(modifier = Modifier.fillMaxSize(), containerColor = Color.Transparent) { innerPadding ->
-            AppNavHost(
-                navController = navController,
-                startDestination = destinoInicial,
-                modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding)
-            )
         }
     }
 }
