@@ -15,8 +15,18 @@
     <string name="registro_button">Crear Cuenta</string>
     <string name="sin_cuenta">No tenes una cuenta? Registrate.</string>
 
+    <!-- =====================TÍTULOS DE PANTALLA========================== -->
+    <string name="titulo_entrenar">Entrenar</string>
+    <string name="titulo_inmersiones">Inmersiones</string>
+    <string name="inmersiones_total">%1$d en total</string>
+    <string name="ver_estadisticas">📈 Estadísticas</string>
+
+    <!-- ==========================INICIO=================================== -->
+    <string name="inicio_saludo">Hola, %1$s</string>
+    <string name="inicio_saludo_sin_nombre">Hola</string>
+
     <!-- ==========================CUENTA=================================== -->
-    <string name="cuenta_greeting">Hola, %1$s</string>
+    <string name="cuenta_titulo">Cuenta</string>
     <string name="cuenta_username">Nombre de Usuario</string>
     <string name="cuenta_cerrar_session">Cerrar Sesion</string>
 </resources>

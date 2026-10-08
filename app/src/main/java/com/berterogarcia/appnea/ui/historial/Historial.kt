@@ -4,7 +4,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,6 +53,9 @@ import com.berterogarcia.appnea.ui.theme.VeloMedio
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import com.berterogarcia.appnea.ui.components.TituloPantalla
+import com.berterogarcia.appnea.ui.components.BotonVerEstadisticas
+import androidx.compose.ui.res.stringResource
 
 private val LOCALE_ES: Locale = Locale.forLanguageTag("es-AR")
 private val FORMATO_MES_ANIO: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", LOCALE_ES)
@@ -171,20 +173,11 @@ fun HistorialScreen(
 
 @Composable
 private fun Encabezado(totalGeneral: Int, onVerEstadisticas: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                "Inmersiones",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            if (totalGeneral > 0) {
-                Text("$totalGeneral en total", style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
-            }
-        }
-        TextButton(onClick = onVerEstadisticas) { Text("📈 Estadísticas", color = Acento) }
-    }
+    TituloPantalla(
+        titulo = stringResource(R.string.titulo_inmersiones),
+        subtitulo = if (totalGeneral > 0) stringResource(R.string.inmersiones_total, totalGeneral) else null,
+        accion = { BotonVerEstadisticas(onClick = onVerEstadisticas) }
+    )
 }
 
 @Composable
