@@ -1,5 +1,7 @@
 package com.berterogarcia.appnea.ui.detalleinmersion
 
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -7,6 +9,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -40,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -47,10 +52,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.Aptitud
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.local.Ubicacion
 import com.berterogarcia.appnea.data.local.formatearDuracion
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado
 import com.berterogarcia.appnea.data.perfil.PuntoPerfil
@@ -60,9 +67,12 @@ import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.Chips
 import com.berterogarcia.appnea.ui.components.DatoChico
 import com.berterogarcia.appnea.ui.components.FilaMosaicos
+import com.berterogarcia.appnea.ui.components.MapaLibre
 import com.berterogarcia.appnea.ui.components.Mosaico
+import com.berterogarcia.appnea.ui.components.PinMapa
 import com.berterogarcia.appnea.ui.components.TarjetaAviso
 import com.berterogarcia.appnea.ui.components.TarjetaHero
+import com.berterogarcia.appnea.ui.components.formatoCoordenadas
 import com.berterogarcia.appnea.ui.condiciones.FilaDato
 import com.berterogarcia.appnea.ui.condiciones.Semaforo
 import com.berterogarcia.appnea.ui.condiciones.TarjetaCondicion
@@ -76,6 +86,7 @@ import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.theme.TextoTerciario
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.time.Duration as JDuration
 
 private val FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy")
@@ -233,7 +244,7 @@ private fun PestanaGeneral(i: InmersionEntity) {
             if (i.paradaSeguridadMin > 0f) "a 5 m" else ""
         )
     }
-
+    TarjetaUbicacion(i)   // ← nuevo; no muestra nada si la inmersión no tiene coordenadas
     TarjetaCondicion("📝 Notas") {
         Text("Actividad", style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
         Text(i.actividad.ifBlank { "—" }, modifier = Modifier.padding(top = 2.dp, bottom = 8.dp))
@@ -247,7 +258,57 @@ private fun PestanaGeneral(i: InmersionEntity) {
         }
     }
 }
+/** Mini mapa del lugar marcado. Las inmersiones sin coordenadas no muestran la tarjeta. */
+@Composable
+private fun TarjetaUbicacion(i: InmersionEntity) {
+    val lat = i.latitud ?: return
+    val lon = i.longitud ?: return
+    val context = LocalContext.current
 
+    // Abre la app de mapas del teléfono con un pin con el nombre del lugar.
+    // Coordenadas con Locale.US: el URI necesita punto decimal, no coma.
+    val abrirEnMapas: () -> Unit = {
+        val etiqueta = Uri.encode(i.lugar.ifBlank { "Inmersión" })
+        val coords = "%.6f,%.6f".format(Locale.US, lat, lon)
+        val intent = Intent(Intent.ACTION_VIEW, "geo:0,0?q=$coords($etiqueta)".toUri())
+        // Si no hay app de mapas (o falla por cualquier motivo) se avisa en vez de crashear
+        runCatching { context.startActivity(intent) }
+            .onFailure {
+                Toast.makeText(context, "No hay una app de mapas instalada", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    TarjetaCondicion("📍 Lugar") {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(160.dp)
+                .clip(RoundedCornerShape(12.dp))
+        ) {
+            MapaLibre(
+                centro = Ubicacion(lat, lon),
+                zoom = 14.0,
+                interactivo = false,
+                modifier = Modifier.matchParentSize()
+            )
+            PinMapa(Modifier.align(Alignment.Center))
+            // Capa transparente: un toque abre Mapas y el deslizar lateral sigue cambiando de pestaña
+            Box(Modifier.matchParentSize().clickable(onClick = abrirEnMapas))
+        }
+        Row(
+            Modifier.fillMaxWidth().padding(top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                formatoCoordenadas(lat, lon),
+                style = MaterialTheme.typography.bodySmall,
+                color = TextoTerciario,
+                modifier = Modifier.weight(1f)
+            )
+            TextButton(onClick = abrirEnMapas) { Text("Abrir en Mapas", color = Acento) }
+        }
+    }
+}
 @Composable
 private fun PestanaGrafico(i: InmersionEntity, perfil: List<PuntoPerfil>) {
     // La curva se dibuja de izquierda a derecha cada vez que se entra a la pestaña

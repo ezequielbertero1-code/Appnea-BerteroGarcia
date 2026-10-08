@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -33,12 +34,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -65,9 +71,6 @@ import com.berterogarcia.appnea.ui.theme.FondoTarjeta
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.theme.TextoSobreAcento
 import com.berterogarcia.appnea.ui.theme.TextoTerciario
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.Role
-import androidx.compose.material3.Checkbox
 
 // Características del agua, en grupos. Se siguen guardando juntas en caracteristicasAgua.
 private val AGUA_TIPO = listOf("Dulce", "Salada")             // una
@@ -106,7 +109,22 @@ fun NuevaInmersionScreen(
     LaunchedEffect(uiState.guardadoOk) {
         if (uiState.guardadoOk) onGuardado()
     }
-
+    // Mapa a pantalla completa: mientras está abierto, reemplaza al formulario
+    var mapaAbierto by rememberSaveable { mutableStateOf(false) }
+    if (mapaAbierto) {
+        val centro = remember { viewModel.centroInicialMapa() }
+        SelectorLugarMapa(
+            centroInicial = centro,
+            nombreInicial = uiState.lugar,
+            onCancelar = { mapaAbierto = false },
+            onConfirmar = { lat, lon, nombre ->
+                viewModel.onUbicacionElegida(lat, lon, nombre)
+                mapaAbierto = false
+            },
+            modifier = modifier
+        )
+        return
+    }
     // Botón atrás del sistema: vuelve a la etapa anterior en vez de salir
     BackHandler(enabled = !esPrimera) { viewModel.anterior() }
 
@@ -139,7 +157,7 @@ fun NuevaInmersionScreen(
                     .padding(top = 16.dp)
             ) {
                 when (etapa) {
-                    Etapa.GENERAL -> EtapaGeneral(uiState, viewModel)
+                    Etapa.GENERAL -> EtapaGeneral(uiState, viewModel, onAbrirMapa = { mapaAbierto = true })
                     Etapa.INMERSION -> EtapaInmersion(uiState, viewModel)
                     Etapa.CONDICIONES -> EtapaCondiciones(uiState, viewModel)
                     Etapa.EQUIPO -> EtapaEquipo(uiState, viewModel, onCargarEquipo)
@@ -226,7 +244,11 @@ private fun rememberFocoInicial(): FocusRequester {
 }
 
 @Composable
-private fun EtapaGeneral(uiState: NuevaInmersionUiState, viewModel: NuevaInmersionViewModel) {
+private fun EtapaGeneral(
+    uiState: NuevaInmersionUiState,
+    viewModel: NuevaInmersionViewModel,
+    onAbrirMapa: () -> Unit
+) {
     val foco = rememberFocoInicial()
     SelectorSegmentado(
         titulo = "¿Qué tipo de inmersión fue?",
@@ -246,6 +268,17 @@ private fun EtapaGeneral(uiState: NuevaInmersionUiState, viewModel: NuevaInmersi
         esError = uiState.errores.containsKey(Campo.LUGAR), mensajeError = uiState.errores[Campo.LUGAR] ?: "",
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp).focusRequester(foco),
+    )
+    TarjetaLugar(
+        latitud = uiState.latitud,
+        longitud = uiState.longitud,
+        buscando = uiState.buscandoUbicacion,
+        aviso = uiState.avisoUbicacion,
+        onAbrirMapa = onAbrirMapa,
+        onMiUbicacion = viewModel::usarMiUbicacion,
+        onPermisoDenegado = viewModel::permisoUbicacionDenegado,
+        onQuitar = viewModel::quitarUbicacion,
+        modifier = Modifier.padding(top = 4.dp)
     )
     TimePickerField(
         label = "Hora de entrada", valor = uiState.horaEntrada, onValorChange = viewModel::onHoraEntradaChange,

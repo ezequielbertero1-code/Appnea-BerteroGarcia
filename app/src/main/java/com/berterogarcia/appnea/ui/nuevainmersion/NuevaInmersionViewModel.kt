@@ -11,6 +11,7 @@ import com.berterogarcia.appnea.data.local.EquipoEntity
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
+import com.berterogarcia.appnea.data.local.Ubicacion
 import com.berterogarcia.appnea.data.local.UbicacionHelper
 import com.berterogarcia.appnea.data.local.descripcion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
@@ -65,6 +66,10 @@ data class NuevaInmersionUiState(
     val tipo: TipoInmersion = TipoInmersion.BUCEO,
     val fecha: String = "",
     val lugar: String = "",
+    val latitud: Double? = null,          // lugar marcado (mapa o GPS); null = sin marcar
+    val longitud: Double? = null,
+    val buscandoUbicacion: Boolean = false,
+    val avisoUbicacion: String? = null,
     val profundidadMetros: String = "",
     val paradaSeguridadMin: String = "",
     val tiempoFondo: String = "",
@@ -170,6 +175,45 @@ class NuevaInmersionViewModel(
 
     fun onFechaChange(v: String) = _uiState.update { it.copy(fecha = v) }
     fun onLugarChange(v: String) = _uiState.update { it.copy(lugar = v) }
+    /** Centro con el que abre el mapa: lo ya marcado → última ubicación del teléfono → Comodoro. */
+    fun centroInicialMapa(): Ubicacion {
+        val s = _uiState.value
+        return if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
+        else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
+    }
+
+    /** Viene del mapa. Si el nombre quedó vacío, se mantiene el que ya estaba escrito. */
+    fun onUbicacionElegida(latitud: Double, longitud: Double, nombre: String) = _uiState.update {
+        val nuevoLugar = nombre.trim().ifBlank { it.lugar }
+        it.copy(
+            latitud = latitud, longitud = longitud, lugar = nuevoLugar, avisoUbicacion = null,
+            errores = if (nuevoLugar.isBlank()) it.errores else it.errores - Campo.LUGAR
+        )
+    }
+
+    fun quitarUbicacion() = _uiState.update { it.copy(latitud = null, longitud = null) }
+
+    /** Botón "Mi ubicación" de la tarjeta (la pantalla ya pidió el permiso). */
+    fun usarMiUbicacion() {
+        if (_uiState.value.buscandoUbicacion) return
+        _uiState.update { it.copy(buscandoUbicacion = true, avisoUbicacion = null) }
+        viewModelScope.launch {
+            val u = runCatching { UbicacionHelper.obtenerUbicacionActual(appContext, 15.seconds) }.getOrNull()
+            _uiState.update {
+                if (u != null) it.copy(latitud = u.latitud, longitud = u.longitud, buscandoUbicacion = false)
+                else it.copy(
+                    buscandoUbicacion = false,
+                    avisoUbicacion = if (!UbicacionHelper.ubicacionActivada(appContext))
+                        "Activá la ubicación del teléfono y probá de nuevo."
+                    else "No se pudo obtener tu ubicación. Probá marcándola en el mapa."
+                )
+            }
+        }
+    }
+
+    fun permisoUbicacionDenegado() = _uiState.update {
+        it.copy(avisoUbicacion = "Sin permiso de ubicación. Podés marcar el lugar en el mapa.")
+    }
     fun onProfundidadChange(v: String) = _uiState.update { it.copy(profundidadMetros = v) }
     fun onParadaChange(v: String) = _uiState.update { it.copy(paradaSeguridadMin = v.filter { c -> c.isDigit() || c == '.'}) }
     fun onTiempoFondoChange(v: String) = _uiState.update { it.copy(tiempoFondo = v.filter { c -> c.isDigit() }.take(4)) }
@@ -246,9 +290,10 @@ class NuevaInmersionViewModel(
         viewModelScope.launch {
             val fecha = LocalDate.parse(s.fecha, FORMATO_FECHA)
             val horaEntrada = LocalTime.parse(s.horaEntrada)
-            // Ubicación del teléfono si hay permiso; si no, Comodoro. Sin internet guarda solo la luna.
-            // (En la parte C se va a usar el lugar marcado en el mapa.)
-            val ubicacion = UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
+            // Condiciones del LUGAR marcado. Sin marcar: ubicación del teléfono → Comodoro.
+            // Sin internet guarda solo la luna.
+            val ubicacion = if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
+            else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
             val condiciones = runCatching {
                 CondicionesRepository.registroPara(ubicacion.latitud, ubicacion.longitud, fecha.atTime(horaEntrada))
             }.getOrNull()
@@ -273,7 +318,9 @@ class NuevaInmersionViewModel(
                     actividad = s.actividad,
                     comentarios = s.comentarios,
                     condiciones = condiciones,
-                    tipo = s.tipo
+                    tipo = s.tipo,
+                    latitud = s.latitud,   // solo lo marcado; null si no se marcó nada
+                    longitud = s.longitud
                 )
             )
             _uiState.update { it.copy(guardadoOk = true, guardando = false) }

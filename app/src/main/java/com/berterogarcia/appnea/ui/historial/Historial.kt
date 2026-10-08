@@ -50,15 +50,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.CondicionesRegistro
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.remote.emojiClima
 import com.berterogarcia.appnea.ui.condiciones.direccion
 import com.berterogarcia.appnea.ui.theme.Acento
@@ -94,6 +98,7 @@ fun HistorialScreen(
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
     val periodo by viewModel.periodo.collectAsStateWithLifecycle()
     val busqueda by viewModel.busqueda.collectAsStateWithLifecycle()
+    val tipo by viewModel.tipo.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
     // El botón se achica a solo "+" cuando scrolleás, así tapa menos
@@ -107,7 +112,19 @@ fun HistorialScreen(
                 Spacer(Modifier.height(12.dp))
                 Buscador(texto = busqueda, onTextoChange = viewModel::onBusquedaChange)
                 Spacer(Modifier.height(10.dp))
-                FiltrosPeriodo(seleccionado = periodo, onSeleccion = viewModel::onPeriodoChange)
+                FilaFiltros(
+                    opciones = listOf(null) + TipoInmersion.entries,
+                    seleccionada = tipo,
+                    etiqueta = { t -> t?.let { "${it.emoji} ${it.etiqueta}" } ?: "Todos" },
+                    onSeleccion = viewModel::onTipoChange
+                )
+                Spacer(Modifier.height(6.dp))
+                FilaFiltros(
+                    opciones = PeriodoFiltro.entries,
+                    seleccionada = periodo,
+                    etiqueta = { it.etiqueta },
+                    onSeleccion = viewModel::onPeriodoChange
+                )
             }
 
             // ---- Lista ----
@@ -125,7 +142,7 @@ fun HistorialScreen(
                 )
                 estado.cantidadFiltrada == 0 -> MensajeCentrado(
                     titulo = "No hay inmersiones para este filtro",
-                    detalle = "Probá con otro período u otra búsqueda.",
+                    detalle = "Probá con otro tipo, período o búsqueda.",
                     accion = "Ver todas",
                     onAccion = viewModel::limpiarFiltros
                 )
@@ -137,7 +154,7 @@ fun HistorialScreen(
                 ) {
                     item(key = "resumen") {
                         Text(
-                            text = textoResumen(estado.cantidadFiltrada, periodo, busqueda),
+                            text = textoResumen(estado.cantidadFiltrada, periodo, busqueda, tipo),
                             style = MaterialTheme.typography.bodySmall,
                             color = TextoSecundario,
                             modifier = Modifier.padding(start = 4.dp)
@@ -231,19 +248,25 @@ private fun Buscador(texto: String, onTextoChange: (String) -> Unit) {
     )
 }
 
+/** Fila de chips de una sola opción (mismo estilo para tipo y período). */
 @Composable
-private fun FiltrosPeriodo(seleccionado: PeriodoFiltro, onSeleccion: (PeriodoFiltro) -> Unit) {
+private fun <T> FilaFiltros(
+    opciones: List<T>,
+    seleccionada: T,
+    etiqueta: (T) -> String,
+    onSeleccion: (T) -> Unit
+) {
     // Scroll horizontal por si la pantalla es angosta o la letra está agrandada
     Row(
         modifier = Modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        PeriodoFiltro.entries.forEach { periodo ->
-            val elegido = periodo == seleccionado
+        opciones.forEach { opcion ->
+            val elegido = opcion == seleccionada
             FilterChip(
                 selected = elegido,
-                onClick = { onSeleccion(periodo) },
-                label = { Text(periodo.etiqueta, fontWeight = if (elegido) FontWeight.Bold else FontWeight.Normal) },
+                onClick = { onSeleccion(opcion) },
+                label = { Text(etiqueta(opcion), fontWeight = if (elegido) FontWeight.Bold else FontWeight.Normal) },
                 shape = RoundedCornerShape(50),
                 colors = FilterChipDefaults.filterChipColors(
                     containerColor = Color.Transparent,
@@ -339,15 +362,22 @@ private fun TarjetaInmersion(inmersion: InmersionEntity, onClick: () -> Unit) {
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    primeraLinea(inmersion.actividad)?.let {
-                        Text(
-                            it,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextoSecundario,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    // "🤿 Buceo · Recreativo": el tipo en cian y la actividad al lado
+                    // (si la actividad repite el tipo, como "Apnea", no se muestra dos veces)
+                    val actividad = primeraLinea(inmersion.actividad)
+                        ?.takeUnless { it.equals(inmersion.tipo.etiqueta, ignoreCase = true) }
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(SpanStyle(color = Acento, fontWeight = FontWeight.SemiBold)) {
+                                append("${inmersion.tipo.emoji} ${inmersion.tipo.etiqueta}")
+                            }
+                            actividad?.let { append(" · $it") }
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextoSecundario,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
                 Spacer(Modifier.width(8.dp))
                 Text(
@@ -418,10 +448,11 @@ private fun LineaCondiciones(c: CondicionesRegistro) {
 
 // ==================================== FORMATOS ====================================
 
-private fun textoResumen(cantidad: Int, periodo: PeriodoFiltro, busqueda: String): String {
+private fun textoResumen(cantidad: Int, periodo: PeriodoFiltro, busqueda: String, tipo: TipoInmersion?): String {
     val sustantivo = if (cantidad == 1) "inmersión" else "inmersiones"
+    val deTipo = tipo?.let { " de ${it.etiqueta.lowercase()}" }.orEmpty()
     val conBusqueda = busqueda.trim().takeIf { it.isNotEmpty() }?.let { " con \"$it\"" }.orEmpty()
-    return "$cantidad $sustantivo$conBusqueda ${periodo.descripcion}"
+    return "$cantidad $sustantivo$deTipo$conBusqueda ${periodo.descripcion}"
 }
 
 /** "oct." → "oct" (según la versión de Android, el mes abreviado puede venir con punto). */
