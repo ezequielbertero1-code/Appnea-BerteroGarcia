@@ -20,7 +20,7 @@ object TablasPredefinidas {
             }
         }
         return TablaApnea(
-            "Tabata $repeticiones x (${apneaSeg}s apnea / ${descansoSeg}s descanso)",
+            "Tabata", // el detalle (4 × 1:30 apnea / 1:00 descanso) lo arma la tarjeta
             fases
         )
     }
@@ -36,7 +36,7 @@ object TablasPredefinidas {
                 if (i < escalones - 1) add(Fase(TipoFase.DESCANSO, descansoSeg))
             }
         }
-        return TablaApnea("Pirámide $escalones escalones", fases)
+        return TablaApnea("Pirámide", fases)
     }
 
     // Ejemplo de Franco: 3' preparación, 2' apnea, 1' descanso, 2' apnea, 1' descanso, 3' apnea
