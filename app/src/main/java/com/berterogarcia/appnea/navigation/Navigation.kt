@@ -207,11 +207,18 @@ fun AppNavHost(
         }
         composable(RUTA_NUEVA_INMERSION) {
             val viewModel: NuevaInmersionViewModel = viewModel(
-                factory = NuevaInmersionViewModel.Factory(app.inmersionRepository, app.applicationContext)
+                factory = NuevaInmersionViewModel.Factory(
+                    repository = app.inmersionRepository,
+                    perfilRepository = app.perfilRepository,
+                    nombreUsuario = app.sessionManager.obtenerUsuario(),
+                    appContext = app.applicationContext
+                )
             )
             NuevaInmersionScreen(
                 viewModel = viewModel,
-                onGuardado = { navController.popBackStack() }
+                onGuardado = { navController.popBackStack() },
+                // Abre el alta de equipo; al guardarlo vuelve acá y la lista se actualiza sola
+                onCargarEquipo = { navController.navigate(rutaFormEquipo()) { launchSingleTop = true } }
             )
         }
         composable(

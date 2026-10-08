@@ -20,9 +20,12 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,8 +47,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.berterogarcia.appnea.data.local.EquipoEntity
 import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.BotonSecundario
@@ -55,18 +60,19 @@ import com.berterogarcia.appnea.ui.components.DatePickerField
 import com.berterogarcia.appnea.ui.components.SelectorSegmentado
 import com.berterogarcia.appnea.ui.components.TimePickerField
 import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.BordeSuave
+import com.berterogarcia.appnea.ui.theme.FondoTarjeta
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.TextoSobreAcento
 import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.material3.Checkbox
 
 // Características del agua, en grupos. Se siguen guardando juntas en caracteristicasAgua.
 private val AGUA_TIPO = listOf("Dulce", "Salada")             // una
 private val AGUA_ENTRADA = listOf("Orilla", "Bote")           // una
 private val AGUA_MAR = listOf("Olas", "Corrientes", "Resaca") // varias
-
-private val OPCIONES_EQUIPAMIENTO = listOf(
-    "Ninguna", "Corto", "Largo", "Dos piezas", "Semi seco", "Seco",
-    "Guantes", "Botas", "Casco"
-)
 
 private val tiempoFondoVisualTransformation = VisualTransformation { texto ->
     val digitos = texto.text
@@ -89,7 +95,8 @@ private val tiempoFondoVisualTransformation = VisualTransformation { texto ->
 fun NuevaInmersionScreen(
     modifier: Modifier = Modifier,
     viewModel: NuevaInmersionViewModel,
-    onGuardado: () -> Unit
+    onGuardado: () -> Unit,
+    onCargarEquipo: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val esPrimera = uiState.etapa == Etapa.entries.first()
@@ -135,7 +142,7 @@ fun NuevaInmersionScreen(
                     Etapa.GENERAL -> EtapaGeneral(uiState, viewModel)
                     Etapa.INMERSION -> EtapaInmersion(uiState, viewModel)
                     Etapa.CONDICIONES -> EtapaCondiciones(uiState, viewModel)
-                    Etapa.EQUIPO -> EtapaEquipo(uiState, viewModel)
+                    Etapa.EQUIPO -> EtapaEquipo(uiState, viewModel, onCargarEquipo)
                     Etapa.NOTAS -> EtapaNotas(uiState, viewModel)
                 }
             }
@@ -335,13 +342,54 @@ private fun EtapaCondiciones(uiState: NuevaInmersionUiState, viewModel: NuevaInm
 }
 
 @Composable
-private fun EtapaEquipo(uiState: NuevaInmersionUiState, viewModel: NuevaInmersionViewModel) {
-    val foco = rememberFocoInicial()
+private fun EtapaEquipo(
+    uiState: NuevaInmersionUiState,
+    viewModel: NuevaInmersionViewModel,
+    onCargarEquipo: () -> Unit
+) {
+    Row {
+        Text("¿Qué equipo usaste?", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+        Text(" · de tu perfil", color = TextoTerciario, style = MaterialTheme.typography.bodyMedium)
+    }
+    when {
+        !uiState.equipoCargado -> LinearProgressIndicator(
+            color = Acento,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
+        )
+        uiState.equipoVisible.isEmpty() -> SinEquipo(
+            perfilVacio = uiState.equipoPerfil.isEmpty(),
+            onCargarEquipo = onCargarEquipo
+        )
+        else -> {
+            uiState.equipoVisible
+                .groupBy { it.categoria }
+                .toSortedMap()   // en el orden del enum: Máscara, Snorkel, Aletas, Traje...
+                .forEach { (categoria, equipos) ->
+                    Text(
+                        categoria.etiqueta,
+                        color = TextoTerciario,
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(top = 10.dp, start = 2.dp)
+                    )
+                    equipos.forEach { equipo ->
+                        val etiqueta = equipo.etiquetaInmersion
+                        FilaEquipo(
+                            equipo = equipo,
+                            marcado = etiqueta in uiState.equipamiento,
+                            onCambio = { viewModel.onEquipamientoToggle(etiqueta, it) }
+                        )
+                    }
+                }
+            TextButton(onClick = onCargarEquipo, modifier = Modifier.padding(top = 4.dp)) {
+                Text("+ Agregar otro equipo", color = Acento)
+            }
+        }
+    }
     CampoTexto(
         valor = uiState.lastreKg, onValorChange = viewModel::onLastreChange, etiqueta = "Lastre (kg)",
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
         esError = uiState.errores.containsKey(Campo.LASTRE), mensajeError = uiState.errores[Campo.LASTRE] ?: "",
-        modifier = Modifier.fillMaxWidth().focusRequester(foco)
+        modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
     )
     CampoTexto(
         valor = uiState.proteccionMm, onValorChange = viewModel::onProteccionMmChange, etiqueta = "Protección (mm)",
@@ -349,10 +397,62 @@ private fun EtapaEquipo(uiState: NuevaInmersionUiState, viewModel: NuevaInmersio
         esError = uiState.errores.containsKey(Campo.PROTECCION), mensajeError = uiState.errores[Campo.PROTECCION] ?: "",
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
     )
-    CheckboxGroup(
-        titulo = "Equipamiento", opciones = OPCIONES_EQUIPAMIENTO,
-        seleccionadas = uiState.equipamiento, onCambio = viewModel::onEquipamientoToggle
-    )
+}
+
+/** Toda la fila se toca (no solo el checkbox) y TalkBack la anuncia como checkbox. */
+@Composable
+private fun FilaEquipo(equipo: EquipoEntity, marcado: Boolean, onCambio: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 6.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(FondoTarjeta)
+            .toggleable(value = marcado, role = Role.Checkbox, onValueChange = onCambio)
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = marcado,
+            onCheckedChange = null, // lo maneja el toggleable de la fila
+            colors = CheckboxDefaults.colors(
+                checkedColor = Acento,
+                uncheckedColor = BordeSuave,
+                checkmarkColor = TextoSobreAcento
+            )
+        )
+        Column(modifier = Modifier.weight(1f).padding(vertical = 10.dp)) {
+            val nombre = listOf(equipo.marca, equipo.modelo)
+                .filter { it.isNotBlank() }
+                .joinToString(" ")
+                .ifBlank { equipo.categoria.etiqueta }
+            Text(nombre, color = Color.White, style = MaterialTheme.typography.bodyMedium)
+            if (equipo.talle.isNotBlank()) {
+                Text(equipo.talle, color = TextoTerciario, style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SinEquipo(perfilVacio: Boolean, onCargarEquipo: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = if (perfilVacio) "Todavía no cargaste equipo en tu perfil."
+            else "No tenés equipo en uso para este tipo de inmersión.",
+            color = TextoSecundario,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        BotonSecundario(
+            texto = "Cargar equipo",
+            onClick = onCargarEquipo,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+    }
 }
 
 @Composable
