@@ -88,6 +88,8 @@ import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.time.Duration as JDuration
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 
 private val FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 private val HH_MM = DateTimeFormatter.ofPattern("HH:mm")
@@ -98,7 +100,8 @@ private val ICONOS = listOf(R.drawable.ic_info, R.drawable.ic_reloj, R.drawable.
 fun DetalleInmersionScreen(
     modifier: Modifier = Modifier,
     viewModel: DetalleInmersionViewModel,
-    onEliminada: () -> Unit
+    onEliminada: () -> Unit,
+    onEditar: (Long) -> Unit = {}
 ) {
     var mostrarDialogo by remember { mutableStateOf(false) }
     val inmersion by viewModel.inmersion.collectAsStateWithLifecycle()
@@ -135,6 +138,9 @@ fun DetalleInmersionScreen(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
+                IconButton(onClick = { onEditar(i.id) }) {
+                    Icon(Icons.Filled.Edit, contentDescription = "Editar inmersión", tint = TextoSecundario)
+                }
                 IconButton(onClick = { mostrarDialogo = true }) {
                     Icon(
                         painterResource(R.drawable.ic_borrar),

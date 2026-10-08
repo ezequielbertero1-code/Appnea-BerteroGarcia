@@ -27,6 +27,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -41,6 +42,7 @@ enum class Etapa(val titulo: String, val campos: Set<Campo>) {
 }
 
 private val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy", Locale.US)
+private val FORMATO_HORA: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.US)
 private val REGEX_TIEMPO_FONDO = Regex("^\\d{2}[0-5]\\d\$") // 4 dígitos, segundos 00-59
 
 /** Categorías que solo tienen sentido en buceo con tanque: en Apnea no se ofrecen. */
@@ -51,6 +53,22 @@ private fun parseTiempoFondo(v: String): Duration {
     val minutos = digitos.substring(0, 2).toInt()
     val segundos = digitos.substring(2, 4).toInt()
     return (minutos * 60 + segundos).seconds
+}
+
+// ---- De lo guardado al texto de los campos (modo edición) ----
+
+/** 18.0 → "18", 18.5 → "18.5" */
+private fun numeroEditable(v: Float): String = if (v % 1f == 0f) v.toInt().toString() else v.toString()
+
+/** Campos que solo aceptan dígitos (lastre, protección, visibilidad). */
+private fun enteroEditable(v: Float): String = v.roundToInt().coerceAtLeast(0).toString()
+
+/** 41 min 05 s → "4105" (el campo guarda solo dígitos y muestra mm:ss). */
+private fun tiempoFondoEditable(d: Duration): String {
+    val total = d.inWholeSeconds.coerceAtLeast(0)
+    val minutos = (total / 60).coerceAtMost(99)
+    val segundos = if (total / 60 > 99) 59L else total % 60
+    return "%02d%02d".format(minutos, segundos)
 }
 
 /**
@@ -90,6 +108,10 @@ data class NuevaInmersionUiState(
     val guardadoOk: Boolean = false,
     val guardando: Boolean = false,
     val errores: Map<Campo, String> = emptyMap(),
+    val editando: Boolean = false,          // true = se está editando una inmersión existente
+    val cargandoEdicion: Boolean = false,   // leyendo la inmersión a editar
+    val errorCarga: String? = null,         // no se pudo leer la inmersión a editar
+    val errorGuardado: String? = null,
 ) {
     /** Equipo que se ofrece según el tipo (en Apnea sin regulador, chaleco ni tubo). */
     val equipoVisible: List<EquipoEntity>
@@ -100,11 +122,18 @@ class NuevaInmersionViewModel(
     private val repository: InmersionRepository,
     perfilRepository: PerfilRepository,
     nombreUsuario: String?,
-    private val appContext: Context
+    private val appContext: Context,
+    /** null = alta de una inmersión nueva; con id = edición de esa inmersión. */
+    private val idEditar: Long? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
-        NuevaInmersionUiState(fecha = LocalDate.now().format(FORMATO_FECHA)))
+        NuevaInmersionUiState(
+            fecha = LocalDate.now().format(FORMATO_FECHA),
+            editando = idEditar != null,
+            cargandoEdicion = idEditar != null
+        )
+    )
     val uiState: StateFlow<NuevaInmersionUiState> = _uiState
 
     /** Inmersiones anteriores, para pre-marcar el equipo de la última del mismo tipo. */
@@ -113,7 +142,11 @@ class NuevaInmersionViewModel(
     /** true cuando el usuario tocó algún equipo: desde ahí no se pre-marca nada solo. */
     private var equipoTocado = false
 
+    /** La inmersión tal como estaba guardada (solo en modo edición). */
+    private var original: InmersionEntity? = null
+
     init {
+        if (idEditar != null) cargarParaEditar(idEditar)
         viewModelScope.launch {
             inmersionesPrevias = runCatching { repository.todasLasInmersiones.first() }
                 .getOrDefault(emptyList())
@@ -141,6 +174,8 @@ class NuevaInmersionViewModel(
      * (equipo que se pasó a "no en uso", o regulador al cambiar a Apnea).
      */
     private fun preseleccionarEquipo() {
+        // Editando: se respeta exactamente el equipo guardado (aunque ya no esté "en uso")
+        if (idEditar != null) return
         _uiState.update { s ->
             val visibles = s.equipoVisible.map { it.etiquetaInmersion }.toSet()
             val base = if (equipoTocado) s.equipamiento else {
@@ -151,6 +186,45 @@ class NuevaInmersionViewModel(
                     .orEmpty()
             }
             s.copy(equipamiento = base intersect visibles)
+        }
+    }
+
+    /** Lee la inmersión y completa el formulario con sus datos. */
+    private fun cargarParaEditar(id: Long) {
+        viewModelScope.launch {
+            val i = runCatching { repository.obtenerPorId(id).first() }.getOrNull()
+            if (i == null) {
+                _uiState.update {
+                    it.copy(cargandoEdicion = false, errorCarga = "No se encontró la inmersión para editar.")
+                }
+                return@launch
+            }
+            original = i
+            equipoTocado = true
+            _uiState.update {
+                it.copy(
+                    cargandoEdicion = false,
+                    tipo = i.tipo,
+                    fecha = i.fecha.format(FORMATO_FECHA),
+                    lugar = i.lugar,
+                    latitud = i.latitud,
+                    longitud = i.longitud,
+                    profundidadMetros = numeroEditable(i.profundidadMetros),
+                    paradaSeguridadMin = if (i.tipo == TipoInmersion.APNEA) "" else numeroEditable(i.paradaSeguridadMin),
+                    tiempoFondo = tiempoFondoEditable(i.tiempoFondo),
+                    horaEntrada = i.horaEntrada.format(FORMATO_HORA),
+                    horaSalida = i.horaSalida.format(FORMATO_HORA),
+                    caracteristicasAgua = i.caracteristicasAgua,
+                    lastreKg = enteroEditable(i.lastreKg),
+                    proteccionMm = enteroEditable(i.proteccionMm),
+                    equipamiento = i.equipamiento,
+                    temperaturaAireC = numeroEditable(i.temperaturaAireC),
+                    temperaturaAguaC = numeroEditable(i.temperaturaAguaC),
+                    visibilidadMetros = enteroEditable(i.visibilidadMetros),
+                    actividad = i.actividad,
+                    comentarios = i.comentarios
+                )
+            }
         }
     }
 
@@ -294,20 +368,29 @@ class NuevaInmersionViewModel(
             return
         }
         if (s.guardando) return
-        _uiState.update { it.copy(guardando = true, errores = emptyMap()) }
+        _uiState.update { it.copy(guardando = true, errores = emptyMap(), errorGuardado = null) }
 
         viewModelScope.launch {
             val fecha = LocalDate.parse(s.fecha, FORMATO_FECHA)
             val horaEntrada = LocalTime.parse(s.horaEntrada)
-            // Condiciones del LUGAR marcado. Sin marcar: ubicación del teléfono → Comodoro.
-            // Sin internet guarda solo la luna.
-            val ubicacion = if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
-            else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
-            val condiciones = runCatching {
-                CondicionesRepository.registroPara(ubicacion.latitud, ubicacion.longitud, fecha.atTime(horaEntrada))
-            }.getOrNull()
-            repository.guardar(
-                InmersionEntity(
+            val anterior = original
+
+            // Editando sin cambiar fecha, hora de entrada ni lugar marcado: se conservan las
+            // condiciones que ya estaban (no tiene sentido volver a pedirlas a internet).
+            val mismoMomentoYLugar = anterior != null &&
+                anterior.fecha == fecha && anterior.horaEntrada == horaEntrada &&
+                anterior.latitud == s.latitud && anterior.longitud == s.longitud
+
+            val condiciones = if (mismoMomentoYLugar) anterior.condiciones else {
+                // Condiciones del LUGAR marcado. Sin marcar: ubicación del teléfono → Comodoro.
+                // Sin internet guarda solo la luna.
+                val ubicacion = if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
+                else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
+                runCatching {
+                    CondicionesRepository.registroPara(ubicacion.latitud, ubicacion.longitud, fecha.atTime(horaEntrada))
+                }.getOrNull() ?: anterior?.condiciones
+            }
+            val entidad = InmersionEntity(
                     fecha = fecha,
                     lugar = s.lugar,
                     profundidadMetros = s.profundidadMetros.toFloat(), // ya validado, no hace falta toFloatOrNull
@@ -331,8 +414,14 @@ class NuevaInmersionViewModel(
                     latitud = s.latitud,   // solo lo marcado; null si no se marcó nada
                     longitud = s.longitud
                 )
-            )
-            _uiState.update { it.copy(guardadoOk = true, guardando = false) }
+            val ok = runCatching {
+                if (anterior != null) repository.actualizar(entidad.copy(id = anterior.id))
+                else repository.guardar(entidad)
+            }.getOrDefault(false)
+            _uiState.update {
+                if (ok) it.copy(guardadoOk = true, guardando = false)
+                else it.copy(guardando = false, errorGuardado = "No se pudo guardar. Probá de nuevo.")
+            }
         }
     }
 
@@ -385,9 +474,10 @@ class NuevaInmersionViewModel(
             repository: InmersionRepository,
             perfilRepository: PerfilRepository,
             nombreUsuario: String?,
-            appContext: Context
+            appContext: Context,
+            idEditar: Long? = null
         ) = viewModelFactory {
-            initializer { NuevaInmersionViewModel(repository, perfilRepository, nombreUsuario, appContext) }
+            initializer { NuevaInmersionViewModel(repository, perfilRepository, nombreUsuario, appContext, idEditar) }
         }
     }
 }

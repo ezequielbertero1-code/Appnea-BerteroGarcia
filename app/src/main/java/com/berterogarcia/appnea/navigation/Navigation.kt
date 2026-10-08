@@ -60,6 +60,8 @@ const val RUTA_REGISTRO = "registro"
 const val RUTA_LOGIN = "login"
 const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
 const val RUTA_DETALLE_INMERSION = "detalle_inmersion/{id}"
+const val RUTA_EDITAR_INMERSION = "editar_inmersion/{id}"
+fun rutaEditarInmersion(id: Long) = "editar_inmersion/$id"
 const val RUTA_CONDICIONES = "condiciones"
 const val RUTA_CREAR_TABLA = "entrenamiento/crear_tabla"
 const val RUTA_ESTADISTICAS = "estadisticas?pestania={pestania}"
@@ -105,6 +107,7 @@ private fun NavHostController.volverDesde(entrada: NavBackStackEntry) {
 /** Formularios a pantalla completa: se oculta la barra de navegación (ver MainActivity). */
 val RUTAS_SIN_BARRA = setOf(
     RUTA_NUEVA_INMERSION,
+    RUTA_EDITAR_INMERSION,
     RUTA_CREAR_TABLA,
     RUTA_DATOS_PERSONALES,
     RUTA_FORM_EQUIPO,
@@ -249,6 +252,27 @@ fun AppNavHost(
                 onCargarEquipo = { navController.navigate(rutaFormEquipo()) { launchSingleTop = true } }
             )
         }
+        // Editar: el mismo formulario, cargado con la inmersión guardada
+        composable(
+            route = RUTA_EDITAR_INMERSION,
+            arguments = listOf(navArgument("id") { type = NavType.LongType })
+        ) { entrada ->
+            val id = entrada.arguments?.getLong("id") ?: 0L
+            val viewModel: NuevaInmersionViewModel = viewModel(
+                factory = NuevaInmersionViewModel.Factory(
+                    repository = app.inmersionRepository,
+                    perfilRepository = app.perfilRepository,
+                    nombreUsuario = app.sessionManager.obtenerUsuario(),
+                    appContext = app.applicationContext,
+                    idEditar = id
+                )
+            )
+            NuevaInmersionScreen(
+                viewModel = viewModel,
+                onGuardado = { navController.volverDesde(entrada) }, // vuelve al detalle, que se actualiza solo
+                onCargarEquipo = { navController.navigate(rutaFormEquipo()) { launchSingleTop = true } }
+            )
+        }
         composable(
             route = RUTA_DETALLE_INMERSION,
             arguments = listOf(navArgument("id") { type = NavType.LongType })
@@ -259,7 +283,8 @@ fun AppNavHost(
             )
             DetalleInmersionScreen(
                 viewModel = viewModel,
-                onEliminada = { navController.popBackStack() }
+                onEliminada = { navController.popBackStack() },
+                onEditar = { id -> navController.navigate(rutaEditarInmersion(id)) { launchSingleTop = true } }
             )
         }
 

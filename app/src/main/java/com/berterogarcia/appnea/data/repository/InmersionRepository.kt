@@ -5,6 +5,7 @@ import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.ProveedorUsuario
 import com.berterogarcia.appnea.data.local.porUsuario
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 /**
  * [CAMBIO v7] Trabaja siempre sobre el usuario logueado ([sesion]).
@@ -29,6 +30,17 @@ class InmersionRepository(
         val usuario = sesion.usuarioActual.value ?: return false
         dao.insertar(inmersion.copy(nombreUsuario = usuario))
         return true
+    }
+
+    /**
+     * Guarda los cambios de una inmersión que ya existe.
+     * @return false si no hay sesión o si esa inmersión no es del usuario logueado
+     * (se verifica antes: @Update solo mira el id y podría pisar la de otro usuario).
+     */
+    suspend fun actualizar(inmersion: InmersionEntity): Boolean {
+        val usuario = sesion.usuarioActual.value ?: return false
+        dao.obtenerPorId(inmersion.id, usuario).first() ?: return false
+        return dao.actualizar(inmersion.copy(nombreUsuario = usuario)) > 0
     }
 
     /** @return true si se borró (false si no hay sesión, no existía o era de otro usuario). */
