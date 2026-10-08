@@ -32,7 +32,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.R
@@ -44,6 +43,8 @@ import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.theme.TextoSobreResaltada
+import androidx.compose.ui.res.stringResource
+import com.berterogarcia.appnea.ui.components.TituloPantalla
 
 /**
  * Inicio: la acción principal (registrar una inmersión) va primero, después las últimas
@@ -68,13 +69,11 @@ fun InicioScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Text(
-            text = "Hola ${nombreUsuario.orEmpty()}! 🤿🫧",
-            fontSize = 24.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(vertical = 12.dp)
-                .fillMaxWidth()
+        // Mismo título que Entrenar, Inmersiones y Cuenta
+        TituloPantalla(
+            titulo = if (nombreUsuario.isNullOrBlank()) stringResource(R.string.inicio_saludo_sin_nombre)
+            else stringResource(R.string.inicio_saludo, nombreUsuario),
+            modifier = Modifier.padding(bottom = 12.dp)
         )
 
         // ======================= ACCIÓN PRINCIPAL =======================

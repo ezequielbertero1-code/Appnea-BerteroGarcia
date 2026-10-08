@@ -43,6 +43,9 @@ import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.theme.TextoTerciario
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
+import com.berterogarcia.appnea.ui.components.TituloPantalla
+import com.berterogarcia.appnea.ui.components.BotonVerEstadisticas
+import androidx.compose.ui.res.stringResource
 
 private val HH_MM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
@@ -97,20 +100,12 @@ private fun PestaniasEntrenar(
     val scope = rememberCoroutineScope()
 
     Column(modifier = modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                "Entrenar",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
-            )
-            if (onVerEstadisticas != null) {
-                TextButton(onClick = onVerEstadisticas) { Text("📈 Estadísticas", color = Acento) }
-            }
-        }
+        // Mismos márgenes que Inmersiones (16 dp a cada lado) para que el botón quede en el mismo lugar
+        TituloPantalla(
+            titulo = stringResource(R.string.titulo_entrenar),
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            accion = onVerEstadisticas?.let { { BotonVerEstadisticas(onClick = it) } }
+        )
         SecondaryTabRow(
             selectedTabIndex = pagerState.currentPage,
             containerColor = Color.Transparent

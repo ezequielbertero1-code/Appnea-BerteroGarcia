@@ -27,9 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.nombreCompleto
@@ -45,6 +43,7 @@ import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
 import com.berterogarcia.appnea.ui.theme.ColorError
 import com.berterogarcia.appnea.ui.theme.FondoTarjeta
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.components.TituloPantalla
 
 // Estilo tomado de Clima / Condiciones: tarjetas FondoTarjeta y datos "etiqueta arriba, valor
 // abajo" (DatoChico), así la etiqueta ya no le roba ancho al valor. Los renglones se separan
@@ -79,14 +78,10 @@ fun CuentaScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // [CAMBIO] Saludo con el NOMBRE DE USUARIO usando un string con formato ("Hola, %1$s").
-        Text(
-            text = stringResource(R.string.cuenta_greeting, usuario),
-            fontSize = 24.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp)
+        // Mismo título que Inicio, Entrenar e Inmersiones
+        TituloPantalla(
+            titulo = stringResource(R.string.cuenta_titulo),
+            modifier = Modifier.padding(bottom = 12.dp)
         )
 
         if (resumen.error) {
