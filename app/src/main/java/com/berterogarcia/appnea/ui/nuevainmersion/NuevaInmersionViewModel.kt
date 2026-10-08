@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.EquipoEntity
+import com.berterogarcia.appnea.data.local.Geocodificador
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
@@ -207,6 +208,14 @@ class NuevaInmersionViewModel(
                         "Activá la ubicación del teléfono y probá de nuevo."
                     else "No se pudo obtener tu ubicación. Probá marcándola en el mapa."
                 )
+            }
+            // Si el campo Lugar está vacío, se completa con el nombre encontrado
+            if (u != null && _uiState.value.lugar.isBlank()) {
+                Geocodificador.nombrePara(appContext, u.latitud, u.longitud)?.let { nombre ->
+                    _uiState.update { s ->
+                        if (s.lugar.isBlank()) s.copy(lugar = nombre, errores = s.errores - Campo.LUGAR) else s
+                    }
+                }
             }
         }
     }

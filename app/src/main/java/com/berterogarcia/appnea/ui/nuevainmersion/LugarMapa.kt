@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.berterogarcia.appnea.data.local.Geocodificador
 import com.berterogarcia.appnea.data.local.Ubicacion
 import com.berterogarcia.appnea.data.local.UbicacionHelper
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
@@ -44,10 +47,12 @@ import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
 import com.berterogarcia.appnea.ui.theme.FondoTarjeta
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 /** Tarjeta de "Datos generales": mini mapa + coordenadas + botones. */
@@ -149,6 +154,21 @@ fun SelectorLugarMapa(
     var mapa by remember { mutableStateOf<MapLibreMap?>(null) }
     var marcado by remember { mutableStateOf(centroInicial) }
     var nombre by rememberSaveable { mutableStateOf(nombreInicial) }
+    // Si ya venía un nombre escrito, la sugerencia no lo pisa
+    var nombreEditado by rememberSaveable { mutableStateOf(nombreInicial.isNotBlank()) }
+    var sugerencia by remember { mutableStateOf<String?>(null) }
+    var buscandoNombre by remember { mutableStateOf(false) }
+
+    // Cada vez que el pin queda quieto se busca el nombre. Si el mapa se vuelve a mover antes,
+    // este efecto se cancela y arranca otro: no se hacen pedidos de más.
+    LaunchedEffect(marcado) {
+        delay(600.milliseconds)
+        buscandoNombre = true
+        val encontrado = Geocodificador.nombrePara(appContext, marcado.latitud, marcado.longitud)
+        buscandoNombre = false
+        sugerencia = encontrado
+        if (encontrado != null && !nombreEditado) nombre = encontrado
+    }
     var buscando by remember { mutableStateOf(false) }
     var aviso by remember { mutableStateOf<String?>(null) }
 
@@ -215,7 +235,10 @@ fun SelectorLugarMapa(
                 .imePadding()
                 .padding(16.dp)
         ) {
-            Text(nombre.ifBlank { "Lugar sin nombre" }, style = MaterialTheme.typography.titleMedium)
+            Text(
+                nombre.ifBlank { if (buscandoNombre) "Buscando nombre…" else "Lugar sin nombre" },
+                style = MaterialTheme.typography.titleMedium
+            )
             Text(
                 formatoCoordenadas(marcado.latitud, marcado.longitud),
                 style = MaterialTheme.typography.bodySmall,
@@ -223,11 +246,21 @@ fun SelectorLugarMapa(
             )
             CampoTexto(
                 valor = nombre,
-                onValorChange = { nombre = it },
+                onValorChange = {
+                    nombre = it
+                    nombreEditado = it.isNotBlank() // si lo borra todo, vuelve a autocompletarse
+                },
                 etiqueta = "Nombre del lugar (podés editarlo)",
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
             )
+            // El usuario escribió su propio nombre: se le ofrece el encontrado sin pisarlo
+            val s = sugerencia
+            if (nombreEditado && s != null && s != nombre) {
+                TextButton(onClick = { nombre = s; nombreEditado = false }) {
+                    Text("Usar \"$s\"", color = Acento, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
             aviso?.let {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = ColorAdvertencia)
             }

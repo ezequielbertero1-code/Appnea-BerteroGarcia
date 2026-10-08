@@ -31,25 +31,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.ui.clima.ClimaCompacto
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.components.BotonSecundario
+import com.berterogarcia.appnea.ui.components.TarjetaInmersion
 import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.FondoTarjeta
 import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
 import com.berterogarcia.appnea.ui.theme.TextoSecundario
 import com.berterogarcia.appnea.ui.theme.TextoSobreResaltada
-import java.time.format.DateTimeFormatter
-import kotlin.time.Duration
-
-private val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy")
 
 /**
  * Inicio: la acción principal (registrar una inmersión) va primero, después las últimas
@@ -123,7 +117,7 @@ fun InicioScreen(
                 "Todavía no registraste inmersiones.\nTocá \"Registrar inmersión\" para cargar la primera."
             )
             else -> e.ultimas.forEach { inmersion ->
-                FilaInmersion(inmersion = inmersion, onClick = { onVerDetalleInmersion(inmersion.id) })
+                TarjetaInmersion(inmersion = inmersion, onClick = { onVerDetalleInmersion(inmersion.id) })
             }
         }
 
@@ -198,52 +192,6 @@ private fun EncabezadoSeccion(titulo: String, accion: String? = null, onAccion: 
 }
 
 @Composable
-private fun FilaInmersion(inmersion: InmersionEntity, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = FondoTarjeta, contentColor = Color.White)
-    ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = inmersion.lugar.ifBlank { "Sin lugar" },
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = listOf(inmersion.fecha.format(FORMATO_FECHA), inmersion.actividad)
-                        .filter { it.isNotBlank() }
-                        .joinToString(" · "),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextoSecundario,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "%.1f m".format(inmersion.profundidadMetros),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Acento
-                )
-                Text(
-                    text = "⏱ ${formatoDuracion(inmersion.tiempoFondo)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextoSecundario
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun TextoSecundarioCentrado(texto: String) {
     Text(
         text = texto,
@@ -255,7 +203,3 @@ private fun TextoSecundarioCentrado(texto: String) {
             .padding(vertical = 16.dp)
     )
 }
-
-/** mm:ss */
-private fun formatoDuracion(d: Duration): String =
-    d.toComponents { minutos, segundos, _ -> "%d:%02d".format(minutos, segundos) }
