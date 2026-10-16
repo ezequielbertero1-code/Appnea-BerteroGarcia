@@ -194,7 +194,7 @@ private fun TituloSeccion(texto: String, modifier: Modifier = Modifier) {
     Text(
         texto,
         style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Normal,
         modifier = modifier.padding(start = 2.dp, top = 8.dp, bottom = 6.dp)
     )
 }
@@ -242,7 +242,7 @@ fun EntrenamientoEnCurso(
         Text(
             tabla.nombre,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Normal,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -262,11 +262,11 @@ fun EntrenamientoEnCurso(
                         Text(
                             etiquetaFase(fase.tipo).uppercase(),
                             style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Normal,
                             letterSpacing = 2.sp,
                             color = if (fase.tipo == TipoFase.PREPARACION) TextoChip else color
                         )
-                        Text(minSeg(estado.segundosRestantes), fontSize = 56.sp, fontWeight = FontWeight.Bold)
+                        Text(minSeg(estado.segundosRestantes), fontSize = 56.sp, fontWeight = FontWeight.Normal)
                         Text(
                             "quedan · de ${minSeg(fase.duracionSegundos)}",
                             style = MaterialTheme.typography.bodySmall,
@@ -346,7 +346,7 @@ fun ResultadoEntrenamiento(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            Text("Sesión terminada", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text("Sesión terminada", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Normal)
 
             Card(
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
@@ -359,7 +359,7 @@ fun ResultadoEntrenamiento(
                         if (estado.completada) "🎉 ¡Completaste la tabla!"
                         else "Cortaste en la fase ${estado.faseAlcanzada} de ${estado.totalFases}",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Normal
                     )
                     Text(
                         estado.tablaSeleccionada?.nombre.orEmpty(),
@@ -443,6 +443,6 @@ fun ResultadoEntrenamiento(
 private fun DatoResultado(etiqueta: String, valor: String, modifier: Modifier = Modifier) {
     Column(modifier) {
         Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = TextoSobreResaltada)
-        Text(valor, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(valor, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Normal)
     }
 }

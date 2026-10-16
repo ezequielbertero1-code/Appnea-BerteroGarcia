@@ -93,7 +93,7 @@ fun RegistroScreen(
             .padding(horizontal = 16.dp)
             .padding(top = 24.dp, bottom = 16.dp)
     ) {
-        Text("Crear cuenta", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text("Crear cuenta", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Normal)
         Spacer(Modifier.height(16.dp))
         IndicadorPasos(actual = s.paso, conErrores = s.pasosConError, onPasoClick = viewModel::irA)
 
@@ -381,7 +381,7 @@ private fun TarjetaResumen(titulo: String, filas: List<Pair<String, String>>, on
     ) {
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Normal, modifier = Modifier.weight(1f))
                 Text(
                     "Editar",
                     color = Acento,
@@ -394,7 +394,7 @@ private fun TarjetaResumen(titulo: String, filas: List<Pair<String, String>>, on
             }
             filas.forEach { (etiqueta, valor) ->
                 Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = TextoSecundario, modifier = Modifier.padding(top = 8.dp))
-                Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Normal)
             }
         }
     }
@@ -411,7 +411,7 @@ private fun AvisoSeguridad(aceptado: Boolean, error: String?, onCambio: (Boolean
             .background(ColorAdvertencia.copy(alpha = 0.08f))
             .padding(12.dp)
     ) {
-        Text("Aviso de seguridad", fontWeight = FontWeight.Bold, color = ColorAdvertencia)
+        Text("Aviso de seguridad", fontWeight = FontWeight.Normal, color = ColorAdvertencia)
         Text(
             "AppneaMe es un registro personal de tus inmersiones y entrenamientos. " +
                     "No reemplaza la formación con un instructor certificado ni el criterio en el agua. " +

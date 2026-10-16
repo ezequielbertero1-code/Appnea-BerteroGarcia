@@ -68,7 +68,7 @@ fun EncabezadoPerfil(titulo: String, onVolver: () -> Unit, modifier: Modifier = 
         Text(
             text = titulo,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Normal
         )
     }
 }
@@ -197,7 +197,7 @@ fun InsigniaChica(insignia: Insignia, modifier: Modifier = Modifier) {
         text = insignia.texto,
         color = insignia.color,
         style = MaterialTheme.typography.labelMedium,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Normal,
         modifier = modifier
             .background(insignia.color.copy(alpha = 0.15f), RoundedCornerShape(50))
             .padding(horizontal = 10.dp, vertical = 4.dp)
@@ -237,7 +237,7 @@ fun TarjetaItemPerfil(
                     Text(
                         text = titulo,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         color = Color.White.copy(alpha = alfa)
                     )
                 }

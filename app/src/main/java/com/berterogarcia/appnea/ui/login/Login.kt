@@ -101,7 +101,7 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistr
                 Text(
                     text = if (s.usuarioRecordado) "Hola de nuevo, ${s.usuario}" else stringResource(R.string.login_button),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
@@ -170,7 +170,7 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistr
         ) {
             Text("¿No tenés cuenta?", color = TextoSecundario)
             TextButton(onClick = onRegistroClick, enabled = !s.cargando) {
-                Text("Creá una", color = Acento, fontWeight = FontWeight.Bold)
+                Text("Creá una", color = Acento, fontWeight = FontWeight.Normal)
             }
         }
     }
@@ -201,7 +201,7 @@ private fun Encabezado() {
     Text(
         text = stringResource(R.string.app_name).trim(),
         style = MaterialTheme.typography.headlineLarge,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Normal,
         color = Color.White
     )
     Text(

@@ -89,7 +89,7 @@ fun EstadisticasScreen(
             IconButton(onClick = onVolver) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
             }
-            Text("Estadísticas", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text("Estadísticas", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Normal)
         }
         SecondaryTabRow(selectedTabIndex = pagerState.currentPage, containerColor = Color.Transparent) {
             titulos.forEachIndexed { index, titulo ->
@@ -341,7 +341,7 @@ private fun SinDatos(
     ) {
         Text(emoji, fontSize = 44.sp)
         Spacer(Modifier.height(8.dp))
-        Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Normal, textAlign = TextAlign.Center)
         Text(
             detalle,
             style = MaterialTheme.typography.bodyMedium,

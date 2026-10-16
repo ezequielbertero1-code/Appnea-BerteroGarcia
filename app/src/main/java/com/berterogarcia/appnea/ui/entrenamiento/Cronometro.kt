@@ -180,7 +180,7 @@ private fun CronometroLibre(
                     Text(
                         minSeg((estado.transcurridoMs / 1000L).toInt()),
                         fontSize = 46.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         modifier = Modifier.alignByBaseline()
                     )
                     Text(
@@ -231,7 +231,7 @@ private fun CronometroLibre(
                 Text(
                     "Intentos de hoy",
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     modifier = Modifier.weight(1f)
                 )
                 // Preparado para Estadísticas: aparece cuando se conecte onGuardarIntentos
@@ -267,11 +267,11 @@ private fun FilaIntento(intento: IntentoApnea, mejorMs: Long) {
             Text(
                 "${minSeg((intento.duracionMs / 1000L).toInt())}.${(intento.duracionMs % 1000L) / 100L}",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Normal
             )
         }
         if (esMejor) {
-            Text("★ Mejor", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Acento)
+            Text("★ Mejor", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Normal, color = Acento)
         } else {
             Text(
                 "−${minSeg(((mejorMs - intento.duracionMs) / 1000L).toInt())}",

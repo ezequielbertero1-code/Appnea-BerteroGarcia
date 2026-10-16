@@ -46,7 +46,7 @@ fun ChipsSeleccionMultiple(
             FilterChip(
                 selected = elegida,
                 onClick = { onCambio(opcion, !elegida) },
-                label = { Text(opcion, fontWeight = if (elegida) FontWeight.SemiBold else FontWeight.Normal) },
+                label = { Text(opcion, fontWeight = FontWeight.Normal) },
                 leadingIcon = if (elegida) {
                     { Icon(Icons.Filled.Check, contentDescription = null, tint = Acento, modifier = Modifier.size(16.dp)) }
                 } else {
@@ -94,7 +94,7 @@ fun <T> ChipsSeleccionUnica(
             FilterChip(
                 selected = elegido,
                 onClick = { onSeleccion(opcion) },
-                label = { Text(etiqueta(opcion), fontWeight = if (elegido) FontWeight.Bold else FontWeight.Normal) },
+                label = { Text(etiqueta(opcion), fontWeight = FontWeight.Normal) },
                 shape = RoundedCornerShape(50),
                 colors = FilterChipDefaults.filterChipColors(
                     containerColor = Color.Transparent,

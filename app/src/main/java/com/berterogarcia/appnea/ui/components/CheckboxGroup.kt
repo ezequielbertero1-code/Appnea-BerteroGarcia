@@ -26,7 +26,7 @@ fun CheckboxGroup(
     Text(
         text = titulo,
         color = Color.White,
-        fontWeight = FontWeight.SemiBold
+        fontWeight = FontWeight.Normal
     )
     FlowRow(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)) {
         opciones.forEach { opcion ->

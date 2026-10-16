@@ -41,7 +41,7 @@ fun AvisoSeguridadApnea(modifier: Modifier = Modifier) {
             Column {
                 Text(
                     "Nunca practiques apnea en soledad",
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     color = AvisoAcento
                 )
                 Text(

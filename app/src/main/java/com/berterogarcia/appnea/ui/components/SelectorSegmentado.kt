@@ -94,7 +94,7 @@ fun <T> SelectorSegmentado(
                     Text(
                         text = etiqueta(opcion),
                         color = if (elegida) Color.White else TextoChip,
-                        fontWeight = if (elegida) FontWeight.Bold else FontWeight.Normal,
+                        fontWeight = FontWeight.Normal,
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }

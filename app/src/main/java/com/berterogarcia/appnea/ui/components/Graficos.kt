@@ -60,7 +60,7 @@ import kotlin.math.abs
 
 private val estiloEje = TextStyle(color = TextoTerciario, fontSize = 11.sp)
 private val estiloValor = TextStyle(color = TextoChip, fontSize = 11.sp)
-private val estiloRecord = TextStyle(color = ColorBajamar, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+private val estiloRecord = TextStyle(color = ColorBajamar, fontSize = 12.sp, fontWeight = FontWeight.Normal)
 
 /** Escribe [t] con el centro (o el borde izquierdo) en x, sin salirse del Canvas. */
 private fun DrawScope.texto(

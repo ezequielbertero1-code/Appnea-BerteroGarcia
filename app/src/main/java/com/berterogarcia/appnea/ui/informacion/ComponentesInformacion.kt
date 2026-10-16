@@ -83,7 +83,7 @@ fun TarjetaSeguridad(
             Column {
                 Text(
                     text = titulo,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     color = AvisoAcento,
                     style = MaterialTheme.typography.titleSmall
                 )
@@ -113,7 +113,7 @@ fun ListaDePuntos(
                 Text(
                     text = "•  ",
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Normal
                 )
                 Text(
                     text = punto,
@@ -136,7 +136,7 @@ fun TituloSeccion(
     Text(
         text = texto,
         style = MaterialTheme.typography.titleLarge,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Normal,
         modifier = modifier
             .fillMaxWidth()
             .padding(top = 8.dp, bottom = 8.dp)
@@ -236,7 +236,7 @@ fun TarjetaDesplegable(
             Text(
                 text = tema.titulo,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 modifier = Modifier.weight(1f)
             )
             // Indica, sin abrir la tarjeta, que el tema tiene una alerta de seguridad

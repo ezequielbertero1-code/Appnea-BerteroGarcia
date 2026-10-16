@@ -125,7 +125,7 @@ fun GraficoMarea(
             val py = y(e.alturaM)
             drawCircle(color, radius = 5.dp.toPx(), center = Offset(px, py))
             val etiqueta = hora(e.hora)
-            val estilo = TextStyle(color = color, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            val estilo = TextStyle(color = color, fontSize = 12.sp, fontWeight = FontWeight.Normal)
             val yTexto = if (e.esPleamar) py - 22.dp.toPx() else py + 8.dp.toPx()
             texto(medidor, etiqueta, px, yTexto, estilo)
         }

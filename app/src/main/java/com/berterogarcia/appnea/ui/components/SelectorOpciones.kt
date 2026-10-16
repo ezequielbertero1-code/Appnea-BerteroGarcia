@@ -69,7 +69,7 @@ fun <T> SelectorOpciones(
         Text(
             text = titulo,
             color = if (hayError) ColorError else Color.White,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.Normal
         )
 
         when {

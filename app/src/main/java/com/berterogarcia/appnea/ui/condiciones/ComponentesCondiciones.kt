@@ -103,7 +103,7 @@ fun TarjetaCondicion(
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             if (titulo != null) {
-                Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Normal)
                 Spacer(Modifier.height(8.dp))
             }
             contenido()
@@ -130,7 +130,7 @@ fun FilaDato(etiqueta: String, valor: String) {
         Text(
             valor,
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Normal,
             textAlign = TextAlign.End,
             modifier = Modifier.weight(1f)
         )
@@ -141,7 +141,7 @@ fun FilaDato(etiqueta: String, valor: String) {
 @Composable
 fun DatoGrande(valor: String, etiqueta: String, modifier: Modifier = Modifier, color: Color = Color.White) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(valor, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = color)
+        Text(valor, fontSize = 24.sp, fontWeight = FontWeight.Normal, color = color)
         Text(etiqueta.uppercase(), style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
     }
 }
@@ -157,7 +157,7 @@ fun Semaforo(color: Color, texto: String) {
                 .background(color, CircleShape)
         )
         Spacer(Modifier.width(8.dp))
-        Text(texto, fontWeight = FontWeight.Bold, color = color, fontSize = 18.sp)
+        Text(texto, fontWeight = FontWeight.Normal, color = color, fontSize = 18.sp)
     }
 }
 

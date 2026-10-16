@@ -165,7 +165,7 @@ fun CrearTablaScreen(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onCerrar) { Icon(Icons.Filled.Close, contentDescription = "Cerrar") }
-            Text("Nueva tabla", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text("Nueva tabla", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Normal)
         }
 
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {

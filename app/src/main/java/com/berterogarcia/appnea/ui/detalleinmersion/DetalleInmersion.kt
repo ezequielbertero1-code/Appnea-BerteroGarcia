@@ -133,7 +133,7 @@ fun DetalleInmersionScreen(
                 Text(
                     i.lugar,
                     style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -229,7 +229,7 @@ private fun PestanaGeneral(i: InmersionEntity) {
         subtitulo = "Profundidad máxima",
         modifier = Modifier.padding(bottom = 12.dp),
         derecha = {
-            Text(if (apnea) "Apnea" else "Buceo", color = Acento, fontWeight = FontWeight.Bold)
+            Text(if (apnea) "Apnea" else "Buceo", color = Acento, fontWeight = FontWeight.Normal)
             Text("⏱️ $fondo", style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
         },
         abajo = {

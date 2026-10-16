@@ -124,6 +124,6 @@ private fun BotonBase(
                 Spacer(Modifier.width(8.dp))
             }
         }
-        Text(texto, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(texto, fontWeight = FontWeight.Normal, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

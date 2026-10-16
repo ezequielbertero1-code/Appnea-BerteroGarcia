@@ -148,7 +148,7 @@ fun HistorialScreen(
         }
 
         ExtendedFloatingActionButton(
-            text = { Text("Nueva inmersión", fontWeight = FontWeight.Bold) },
+            text = { Text("Nueva inmersión", fontWeight = FontWeight.Normal) },
             icon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_agregar),

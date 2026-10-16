@@ -65,7 +65,7 @@ fun CondicionesScreen(viewModel: ClimaViewModel, modifier: Modifier = Modifier) 
             text = if (uiState.buscandoUbicacion) "📍 Buscando tu ubicación…"
             else "📍 ${uiState.ubicacion.nombre ?: "Ubicación seleccionada"}",
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Normal,
             modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp)
         )
         SelectorUbicacion(
@@ -148,7 +148,7 @@ private fun PaginaResumen(c: Condiciones) {
             Text(emojiClima(clima?.codigoClima, clima?.esDeDia ?: true), fontSize = 48.sp)
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(num(clima?.temperaturaC, unidad = "°C"), fontSize = 36.sp, fontWeight = FontWeight.Bold)
+                Text(num(clima?.temperaturaC, unidad = "°C"), fontSize = 36.sp, fontWeight = FontWeight.Normal)
                 Text(clima?.codigoClima?.let { descripcionClima(it) } ?: "Sin datos")
             }
             Column(horizontalAlignment = Alignment.End) {
@@ -213,7 +213,7 @@ private fun PaginaResumen(c: Condiciones) {
                 ) {
                     Text(hora(h.hora), style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
                     Text(emojiClima(h.codigoClima, h.esDeDia ?: true), fontSize = 22.sp)
-                    Text(num(h.temperaturaC, unidad = "°"), fontWeight = FontWeight.Bold)
+                    Text(num(h.temperaturaC, unidad = "°"), fontWeight = FontWeight.Normal)
                     Text("💨${num(h.vientoKmh)}", style = MaterialTheme.typography.bodySmall)
                     Text(direccion(h.direccionVientoGrados), style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
                     marPorHora[h.hora]?.olaM?.let {
@@ -249,7 +249,7 @@ private fun PaginaMareas(c: Condiciones) {
         } else 0.5f
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(if (estado.subiendo) "subiendo" else "bajando", color = TextoSecundario)
-            Text("%.2f m".format(estado.alturaM), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text("%.2f m".format(estado.alturaM), fontWeight = FontWeight.Normal, fontSize = 20.sp)
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -305,14 +305,14 @@ private fun PaginaMareas(c: Condiciones) {
         c.mareas.filter { !it.hora.toLocalDate().isBefore(c.ahora.toLocalDate()) }
             .groupBy { it.hora.toLocalDate() }
             .forEach { (fecha, extremos) ->
-                Text(diaCorto(fecha, c.ahora.toLocalDate()), fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
+                Text(diaCorto(fecha, c.ahora.toLocalDate()), fontWeight = FontWeight.Normal, modifier = Modifier.padding(top = 6.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     extremos.forEach { e ->
                         Column {
                             Text(
                                 "${if (e.esPleamar) "▲" else "▼"} ${hora(e.hora)}",
                                 color = if (e.esPleamar) Acento else ColorBajamar,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Normal
                             )
                             Text("%.2f m".format(e.alturaM), style = MaterialTheme.typography.bodySmall)
                         }
@@ -376,7 +376,7 @@ private fun PaginaSolLuna(c: Condiciones) {
             Text(a.emojiFase, fontSize = 52.sp)
             Spacer(Modifier.width(12.dp))
             Column {
-                Text(a.fase, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text(a.fase, fontSize = 22.sp, fontWeight = FontWeight.Normal)
                 Text("Iluminada ${a.iluminacionPorc}% · ${"%.1f".format(a.edadLunaDias)} días", color = TextoSecundario)
             }
         }
@@ -417,13 +417,13 @@ private fun PaginaSemana(c: Condiciones) {
         TarjetaCondicion(resaltada = d.fecha == hoy) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(diaCorto(d.fecha, hoy), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(diaCorto(d.fecha, hoy), fontWeight = FontWeight.Normal, fontSize = 18.sp)
                     Text(d.codigoClima?.let { descripcionClima(it) } ?: "-", style = MaterialTheme.typography.bodySmall)
                 }
                 Text(emojiClima(d.codigoClima), fontSize = 32.sp)
                 Spacer(Modifier.width(10.dp))
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(num(d.maximaC, unidad = "°"), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(num(d.maximaC, unidad = "°"), fontWeight = FontWeight.Normal, fontSize = 18.sp)
                     Text(num(d.minimaC, unidad = "°"), color = TextoSecundario)
                 }
             }

@@ -85,7 +85,7 @@ fun GraficoPerfil(puntos: List<PuntoPerfil>, modifier: Modifier = Modifier, prog
             drawCircle(ColorBajamar, radius = 5.dp.toPx(), center = centro)
             texto(
                 medidor, "%.1f m".format(pico.profundidadM), centro.x, centro.y + 8.dp.toPx(),
-                TextStyle(color = ColorBajamar, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                TextStyle(color = ColorBajamar, fontSize = 12.sp, fontWeight = FontWeight.Normal)
             )
         }
         // Eje X en mm:ss

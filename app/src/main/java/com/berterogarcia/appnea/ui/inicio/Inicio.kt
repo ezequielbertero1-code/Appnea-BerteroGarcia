@@ -157,7 +157,7 @@ private fun TarjetaNuevaInmersion(onClick: () -> Unit) {
                 Text(
                     "Registrar inmersión",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Normal
                 )
                 Text(
                     "Buceo o apnea",
@@ -185,7 +185,7 @@ private fun EncabezadoSeccion(titulo: String, accion: String? = null, onAccion: 
         Text(
             text = titulo,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Normal,
             modifier = Modifier.weight(1f)
         )
         if (accion != null) {

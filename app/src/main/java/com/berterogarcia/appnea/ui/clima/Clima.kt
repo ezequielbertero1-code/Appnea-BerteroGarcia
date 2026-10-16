@@ -98,7 +98,7 @@ fun ClimaCompacto(
                         Text(
                             num(clima?.temperaturaC, unidad = "°C"),
                             fontSize = 26.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Normal,
                             modifier = Modifier.weight(1f)
                         )
                         Column(horizontalAlignment = Alignment.End) {

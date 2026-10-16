@@ -36,7 +36,7 @@ fun TituloPantalla(
             Text(
                 titulo,
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.White
             )
             if (subtitulo != null) {

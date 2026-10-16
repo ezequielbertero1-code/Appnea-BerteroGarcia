@@ -217,7 +217,7 @@ fun TarjetaTabla(
                     Text(
                         tabla.nombre,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -233,7 +233,7 @@ fun TarjetaTabla(
                 Text(
                     minSeg(total),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     color = if (seleccionada) Color.White else Acento
                 )
                 if (onEliminar != null) {
@@ -290,7 +290,7 @@ fun PastillaFase(fase: Fase, modifier: Modifier = Modifier) {
     Text(
         "${etiquetaFase(fase.tipo)} ${minSeg(fase.duracionSegundos)}",
         style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Normal,
         color = if (fase.tipo == TipoFase.PREPARACION) Color.White else color,
         modifier = modifier
             .clip(RoundedCornerShape(50))
@@ -315,7 +315,7 @@ fun SelectorPaso(
         Text(
             valor,
             style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center,
             modifier = Modifier.width(52.dp)
         )

@@ -255,7 +255,7 @@ private fun TarjetaSeccion(
                 Text(
                     text = titulo,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     modifier = Modifier.weight(1f)
                 )
                 if (textoAccion != null) {
@@ -331,7 +331,7 @@ private fun PanelItem(titulo: String, subtitulo: String, insignia: Insignia?) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(titulo, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+            Text(titulo, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Normal)
             if (subtitulo.isNotBlank()) {
                 Text(subtitulo, style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
             }

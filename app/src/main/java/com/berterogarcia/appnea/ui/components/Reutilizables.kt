@@ -108,7 +108,7 @@ fun CampoTexto(
 fun DatoChico(etiqueta: String, valor: String) {
     Column {
         Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
-        Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+        Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Normal)
     }
 }
 
@@ -135,7 +135,7 @@ fun RowScope.Mosaico(
         Column(modifier = Modifier.padding(12.dp)) {
             Text(titulo, style = MaterialTheme.typography.labelMedium, color = Acento)
             Spacer(Modifier.height(4.dp))
-            Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = colorValor)
+            Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Normal, color = colorValor)
             extra?.invoke()
             if (detalle.isNotBlank()) {
                 Text(detalle, style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
@@ -176,7 +176,7 @@ fun TarjetaHero(
                 Text(emoji, fontSize = 44.sp)
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(valor, fontSize = 34.sp, fontWeight = FontWeight.Bold)
+                    Text(valor, fontSize = 34.sp, fontWeight = FontWeight.Normal)
                     Text(subtitulo, style = MaterialTheme.typography.bodyMedium)
                 }
                 Column(horizontalAlignment = Alignment.End, content = derecha)
@@ -197,7 +197,7 @@ fun TarjetaAviso(titulo: String, texto: String, modifier: Modifier = Modifier) {
             Icon(painterResource(R.drawable.ic_info), contentDescription = "Advertencia", tint = AvisoAcento)
             Spacer(Modifier.width(8.dp))
             Column {
-                Text(titulo, fontWeight = FontWeight.Bold, color = AvisoAcento)
+                Text(titulo, fontWeight = FontWeight.Normal, color = AvisoAcento)
                 Text(texto, style = MaterialTheme.typography.bodySmall, color = AvisoTexto)
             }
         }

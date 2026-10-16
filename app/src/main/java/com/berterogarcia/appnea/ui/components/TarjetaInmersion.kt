@@ -73,7 +73,7 @@ fun TarjetaInmersion(
                     Text(
                         "%02d".format(inmersion.fecha.dayOfMonth),
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Normal
                     )
                     Text(mesCorto(inmersion.fecha), style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
                 }
@@ -82,7 +82,7 @@ fun TarjetaInmersion(
                     Text(
                         inmersion.lugar.ifBlank { "Sin lugar" },
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -92,7 +92,7 @@ fun TarjetaInmersion(
                         ?.takeUnless { it.equals(inmersion.tipo.etiqueta, ignoreCase = true) }
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(SpanStyle(color = Acento, fontWeight = FontWeight.SemiBold)) {
+                            withStyle(SpanStyle(color = Acento, fontWeight = FontWeight.Normal)) {
                                 append("${inmersion.tipo.emoji} ${inmersion.tipo.etiqueta}")
                             }
                             actividad?.let { append(" · $it") }
@@ -109,7 +109,7 @@ fun TarjetaInmersion(
                         "%.1f m".format(inmersion.profundidadMetros),
                         style = if (compacta) MaterialTheme.typography.titleMedium
                         else MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         color = Acento
                     )
                     // En la compacta no hay chips: el tiempo de fondo va acá abajo
