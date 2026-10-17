@@ -11,12 +11,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
 
 /**
  * Campo de contraseña con el ojo para mostrar/ocultar. Usa CampoTexto por debajo (mismo estilo).
@@ -53,9 +53,8 @@ fun CampoPassword(
         trailingIcon = {
             IconButton(onClick = { visible = !visible }, enabled = enabled) {
                 Icon(
-                    painter = painterResource(if (visible) R.drawable.ic_ocultar else R.drawable.ic_ver),
-                    contentDescription = if (visible) "Ocultar contraseña" else "Mostrar contraseña",
-                    tint = TextoSecundario
+                    painter = painterResource(if (visible) R.drawable.ic_ms_visibility_off else R.drawable.ic_ms_visibility),
+                    contentDescription = stringResource(if (visible) R.string.campo_ocultar_password else R.string.campo_mostrar_password)
                 )
             }
         }

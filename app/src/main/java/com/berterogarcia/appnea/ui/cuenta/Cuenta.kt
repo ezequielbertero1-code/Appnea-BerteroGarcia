@@ -2,62 +2,54 @@ package com.berterogarcia.appnea.ui.cuenta
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.nombreCompleto
-import com.berterogarcia.appnea.ui.components.BotonSecundario
-import com.berterogarcia.appnea.ui.components.DatoChico
-import com.berterogarcia.appnea.ui.components.formatoLargo
-import com.berterogarcia.appnea.ui.perfil.comun.Insignia
-import com.berterogarcia.appnea.ui.perfil.comun.InsigniaChica
-import com.berterogarcia.appnea.ui.perfil.comun.insigniaMantenimiento
-import com.berterogarcia.appnea.ui.perfil.comun.insigniaVencimiento
-import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.components.Avatar
+import com.berterogarcia.appnea.ui.components.BarraSuperior
+import com.berterogarcia.appnea.ui.components.FilaDeTarjetas
+import com.berterogarcia.appnea.ui.components.FilaLista
+import com.berterogarcia.appnea.ui.components.GrupoLista
+import com.berterogarcia.appnea.ui.components.IconoCirculo
+import com.berterogarcia.appnea.ui.components.TarjetaKpi
+import com.berterogarcia.appnea.ui.components.TonoIcono
+import com.berterogarcia.appnea.ui.perfil.comun.EstadoVencimiento
+import com.berterogarcia.appnea.ui.perfil.comun.estadoVencimiento
 import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
 import com.berterogarcia.appnea.ui.theme.ColorError
-import com.berterogarcia.appnea.ui.theme.FondoTarjeta
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
-import com.berterogarcia.appnea.ui.components.TituloPantalla
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
+import java.util.Locale
 
-// Estilo tomado de Clima / Condiciones: tarjetas FondoTarjeta y datos "etiqueta arriba, valor
-// abajo" (DatoChico), así la etiqueta ya no le roba ancho al valor. Los renglones se separan
-// solo con espacio vertical (sin fondos ni degradés).
+private val LOCALE_ES: Locale = Locale.forLanguageTag("es-AR")
 
-private const val MAX_ITEMS_RESUMEN = 3
+/** Estados que piden atención (aviso naranja en la fila en vez del chevron). */
+private val ESTADOS_AVISO = setOf(EstadoVencimiento.POR_VENCER, EstadoVencimiento.VENCIDO)
 
-/** Separación entre renglones (vertical) y entre las dos columnas (horizontal). */
-private val EspacioRenglones = 14.dp
-private val EspacioColumnas = 12.dp
-
-/** Un dato de la grilla. [anchoCompleto] = ocupa toda la fila (textos largos como el email). */
-private data class Dato(val etiqueta: String, val valor: String, val anchoCompleto: Boolean = false)
-
+/**
+ * Cuenta (estilo "Appnea circular", como Ajustes de Android): avatar y nombre, dos números
+ * clave y una lista agrupada con cada sección del perfil. Cada fila resume lo cargado y abre
+ * su pantalla; si algo vence pronto, la fila muestra un aviso en vez del chevron.
+ */
 @Composable
 fun CuentaScreen(
     viewModel: CuentaViewModel,
@@ -71,296 +63,167 @@ fun CuentaScreen(
     val resumen by viewModel.resumen.collectAsStateWithLifecycle()
     val stats by viewModel.estadisticas.collectAsStateWithLifecycle()
     val usuario = viewModel.usuario.orEmpty()
+    val perfil = resumen.perfil
+    val cargando = stringResource(R.string.cuenta_cargando)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        // Mismo título que Inicio, Entrenar e Inmersiones
-        TituloPantalla(
-            titulo = stringResource(R.string.cuenta_titulo),
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
+    Column(modifier = Modifier.fillMaxSize()) {
+        BarraSuperior(titulo = stringResource(R.string.cuenta_titulo))
 
-        if (resumen.error) {
-            Text(
-                text = "No se pudieron cargar los datos del perfil.",
-                color = ColorError,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-        }
-
-        // ------------------------------ Datos personales ------------------------------
-        val perfil = resumen.perfil
-        TarjetaSeccion(
-            titulo = "👤 Datos personales",
-            textoAccion = if (perfil == null) "Completar" else "Editar",
-            onAccion = onEditarDatos
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
         ) {
-            if (perfil == null) {
-                TextoVacio(if (resumen.cargando) "Cargando..." else "Todavía no cargaste tus datos personales.")
-            } else {
-                GrillaDatos(
-                    listOf(
-                        Dato("Nombre", perfil.nombreCompleto.ifBlank { "-" }, anchoCompleto = true),
-                        Dato("Usuario", usuario.ifBlank { "-" }),
-                        Dato("Nacimiento", perfil.fechaNacimiento.formatoLargo()),
-                        Dato("Email", perfil.email.ifBlank { "-" }, anchoCompleto = true),
-                        Dato("Teléfono", perfil.telefono.ifBlank { "-" }),
-                        Dato("Ciudad", perfil.ciudad.ifBlank { "-" }),
-                        Dato("Compañero/a habitual", perfil.companeroHabitual.ifBlank { "-" }, anchoCompleto = true)
-                    )
-                )
-            }
-        }
-
-        // ------------------------------- Certificaciones -------------------------------
-        TarjetaSeccion(
-            titulo = "🎓 Certificaciones (${resumen.certificados.size})",
-            textoAccion = if (resumen.certificados.isEmpty()) "Agregar" else "Ver todas",
-            onAccion = onVerCertificados
-        ) {
-            if (resumen.certificados.isEmpty()) {
-                TextoVacio(if (resumen.cargando) "Cargando..." else "Sin certificaciones cargadas.")
-            } else {
-                ListaPaneles {
-                    resumen.certificados.take(MAX_ITEMS_RESUMEN).forEach { c ->
-                        PanelItem(
-                            titulo = c.titulo,
-                            subtitulo = listOf(c.tipo.etiqueta, c.entidad).filter { it.isNotBlank() }.joinToString(" · "),
-                            insignia = insigniaVencimiento(c.fechaVencimiento)
-                        )
-                    }
-                }
-                Restantes(resumen.certificados.size)
-            }
-        }
-
-        // -------------------------------- Equipamiento --------------------------------
-        TarjetaSeccion(
-            titulo = "🤿 Equipamiento (${resumen.equiposEnUso.size} en uso)",
-            textoAccion = if (resumen.equipos.isEmpty()) "Agregar" else "Ver todo",
-            onAccion = onVerEquipamiento
-        ) {
-            if (resumen.equiposEnUso.isEmpty()) {
-                TextoVacio(if (resumen.cargando) "Cargando..." else "Sin equipamiento en uso.")
-            } else {
-                ListaPaneles {
-                    resumen.equiposEnUso.take(MAX_ITEMS_RESUMEN).forEach { e ->
-                        val marcaModelo = listOf(e.marca, e.modelo).filter { it.isNotBlank() }.joinToString(" ")
-                        PanelItem(
-                            titulo = marcaModelo.ifBlank { e.categoria.etiqueta },
-                            subtitulo = listOf(e.categoria.etiqueta, e.talle).filter { it.isNotBlank() }.joinToString(" · "),
-                            insignia = insigniaMantenimiento(e.proximoMantenimiento)
-                        )
-                    }
-                }
-                Restantes(resumen.equiposEnUso.size)
-                if (resumen.equiposConServicePendiente > 0) {
-                    Text(
-                        text = "⚠ ${resumen.equiposConServicePendiente} equipo(s) con service pendiente",
-                        color = ColorAdvertencia,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 6.dp)
-                    )
+            // ------------------------------ Encabezado ------------------------------
+            val nombre = perfil?.nombreCompleto?.takeIf { it.isNotBlank() }
+                ?: usuario.replaceFirstChar { it.titlecase(LOCALE_ES) }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Avatar(inicial = nombre.take(1).takeIf { it.isNotBlank() }?.uppercase(LOCALE_ES), tamanio = 72.dp)
+                Text(nombre, style = MaterialTheme.typography.titleLarge, color = TextoSuperficie, textAlign = TextAlign.Center)
+                val detalle = listOf("@$usuario".takeIf { usuario.isNotBlank() }, perfil?.ciudad?.takeIf { it.isNotBlank() })
+                    .filterNotNull()
+                    .joinToString(" · ")
+                if (detalle.isNotEmpty()) {
+                    Text(detalle, style = MaterialTheme.typography.bodySmall, color = TextoSuperficieVariante)
                 }
             }
-        }
 
-        // --------------------------------- Estadísticas ---------------------------------
-        TarjetaSeccion(
-            titulo = "📊 Estadísticas",
-            textoAccion = "Ver todas",
-            onAccion = onVerEstadisticas
-        ) {
-            GrillaDatos(
-                listOf(
-                    Dato("🤿 Inmersiones", stats.inmersiones.toString()),
-                    Dato("📏 Prof. máxima", stats.profundidadMaxima),
-                    Dato("⏱️ Fondo total", stats.tiempoTotalFondo),
-                    Dato("🫁 Mejor apnea", stats.mejorApnea),
-                    Dato(
-                        "🏋️ Entrenamientos",
-                        "${stats.sesionesEntrenamiento} (${stats.sesionesCompletas} completos)",
-                        anchoCompleto = true
-                    )
-                )
-            )
-        }
-
-        // ---------------------------- Contacto de emergencia ----------------------------
-        val principal = resumen.contactoPrincipal
-        TarjetaSeccion(
-            titulo = "🆘 Contacto de emergencia",
-            textoAccion = if (resumen.contactos.isEmpty()) "Agregar" else "Gestionar",
-            onAccion = onVerContactos
-        ) {
-            if (principal == null) {
-                TextoVacio(
-                    if (resumen.cargando) "Cargando..."
-                    else "No tenés contacto de emergencia. Te recomendamos cargar uno."
-                )
-            } else {
-                GrillaDatos(
-                    listOf(
-                        Dato("Nombre", principal.nombre, anchoCompleto = true),
-                        Dato("Relación", principal.relacion.ifBlank { "-" }),
-                        Dato("Teléfono", principal.telefono)
-                    )
-                )
-                if (resumen.contactos.size > 1) {
-                    Text(
-                        "+${resumen.contactos.size - 1} contacto(s) más",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextoSecundario,
-                        modifier = Modifier.padding(top = 6.dp)
-                    )
-                }
-            }
-        }
-
-        Spacer(Modifier.height(8.dp))
-        BotonSecundario(
-            texto = stringResource(R.string.cuenta_cerrar_session),
-            onClick = {
-                viewModel.cerrarSesion()
-                onCerrarSesion()
-            },
-            icono = painterResource(R.drawable.ic_cerrar_sesion),
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-// ====================================== Componentes ======================================
-
-/** Tarjeta de sección, mismo estilo que TarjetaCondicion, con botón de acción opcional. */
-@Composable
-private fun TarjetaSeccion(
-    titulo: String,
-    textoAccion: String? = null,
-    onAccion: () -> Unit = {},
-    contenido: @Composable ColumnScope.() -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 12.dp),
-        colors = CardDefaults.cardColors(containerColor = FondoTarjeta, contentColor = Color.White)
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            if (resumen.error) {
                 Text(
-                    text = titulo,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    text = stringResource(R.string.cuenta_error),
+                    color = ColorError,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            // ------------------------------ Números clave ------------------------------
+            FilaDeTarjetas(modifier = Modifier.padding(top = 14.dp)) {
+                TarjetaKpi(
+                    etiqueta = stringResource(R.string.cuenta_kpi_inmersiones),
+                    valor = stats.inmersiones.toString(),
                     modifier = Modifier.weight(1f)
                 )
-                if (textoAccion != null) {
-                    TextButton(
-                        onClick = onAccion,
-                        colors = ButtonDefaults.textButtonColors(contentColor = Acento)
-                    ) { Text(textoAccion) }
-                }
+                TarjetaKpi(
+                    etiqueta = stringResource(R.string.cuenta_kpi_profundidad),
+                    valor = stats.profundidadMaxima,
+                    unidad = if (stats.profundidadMaxima != "-") "m" else null,
+                    modifier = Modifier.weight(1f)
+                )
             }
-            Spacer(Modifier.height(if (textoAccion != null) 4.dp else 10.dp))
-            contenido()
+
+            // ------------------------------ Secciones ------------------------------
+            val certificadosConAviso = resumen.certificados.count { estadoVencimiento(it.fechaVencimiento) in ESTADOS_AVISO }
+            val principal = resumen.contactoPrincipal
+            val filas = 5
+            GrupoLista(modifier = Modifier.padding(top = 16.dp)) {
+                FilaLista(
+                    titulo = stringResource(R.string.cuenta_datos_personales),
+                    subtitulo = when {
+                        resumen.cargando -> cargando
+                        perfil == null -> stringResource(R.string.cuenta_datos_vacio)
+                        else -> listOf(perfil.nombreCompleto, perfil.email).filter { it.isNotBlank() }.joinToString(" · ")
+                    },
+                    indice = 0, total = filas,
+                    onClick = onEditarDatos,
+                    inicio = { IconoCirculo(painterResource(R.drawable.ic_ms_badge)) },
+                    fin = { if (perfil == null && !resumen.cargando) IconoAviso() else Chevron() }
+                )
+                FilaLista(
+                    titulo = stringResource(R.string.cuenta_certificaciones),
+                    subtitulo = when {
+                        resumen.cargando -> cargando
+                        resumen.certificados.isEmpty() -> stringResource(R.string.cuenta_certificaciones_vacio)
+                        certificadosConAviso > 0 -> pluralStringResource(
+                            R.plurals.cuenta_certificaciones_aviso, certificadosConAviso,
+                            resumen.certificados.size, certificadosConAviso
+                        )
+                        else -> "${resumen.certificados.size} · ${resumen.certificados.first().titulo}"
+                    },
+                    indice = 1, total = filas,
+                    onClick = onVerCertificados,
+                    inicio = { IconoCirculo(painterResource(R.drawable.ic_ms_workspace_premium)) },
+                    fin = { if (certificadosConAviso > 0) IconoAviso() else Chevron() }
+                )
+                FilaLista(
+                    titulo = stringResource(R.string.cuenta_equipamiento),
+                    subtitulo = when {
+                        resumen.cargando -> cargando
+                        resumen.equiposEnUso.isEmpty() -> stringResource(R.string.cuenta_equipamiento_vacio)
+                        resumen.equiposConServicePendiente > 0 -> pluralStringResource(
+                            R.plurals.cuenta_equipamiento_service, resumen.equiposConServicePendiente,
+                            resumen.equiposEnUso.size, resumen.equiposConServicePendiente
+                        )
+                        else -> stringResource(R.string.cuenta_equipamiento_en_uso, resumen.equiposEnUso.size)
+                    },
+                    indice = 2, total = filas,
+                    onClick = onVerEquipamiento,
+                    inicio = { IconoCirculo(painterResource(R.drawable.ic_ms_scuba_diving)) },
+                    fin = { if (resumen.equiposConServicePendiente > 0) IconoAviso() else Chevron() }
+                )
+                FilaLista(
+                    titulo = stringResource(R.string.accion_estadisticas),
+                    subtitulo = stringResource(
+                        R.string.cuenta_estadisticas_resumen,
+                        stats.tiempoTotalFondo, stats.sesionesEntrenamiento, stats.mejorApnea
+                    ),
+                    indice = 3, total = filas,
+                    onClick = onVerEstadisticas,
+                    inicio = { IconoCirculo(painterResource(R.drawable.ic_ms_insights), tono = TonoIcono.APNEA) },
+                    fin = { Chevron() }
+                )
+                FilaLista(
+                    titulo = stringResource(R.string.cuenta_contacto_emergencia),
+                    subtitulo = when {
+                        resumen.cargando -> cargando
+                        principal == null -> stringResource(R.string.cuenta_contacto_vacio)
+                        else -> listOf(principal.nombre, principal.relacion).filter { it.isNotBlank() }.joinToString(" · ")
+                    },
+                    indice = 4, total = filas,
+                    onClick = onVerContactos,
+                    inicio = { IconoCirculo(painterResource(R.drawable.ic_ms_emergency), tono = TonoIcono.ERROR) },
+                    // Sin contacto de emergencia es lo único que conviene resolver ya: aviso
+                    fin = { if (principal == null && !resumen.cargando) IconoAviso() else Chevron() }
+                )
+            }
+
+            GrupoLista(modifier = Modifier.padding(top = 12.dp)) {
+                FilaLista(
+                    titulo = stringResource(R.string.cuenta_cerrar_session),
+                    indice = 0, total = 1,
+                    onClick = {
+                        viewModel.cerrarSesion()
+                        onCerrarSesion()
+                    },
+                    inicio = {
+                        Icon(painterResource(R.drawable.ic_ms_logout), contentDescription = null, tint = ColorError)
+                    },
+                    colorTitulo = ColorError
+                )
+            }
         }
     }
 }
 
-/**
- * Grilla de 2 columnas: cada dato es "etiqueta arriba / valor abajo".
- * Los datos con anchoCompleto ocupan la fila entera.
- */
 @Composable
-private fun GrillaDatos(datos: List<Dato>) {
-    val filas = remember(datos) { armarFilas(datos) }
-    Column(verticalArrangement = Arrangement.spacedBy(EspacioRenglones)) {
-        filas.forEach { fila ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(EspacioColumnas)
-            ) {
-                fila.forEach { dato ->
-                    Column(modifier = Modifier.weight(1f)) {
-                        DatoChico(etiqueta = dato.etiqueta, valor = dato.valor)
-                    }
-                }
-            }
-        }
-    }
+private fun Chevron() {
+    Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
 }
 
-/** Agrupa los datos de a 2 por fila; uno de ancho completo cierra la fila anterior. */
-private fun armarFilas(datos: List<Dato>): List<List<Dato>> {
-    val filas = mutableListOf<List<Dato>>()
-    var pendiente: Dato? = null
-    for (dato in datos) {
-        val anterior = pendiente
-        when {
-            dato.anchoCompleto -> {
-                if (anterior != null) filas.add(listOf(anterior))
-                filas.add(listOf(dato))
-                pendiente = null
-            }
-            anterior == null -> pendiente = dato
-            else -> {
-                filas.add(listOf(anterior, dato))
-                pendiente = null
-            }
-        }
-    }
-    pendiente?.let { filas.add(listOf(it)) }
-    return filas
-}
-
-/** Contenedor de ítems apilados con el mismo espacio que la grilla. */
+/** Reemplaza al chevron cuando la sección necesita atención (vencido, service, sin contacto). */
 @Composable
-private fun ListaPaneles(contenido: @Composable ColumnScope.() -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(EspacioRenglones), content = contenido)
-}
-
-/** Ítem de lista (certificado / equipo): título, subtítulo y una insignia a la derecha. */
-@Composable
-private fun PanelItem(titulo: String, subtitulo: String, insignia: Insignia?) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(titulo, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-            if (subtitulo.isNotBlank()) {
-                Text(subtitulo, style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
-            }
-        }
-        if (insignia != null) {
-            Spacer(Modifier.width(8.dp))
-            InsigniaChica(insignia)
-        }
-    }
-}
-
-@Composable
-private fun TextoVacio(texto: String) {
-    Text(
-        text = texto,
-        style = MaterialTheme.typography.bodyMedium,
-        color = TextoSecundario,
-        modifier = Modifier.padding(vertical = 3.dp)
+private fun IconoAviso() {
+    Icon(
+        painterResource(R.drawable.ic_ms_error),
+        contentDescription = stringResource(R.string.cuenta_requiere_atencion),
+        tint = ColorAdvertencia
     )
-}
-
-@Composable
-private fun Restantes(total: Int) {
-    if (total > MAX_ITEMS_RESUMEN) {
-        Text(
-            "+${total - MAX_ITEMS_RESUMEN} más",
-            style = MaterialTheme.typography.bodySmall,
-            color = TextoSecundario,
-            modifier = Modifier.padding(top = 6.dp)
-        )
-    }
 }

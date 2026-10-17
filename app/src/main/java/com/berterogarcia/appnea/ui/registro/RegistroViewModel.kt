@@ -4,26 +4,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
 import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
 import com.berterogarcia.appnea.data.local.SessionManager
 import com.berterogarcia.appnea.data.repository.NuevoRegistro
 import com.berterogarcia.appnea.data.repository.RegistroRepository
 import com.berterogarcia.appnea.data.repository.ResultadoRegistro
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.Validaciones
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
-enum class PasoRegistro(val titulo: String) {
-    CUENTA("Tu cuenta"),
-    PERSONALES("Datos personales"),
-    EMERGENCIA("Contacto de emergencia"),
-    CONFIRMAR("Confirmá y creá tu cuenta")
-}
+/** Pasos del registro. El nombre que se muestra sale de strings.xml (ver Registro.kt). */
+enum class PasoRegistro { CUENTA, PERSONALES, EMERGENCIA, CONFIRMAR }
 
 /** Cada campo sabe en qué paso está: si hay un error, se vuelve a ese paso. */
 enum class CampoRegistro(val paso: PasoRegistro) {
@@ -57,11 +56,11 @@ data class RegistroUiState(
     val contactoRelacion: String = "",
     val contactoTelefono: String = "",
     val aceptaAviso: Boolean = false,
-    val errores: Map<CampoRegistro, String> = emptyMap(),
+    val errores: Map<CampoRegistro, TextoUi> = emptyMap(),
     val verificandoUsuario: Boolean = false,
     val creando: Boolean = false,
     val registroOk: Boolean = false,
-    val errorGeneral: String? = null
+    val errorGeneral: TextoUi? = null
 ) {
     val fuerza: FuerzaPassword get() = ReglasRegistro.fuerza(password)
     val ocupado: Boolean get() = verificandoUsuario || creando
@@ -142,7 +141,7 @@ class RegistroViewModel(
                 if (disponible) it.copy(verificandoUsuario = false, paso = PasoRegistro.PERSONALES)
                 else it.copy(
                     verificandoUsuario = false,
-                    errores = it.errores + (CampoRegistro.USUARIO to "Ese usuario ya existe, elegí otro.")
+                    errores = it.errores + (CampoRegistro.USUARIO to textoUi(R.string.registro_error_usuario_existe))
                 )
             }
         }
@@ -176,12 +175,12 @@ class RegistroViewModel(
                             ResultadoRegistro.UsuarioExistente -> actual.copy(
                                 creando = false,
                                 paso = PasoRegistro.CUENTA,
-                                errores = actual.errores + (CampoRegistro.USUARIO to "Ese usuario ya existe, elegí otro.")
+                                errores = actual.errores + (CampoRegistro.USUARIO to textoUi(R.string.registro_error_usuario_existe))
                             )
                         }
                     },
                     onFailure = {
-                        actual.copy(creando = false, errorGeneral = "No se pudo crear la cuenta. Intentá de nuevo.")
+                        actual.copy(creando = false, errorGeneral = textoUi(R.string.registro_error_crear))
                     }
                 )
             }
@@ -211,33 +210,33 @@ class RegistroViewModel(
 
     // ---------------------------------- Validación ----------------------------------
 
-    private fun validar(s: RegistroUiState): Map<CampoRegistro, String> = buildMap {
+    private fun validar(s: RegistroUiState): Map<CampoRegistro, TextoUi> = buildMap {
         ReglasRegistro.usuario(s.usuario)?.let { put(CampoRegistro.USUARIO, it) }
         ReglasRegistro.password(s.password)?.let { put(CampoRegistro.PASSWORD, it) }
         ReglasRegistro.confirmacion(s.password, s.confirmacion)?.let { put(CampoRegistro.CONFIRMACION, it) }
 
-        (Validaciones.obligatorio(s.nombre, "tu nombre") ?: Validaciones.largoMaximo(s.nombre, 60))
+        (Validaciones.obligatorio(s.nombre, textoUi(R.string.campo_tu_nombre)) ?: Validaciones.largoMaximo(s.nombre, 60))
             ?.let { put(CampoRegistro.NOMBRE, it) }
-        (Validaciones.obligatorio(s.apellido, "tu apellido") ?: Validaciones.largoMaximo(s.apellido, 60))
+        (Validaciones.obligatorio(s.apellido, textoUi(R.string.campo_tu_apellido)) ?: Validaciones.largoMaximo(s.apellido, 60))
             ?.let { put(CampoRegistro.APELLIDO, it) }
-        (Validaciones.obligatorio(s.email, "tu email") ?: Validaciones.email(s.email))
+        (Validaciones.obligatorio(s.email, textoUi(R.string.campo_tu_email)) ?: Validaciones.email(s.email))
             ?.let { put(CampoRegistro.EMAIL, it) }
         Validaciones.telefono(s.telefono, obligatorio = true)?.let { put(CampoRegistro.TELEFONO, it) }
         when {
-            s.fechaNacimiento == null -> put(CampoRegistro.NACIMIENTO, "Ingresá tu fecha de nacimiento.")
+            s.fechaNacimiento == null -> put(CampoRegistro.NACIMIENTO, textoUi(R.string.registro_error_nacimiento))
             else -> Validaciones.noFutura(s.fechaNacimiento)?.let { put(CampoRegistro.NACIMIENTO, it) }
         }
         Validaciones.largoMaximo(s.ciudad, 80)?.let { put(CampoRegistro.CIUDAD, it) }
 
-        (Validaciones.obligatorio(s.contactoNombre, "el nombre del contacto") ?: Validaciones.largoMaximo(s.contactoNombre, 60))
+        (Validaciones.obligatorio(s.contactoNombre, textoUi(R.string.campo_nombre_contacto)) ?: Validaciones.largoMaximo(s.contactoNombre, 60))
             ?.let { put(CampoRegistro.CONTACTO_NOMBRE, it) }
         Validaciones.largoMaximo(s.contactoRelacion, 40)?.let { put(CampoRegistro.CONTACTO_RELACION, it) }
         Validaciones.telefono(s.contactoTelefono, obligatorio = true)?.let { put(CampoRegistro.CONTACTO_TELEFONO, it) }
         if (s.contactoTelefono.isNotBlank() && s.contactoTelefono.trim() == s.telefono.trim()) {
-            put(CampoRegistro.CONTACTO_TELEFONO, "Tiene que ser el teléfono de OTRA persona.")
+            put(CampoRegistro.CONTACTO_TELEFONO, textoUi(R.string.registro_error_contacto_propio))
         }
 
-        if (!s.aceptaAviso) put(CampoRegistro.ACEPTA_AVISO, "Tenés que leer y aceptar el aviso para continuar.")
+        if (!s.aceptaAviso) put(CampoRegistro.ACEPTA_AVISO, textoUi(R.string.registro_error_aviso))
     }
 
     companion object {

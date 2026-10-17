@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.condiciones
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -26,20 +28,23 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.Aptitud
 import com.berterogarcia.appnea.data.remote.direccionCardinal
 import com.berterogarcia.appnea.ui.theme.ColorBueno
 import com.berterogarcia.appnea.ui.theme.ColorMalo
 import com.berterogarcia.appnea.ui.theme.ColorRegular
-import com.berterogarcia.appnea.ui.theme.Divisor
-import com.berterogarcia.appnea.ui.theme.FondoTarjeta
-import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.ContenedorSecundario
+import com.berterogarcia.appnea.ui.theme.SuperficieTonal
+import com.berterogarcia.appnea.ui.theme.SuperficieTonalAlta
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -54,16 +59,26 @@ private val DD_MM: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM")
 // ===================== Formatos =====================
 fun hora(t: LocalDateTime?): String = t?.format(HH_MM) ?: "--:--"
 
+/** "Hoy", "Mañana" o "Mié 22/10". */
+@Composable
 fun diaCorto(fecha: LocalDate, hoy: LocalDate): String = when (fecha) {
-    hoy -> "Hoy"
-    hoy.plusDays(1) -> "Mañana"
-    else -> fecha.dayOfWeek.getDisplayName(TextStyle.SHORT, LOCALE_AR)
-        .replaceFirstChar { it.uppercase() } + " " + fecha.format(DD_MM)
+    hoy -> stringResource(R.string.dia_hoy)
+    hoy.plusDays(1) -> stringResource(R.string.dia_manana)
+    else -> stringResource(
+        R.string.dia_corto,
+        fecha.dayOfWeek.getDisplayName(TextStyle.SHORT, LOCALE_AR).replaceFirstChar { it.uppercase() },
+        fecha.format(DD_MM)
+    )
 }
 
-fun diaLargo(fecha: LocalDate): String =
-    fecha.dayOfWeek.getDisplayName(TextStyle.FULL, LOCALE_AR).replaceFirstChar { it.uppercase() } +
-        " " + fecha.dayOfMonth + " de " + fecha.month.getDisplayName(TextStyle.FULL, LOCALE_AR)
+/** "Martes 16 de octubre". */
+@Composable
+fun diaLargo(fecha: LocalDate): String = stringResource(
+    R.string.dia_largo,
+    fecha.dayOfWeek.getDisplayName(TextStyle.FULL, LOCALE_AR).replaceFirstChar { it.uppercase() },
+    fecha.dayOfMonth,
+    fecha.month.getDisplayName(TextStyle.FULL, LOCALE_AR)
+)
 
 fun duracion(minutos: Long): String {
     val m = if (minutos < 0) 0 else minutos
@@ -81,9 +96,27 @@ fun colorAptitud(a: Aptitud): Color = when (a) {
     Aptitud.MALA -> ColorMalo
 }
 
+/** Ícono de Material Symbols para un código de clima WMO (de día / de noche). Nunca falla: hay uno genérico. */
+@DrawableRes
+fun iconoClima(codigo: Int?, esDeDia: Boolean = true): Int = when (codigo ?: -1) {
+    0 -> if (esDeDia) R.drawable.ic_ms_sunny else R.drawable.ic_ms_clear_night
+    1, 2 -> if (esDeDia) R.drawable.ic_ms_partly_cloudy_day else R.drawable.ic_ms_partly_cloudy_night
+    3 -> R.drawable.ic_ms_cloud
+    45, 48 -> R.drawable.ic_ms_foggy
+    in 51..57 -> R.drawable.ic_ms_rainy_light
+    in 61..67, in 80..82 -> R.drawable.ic_ms_rainy
+    in 71..77, 85, 86 -> R.drawable.ic_ms_weather_snowy
+    in 95..99 -> R.drawable.ic_ms_thunderstorm
+    else -> R.drawable.ic_ms_thermostat
+}
+
+/** Color del ícono de clima: amarillo con sol, gris azulado el resto. */
+fun colorIconoClima(codigo: Int?, esDeDia: Boolean = true): Color =
+    if (esDeDia && codigo in listOf(0, 1, 2)) ColorRegular else TextoSuperficieVariante
+
 // ===================== Componentes =====================
 
-/** Tarjeta con el estilo de la app (fondo oscuro, texto blanco) y un título opcional. */
+/** Tarjeta de superficie tonal (estilo "Appnea circular") con un título opcional. */
 @Suppress("ModifierParameter") // título primero para poder llamarla como TarjetaCondicion("Mar") { }
 @Composable
 fun TarjetaCondicion(
@@ -96,15 +129,16 @@ fun TarjetaCondicion(
         modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (resaltada) FondoTarjetaResaltada else FondoTarjeta,
-            contentColor = Color.White
+            containerColor = if (resaltada) ContenedorSecundario else SuperficieTonal,
+            contentColor = TextoSuperficie
         )
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             if (titulo != null) {
-                Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
+                Text(titulo, style = MaterialTheme.typography.titleSmall, color = TextoSuperficie)
+                Spacer(Modifier.height(10.dp))
             }
             contenido()
         }
@@ -123,7 +157,7 @@ fun FilaDato(etiqueta: String, valor: String) {
         Text(
             etiqueta,
             style = MaterialTheme.typography.bodyMedium,
-            color = TextoSecundario,
+            color = TextoSuperficieVariante,
             modifier = Modifier.weight(1f)
         )
         Spacer(Modifier.width(12.dp))
@@ -131,6 +165,7 @@ fun FilaDato(etiqueta: String, valor: String) {
             valor,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
+            color = TextoSuperficie,
             textAlign = TextAlign.End,
             modifier = Modifier.weight(1f)
         )
@@ -139,10 +174,10 @@ fun FilaDato(etiqueta: String, valor: String) {
 
 /** Dato grande con etiqueta abajo (como "10:09 h / BAJAMAR"). */
 @Composable
-fun DatoGrande(valor: String, etiqueta: String, modifier: Modifier = Modifier, color: Color = Color.White) {
+fun DatoGrande(valor: String, etiqueta: String, modifier: Modifier = Modifier, color: Color = TextoSuperficie) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(valor, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = color)
-        Text(etiqueta.uppercase(), style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
+        Text(valor, fontSize = 24.sp, color = color)
+        Text(etiqueta.uppercase(), style = MaterialTheme.typography.labelMedium, color = TextoSuperficieVariante)
     }
 }
 
@@ -157,7 +192,7 @@ fun Semaforo(color: Color, texto: String) {
                 .background(color, CircleShape)
         )
         Spacer(Modifier.width(8.dp))
-        Text(texto, fontWeight = FontWeight.Bold, color = color, fontSize = 18.sp)
+        Text(texto, fontWeight = FontWeight.Medium, color = color, fontSize = 16.sp)
     }
 }
 
@@ -172,7 +207,7 @@ fun MedioCirculo(progreso: Float, color: Color, modifier: Modifier = Modifier, a
         val arriba = grosor / 2
         val izquierda = grosor / 2
         drawArc(
-            color = Divisor,
+            color = SuperficieTonalAlta,
             startAngle = 180f, sweepAngle = 180f, useCenter = false,
             topLeft = Offset(izquierda, arriba), size = Size(diametro, diametro),
             style = Stroke(width = grosor, cap = StrokeCap.Round)

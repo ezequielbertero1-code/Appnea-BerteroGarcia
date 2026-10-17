@@ -17,28 +17,32 @@ val fondoApp = Brush.verticalGradient(colors = listOf(FondoArriba, FondoAbajo))
  */
 private val EsquemaAppnea = darkColorScheme(
     primary = Acento,
-    onPrimary = FondoTarjeta,
+    onPrimary = TextoSobreAcentoFuerte,
     primaryContainer = FondoTarjetaResaltada,
-    onPrimaryContainer = Color.White,
+    onPrimaryContainer = TextoSobreContenedorPrimario,
     secondary = FondoTarjetaResaltada,
     onSecondary = Color.White,
+    // Chips elegidos, botones segmentados y tonales
+    secondaryContainer = ContenedorSecundario,
+    onSecondaryContainer = TextoSobreContenedorSecundario,
     tertiary = ColorRegular,
     onTertiary = FondoTarjeta,
     background = FondoAbajo,
     onBackground = Color.White,
     surface = FondoTarjeta,
-    onSurface = Color.White,
+    onSurface = TextoSuperficie,
     surfaceVariant = FondoArriba,
-    onSurfaceVariant = TextoSecundario,
-    // Diálogos, menús y date pickers usan estos: azules de la app en vez del gris violáceo por defecto
+    onSurfaceVariant = TextoSuperficieVariante,
+    // Diálogos (High), menús (Container) y hojas inferiores (Low) van sólidos en FondoIntermedio;
+    // las tarjetas y filas usan velos (SuperficieTonal) con color propio, no estos.
     surfaceContainerLowest = FondoAbajo,
-    surfaceContainerLow = FondoTarjeta,
+    surfaceContainerLow = FondoIntermedio,
     surfaceContainer = FondoIntermedio,
-    surfaceContainerHigh = FondoArriba,
+    surfaceContainerHigh = FondoIntermedio,
     surfaceContainerHighest = FondoTarjetaResaltada,
     error = ColorMalo,
     onError = FondoTarjeta,
-    outline = Contorno,
+    outline = ContornoFuerte,
     outlineVariant = Divisor
 )
 

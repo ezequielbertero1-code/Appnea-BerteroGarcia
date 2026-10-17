@@ -1,11 +1,16 @@
 package com.berterogarcia.appnea.ui.registro
 
+import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
+
 /** Qué tan fuerte es una contraseña (solo informativo, se muestra con una barra). */
-enum class FuerzaPassword(val etiqueta: String, val nivel: Int) {
-    VACIA("", 0),
-    DEBIL("Débil", 1),
-    MEDIA("Media", 2),
-    FUERTE("Fuerte", 3)
+/** Fuerza de la contraseña. El nombre que se muestra sale de strings.xml (ver Etiquetas.kt). */
+enum class FuerzaPassword(val nivel: Int) {
+    VACIA(0),
+    DEBIL(1),
+    MEDIA(2),
+    FUERTE(3)
 }
 
 /**
@@ -17,23 +22,23 @@ object ReglasRegistro {
     private const val PASSWORD_MAX = 64
     private val REGEX_USUARIO = Regex("^[A-Za-z0-9._-]{3,20}$")
 
-    fun usuario(valor: String): String? = when {
-        valor.isBlank() -> "Elegí un nombre de usuario."
-        !REGEX_USUARIO.matches(valor) -> "De 3 a 20 caracteres: letras, números, punto, guion o guion bajo (sin espacios)."
+    fun usuario(valor: String): TextoUi? = when {
+        valor.isBlank() -> textoUi(R.string.val_usuario_vacio)
+        !REGEX_USUARIO.matches(valor) -> textoUi(R.string.val_usuario_formato)
         else -> null
     }
 
-    fun password(valor: String): String? = when {
-        valor.isEmpty() -> "Elegí una contraseña."
-        valor.length < PASSWORD_MIN -> "Tiene que tener al menos $PASSWORD_MIN caracteres."
-        valor.length > PASSWORD_MAX -> "Máximo $PASSWORD_MAX caracteres."
-        !valor.any { it.isLetter() } || !valor.any { it.isDigit() } -> "Tiene que tener letras y números."
+    fun password(valor: String): TextoUi? = when {
+        valor.isEmpty() -> textoUi(R.string.val_password_vacia)
+        valor.length < PASSWORD_MIN -> textoUi(R.string.val_password_minimo, PASSWORD_MIN)
+        valor.length > PASSWORD_MAX -> textoUi(R.string.val_maximo_caracteres, PASSWORD_MAX)
+        !valor.any { it.isLetter() } || !valor.any { it.isDigit() } -> textoUi(R.string.val_password_letras_numeros)
         else -> null
     }
 
-    fun confirmacion(password: String, confirmacion: String): String? = when {
-        confirmacion.isEmpty() -> "Repetí la contraseña."
-        confirmacion != password -> "Las contraseñas no coinciden."
+    fun confirmacion(password: String, confirmacion: String): TextoUi? = when {
+        confirmacion.isEmpty() -> textoUi(R.string.val_confirmacion_vacia)
+        confirmacion != password -> textoUi(R.string.val_confirmacion_distinta)
         else -> null
     }
 

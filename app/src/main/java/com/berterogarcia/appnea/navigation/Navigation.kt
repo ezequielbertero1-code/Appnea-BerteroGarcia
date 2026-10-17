@@ -194,7 +194,7 @@ fun AppNavHost(
                 viewModelStoreOwner = duenio,
                 factory = ClimaViewModel.Factory(app.applicationContext)
             )
-            CondicionesScreen(viewModel = climaViewModel)
+            CondicionesScreen(viewModel = climaViewModel, onVolver = { navController.volverDesde(entrada) })
         }
         //==============================ENTRENAMIENTO (antes Cronometro)=========================
         composable(AppDestinations.ENTRENAMIENTO.name) {
@@ -284,7 +284,8 @@ fun AppNavHost(
             DetalleInmersionScreen(
                 viewModel = viewModel,
                 onEliminada = { navController.popBackStack() },
-                onEditar = { id -> navController.navigate(rutaEditarInmersion(id)) { launchSingleTop = true } }
+                onEditar = { id -> navController.navigate(rutaEditarInmersion(id)) { launchSingleTop = true } },
+                onVolver = { navController.volverDesde(backStackEntry) }
             )
         }
 

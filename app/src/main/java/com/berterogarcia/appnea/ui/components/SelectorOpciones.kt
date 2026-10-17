@@ -1,51 +1,45 @@
 package com.berterogarcia.appnea.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.ColorError
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
-import com.berterogarcia.appnea.ui.theme.VeloSuave
-
+import com.berterogarcia.appnea.ui.theme.SuperficieTonalAlta
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 
 /**
- * Selector de UNA opción con chips (categoría de equipo, tipo de certificado...).
- * Se eligió chips en vez de un dropdown porque la API de ExposedDropdownMenu cambió
- * varias veces entre versiones de Material3 y FilterChip es estable.
+ * Selector de UNA opción con menú desplegable expuesto de Material 3 (categoría de equipo,
+ * tipo de certificado...). El campo es un [CampoTexto] de solo lectura: mismo estilo, ayuda y
+ * error que el resto del formulario.
  *
  * Para que quede claro cuando falta elegir:
- *  - Sin elegir: debajo del título aparece [ayuda] en gris.
- *  - Con error: título en rojo, ícono de advertencia + mensaje, y todos los chips con borde rojo.
+ *  - Sin elegir: debajo del campo aparece [ayuda].
+ *  - Con error: contorno y etiqueta en rojo con [mensajeError] debajo.
  *  - Cada vez que cambia [intentoGuardado] y hay error, la pantalla scrollea hasta el selector
  *    (el botón Guardar está fijo abajo, así que el selector podía quedar fuera de la vista).
  */
-@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun <T> SelectorOpciones(
     titulo: String,
@@ -55,66 +49,54 @@ fun <T> SelectorOpciones(
     onSeleccion: (T) -> Unit,
     modifier: Modifier = Modifier,
     mensajeError: String? = null,
-    ayuda: String? = "Tocá una opción para elegirla.",
+    ayuda: String? = null,
     intentoGuardado: Int = 0
 ) {
-    val hayError = mensajeError != null
+    var abierto by rememberSaveable { mutableStateOf(false) }
     val traerAVista = remember { BringIntoViewRequester() }
 
     LaunchedEffect(intentoGuardado) {
         if (intentoGuardado > 0 && mensajeError != null) traerAVista.bringIntoView()
     }
 
-    Column(modifier = modifier.bringIntoViewRequester(traerAVista)) {
-        Text(
-            text = titulo,
-            color = if (hayError) ColorError else Color.White,
-            fontWeight = FontWeight.SemiBold
+    ExposedDropdownMenuBox(
+        expanded = abierto,
+        onExpandedChange = { abierto = it },
+        modifier = modifier.bringIntoViewRequester(traerAVista)
+    ) {
+        CampoTexto(
+            valor = seleccionada?.let(etiqueta).orEmpty(),
+            onValorChange = {},
+            etiqueta = titulo,
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth(),
+            esError = mensajeError != null,
+            mensajeError = mensajeError.orEmpty(),
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = abierto) },
+            ayuda = if (seleccionada == null) ayuda else null,
+            soloLectura = true
         )
-
-        when {
-            mensajeError != null -> Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 2.dp)
-            ) {
-                Icon(
-                    Icons.Default.Warning,
-                    contentDescription = null,
-                    tint = ColorError,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(mensajeError, color = ColorError, style = MaterialTheme.typography.bodySmall)
-            }
-            seleccionada == null && ayuda != null -> Text(
-                text = ayuda,
-                color = TextoTerciario,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 2.dp)
-            )
-        }
-
-        FlowRow(
-            modifier = Modifier.padding(top = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        ExposedDropdownMenu(expanded = abierto, onDismissRequest = { abierto = false }) {
             opciones.forEach { opcion ->
                 val elegida = opcion == seleccionada
-                FilterChip(
-                    selected = elegida,
-                    onClick = { onSeleccion(opcion) },
-                    label = { Text(etiqueta(opcion)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        containerColor = VeloSuave,
-                        labelColor = Color.White,
-                        selectedContainerColor = Acento.copy(alpha = 0.20f),
-                        selectedLabelColor = Acento
-                    ),
-                    border = if (hayError) {
-                        BorderStroke(1.dp, ColorError)
+                DropdownMenuItem(
+                    text = { Text(etiqueta(opcion)) },
+                    onClick = {
+                        onSeleccion(opcion)
+                        abierto = false
+                    },
+                    trailingIcon = if (elegida) {
+                        { Icon(Icons.Rounded.Check, contentDescription = null) }
                     } else {
-                        FilterChipDefaults.filterChipBorder(enabled = true, selected = elegida)
-                    }
+                        null
+                    },
+                    colors = MenuDefaults.itemColors(
+                        textColor = TextoSuperficie,
+                        trailingIconColor = Acento
+                    ),
+                    modifier = Modifier.background(if (elegida) SuperficieTonalAlta else Color.Transparent),
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                 )
             }
         }

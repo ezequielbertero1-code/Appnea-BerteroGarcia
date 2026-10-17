@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.local.CertificadoEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.perfil.comun.EstadoLista
 import com.berterogarcia.appnea.ui.perfil.comun.EstadoVencimiento
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_ELIMINAR
@@ -48,8 +49,8 @@ class CertificadosViewModel(
             repository.observarCertificados(usuario).comoEstadoLista(viewModelScope, ::ordenarCertificados)
         }
 
-    private val _mensaje = MutableStateFlow<String?>(null)
-    val mensaje: StateFlow<String?> = _mensaje.asStateFlow()
+    private val _mensaje = MutableStateFlow<TextoUi?>(null)
+    val mensaje: StateFlow<TextoUi?> = _mensaje.asStateFlow()
 
     fun eliminar(id: Long) {
         val u = usuario ?: return

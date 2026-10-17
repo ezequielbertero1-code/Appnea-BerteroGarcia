@@ -4,19 +4,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.CertificadoEntity
 import com.berterogarcia.appnea.data.local.TipoCertificado
 import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_CARGAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_GUARDAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_SIN_SESION
 import com.berterogarcia.appnea.ui.perfil.comun.Validaciones
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 enum class CampoCertificado { TIPO, TITULO, ENTIDAD, ESCUELA, NUMERO, EMISION, VENCIMIENTO, NOTAS }
 
@@ -31,10 +34,10 @@ data class CertificadoFormUiState(
     val fechaEmision: LocalDate? = null,
     val fechaVencimiento: LocalDate? = null,
     val notas: String = "",
-    val errores: Map<CampoCertificado, String> = emptyMap(),
+    val errores: Map<CampoCertificado, TextoUi> = emptyMap(),
     val guardando: Boolean = false,
     val guardadoOk: Boolean = false,
-    val errorGeneral: String? = null,
+    val errorGeneral: TextoUi? = null,
     val bloqueado: Boolean = false,
     /** Se incrementa cada vez que se intenta guardar con errores: la UI lo usa para scrollear al error. */
     val intentoGuardado: Int = 0
@@ -70,7 +73,7 @@ class CertificadoFormViewModel(
                 return@launch
             }
             if (c == null) {
-                _uiState.update { it.copy(cargando = false, bloqueado = true, errorGeneral = "La certificación ya no existe.") }
+                _uiState.update { it.copy(cargando = false, bloqueado = true, errorGeneral = textoUi(R.string.perfil_error_cert_no_existe)) }
                 return@launch
             }
             _uiState.update {
@@ -140,9 +143,9 @@ class CertificadoFormViewModel(
         }
     }
 
-    private fun validar(s: CertificadoFormUiState): Map<CampoCertificado, String> = buildMap {
-        if (s.tipo == null) put(CampoCertificado.TIPO, "Falta elegir el tipo de certificación.")
-        (Validaciones.obligatorio(s.titulo, "el nombre del nivel o certificado")
+    private fun validar(s: CertificadoFormUiState): Map<CampoCertificado, TextoUi> = buildMap {
+        if (s.tipo == null) put(CampoCertificado.TIPO, textoUi(R.string.perfil_error_cert_tipo))
+        (Validaciones.obligatorio(s.titulo, textoUi(R.string.campo_nombre_nivel))
             ?: Validaciones.largoMaximo(s.titulo, 80))?.let { put(CampoCertificado.TITULO, it) }
         Validaciones.largoMaximo(s.entidad, 40)?.let { put(CampoCertificado.ENTIDAD, it) }
         Validaciones.largoMaximo(s.escuelaInstructor, 80)?.let { put(CampoCertificado.ESCUELA, it) }
@@ -150,9 +153,9 @@ class CertificadoFormViewModel(
         Validaciones.noFutura(s.fechaEmision)?.let { put(CampoCertificado.EMISION, it) }
         when {
             s.vencimientoObligatorio && s.fechaVencimiento == null ->
-                put(CampoCertificado.VENCIMIENTO, "Ingresá la fecha de vencimiento del apto.")
+                put(CampoCertificado.VENCIMIENTO, textoUi(R.string.perfil_error_cert_vencimiento))
             else -> Validaciones.noAnterior(
-                s.fechaVencimiento, s.fechaEmision, "No puede vencer antes de emitirse."
+                s.fechaVencimiento, s.fechaEmision, textoUi(R.string.perfil_error_cert_vence_antes)
             )?.let { put(CampoCertificado.VENCIMIENTO, it) }
         }
         Validaciones.largoMaximo(s.notas, 300)?.let { put(CampoCertificado.NOTAS, it) }

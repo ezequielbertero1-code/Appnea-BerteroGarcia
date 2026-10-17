@@ -1,29 +1,40 @@
 package com.berterogarcia.appnea.ui.historial
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -31,38 +42,47 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.ui.components.ChipsSeleccionUnica
-import com.berterogarcia.appnea.ui.components.TarjetaInmersion
+import com.berterogarcia.appnea.ui.components.BarraSuperior
+import com.berterogarcia.appnea.ui.components.BotonFlotante
+import com.berterogarcia.appnea.ui.components.ChipFiltro
+import com.berterogarcia.appnea.ui.components.FilaInmersion
+import com.berterogarcia.appnea.ui.components.nombre
 import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
-import com.berterogarcia.appnea.ui.theme.VeloMedio
+import com.berterogarcia.appnea.ui.theme.ContenedorSecundario
+import com.berterogarcia.appnea.ui.theme.ContornoFuerte
+import com.berterogarcia.appnea.ui.theme.SuperficieTonalAlta
+import com.berterogarcia.appnea.ui.theme.TextoSobreContenedorSecundario
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import com.berterogarcia.appnea.ui.components.TituloPantalla
-import com.berterogarcia.appnea.ui.components.BotonVerEstadisticas
-import androidx.compose.ui.res.stringResource
 
 private val LOCALE_ES: Locale = Locale.forLanguageTag("es-AR")
 private val FORMATO_MES_ANIO: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", LOCALE_ES)
 
 /**
- * Bitácora de inmersiones: buscador por lugar, filtro por período, lista agrupada por mes
- * y botón flotante para registrar. Toda la tarjeta abre el detalle.
+ * Bitácora de inmersiones (estilo "Appnea circular"): barra superior con acceso a Estadísticas,
+ * buscador en pastilla, chips de tipo + período, lista agrupada por mes y botón flotante para
+ * registrar. Toda la fila abre el detalle.
  */
 @Composable
 fun HistorialScreen(
@@ -83,24 +103,26 @@ fun HistorialScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // ---- Fijo arriba: título, buscador y filtros ----
-            Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
-                Encabezado(totalGeneral = estado.totalGeneral, onVerEstadisticas = onVerEstadisticas)
-                Spacer(Modifier.height(12.dp))
+            BarraSuperior(
+                titulo = stringResource(R.string.titulo_inmersiones),
+                acciones = {
+                    IconButton(onClick = onVerEstadisticas) {
+                        Icon(
+                            painterResource(R.drawable.ic_ms_bar_chart),
+                            contentDescription = stringResource(R.string.accion_estadisticas)
+                        )
+                    }
+                }
+            )
+
+            // ---- Fijo arriba: buscador y filtros ----
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Buscador(texto = busqueda, onTextoChange = viewModel::onBusquedaChange)
-                Spacer(Modifier.height(10.dp))
-                ChipsSeleccionUnica(
-                    opciones = listOf(null) + TipoInmersion.entries,
-                    seleccionada = tipo,
-                    etiqueta = { t -> t?.let { "${it.emoji} ${it.etiqueta}" } ?: "Todos" },
-                    onSeleccion = viewModel::onTipoChange
-                )
-                Spacer(Modifier.height(6.dp))
-                ChipsSeleccionUnica(
-                    opciones = PeriodoFiltro.entries,
-                    seleccionada = periodo,
-                    etiqueta = { it.etiqueta },
-                    onSeleccion = viewModel::onPeriodoChange
+                Filtros(
+                    tipo = tipo,
+                    onTipo = viewModel::onTipoChange,
+                    periodo = periodo,
+                    onPeriodo = viewModel::onPeriodoChange
                 )
             }
 
@@ -110,121 +132,197 @@ fun HistorialScreen(
                     CircularProgressIndicator(color = Acento)
                 }
                 estado.error -> MensajeCentrado(
-                    titulo = "No se pudieron cargar tus inmersiones",
-                    detalle = "Probá cerrar y volver a abrir la app."
+                    titulo = stringResource(R.string.historial_error_titulo),
+                    detalle = stringResource(R.string.historial_error_detalle)
                 )
                 estado.totalGeneral == 0 -> MensajeCentrado(
-                    titulo = "Todavía no registraste inmersiones",
-                    detalle = "Tocá \"Nueva inmersión\" para cargar la primera."
+                    titulo = stringResource(R.string.historial_vacio_titulo),
+                    detalle = stringResource(R.string.historial_vacio_detalle)
                 )
                 estado.cantidadFiltrada == 0 -> MensajeCentrado(
-                    titulo = "No hay inmersiones para este filtro",
-                    detalle = "Probá con otro tipo, período o búsqueda.",
-                    accion = "Ver todas",
+                    titulo = stringResource(R.string.historial_sin_resultados_titulo),
+                    detalle = stringResource(R.string.historial_sin_resultados_detalle),
+                    accion = stringResource(R.string.inicio_ver_todas),
                     onAccion = viewModel::limpiarFiltros
                 )
                 else -> LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
-                    // Abajo deja lugar para que el botón flotante no tape la última tarjeta
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp)
+                    // Abajo deja lugar para que el botón flotante no tape la última fila
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 96.dp)
                 ) {
                     item(key = "resumen") {
                         Text(
                             text = textoResumen(estado.cantidadFiltrada, periodo, busqueda, tipo),
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextoSecundario,
+                            color = TextoSuperficieVariante,
                             modifier = Modifier.padding(start = 4.dp)
                         )
                     }
                     estado.grupos.forEach { grupo ->
-                        item(key = "mes_${grupo.mes}") { TituloMes(grupo.mes) }
-                        items(grupo.inmersiones, key = { it.id }) { inmersion ->
-                            TarjetaInmersion(inmersion = inmersion, onClick = { onVerDetalle(inmersion.id) })
+                        item(key = "mes_${grupo.mes}") { TituloMes(grupo.mes, grupo.inmersiones.size) }
+                        itemsIndexed(grupo.inmersiones, key = { _, it -> it.id }) { indice, inmersion ->
+                            FilaInmersion(
+                                inmersion = inmersion,
+                                indice = indice,
+                                total = grupo.inmersiones.size,
+                                onClick = { onVerDetalle(inmersion.id) },
+                                conTemperaturaAgua = true,
+                                // Mismo espacio de 2 dp que GrupoLista entre filas
+                                modifier = Modifier.padding(bottom = 2.dp)
+                            )
                         }
                     }
                 }
             }
         }
 
-        ExtendedFloatingActionButton(
-            text = { Text("Nueva inmersión", fontWeight = FontWeight.Bold) },
-            icon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_agregar),
-                    contentDescription = "Nueva inmersión",
-                    modifier = Modifier.size(26.dp)
-                )
-            },
+        BotonFlotante(
+            texto = stringResource(R.string.historial_nueva),
+            icono = rememberVectorPainter(Icons.Rounded.Add),
             onClick = onAgregarClick,
-            expanded = botonExpandido,
-            shape = RoundedCornerShape(16.dp),
-            containerColor = FondoTarjetaResaltada,
-            contentColor = Color.White,
+            expandido = botonExpandido,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
-                .border(1.dp, Acento.copy(alpha = 0.45f), RoundedCornerShape(16.dp))
         )
     }
 }
 
-// ================================ ENCABEZADO Y FILTROS ================================
+// ================================ BUSCADOR Y FILTROS ================================
 
-@Composable
-private fun Encabezado(totalGeneral: Int, onVerEstadisticas: () -> Unit) {
-    TituloPantalla(
-        titulo = stringResource(R.string.titulo_inmersiones),
-        subtitulo = if (totalGeneral > 0) stringResource(R.string.inmersiones_total, totalGeneral) else null,
-        accion = { BotonVerEstadisticas(onClick = onVerEstadisticas) }
-    )
-}
-
+/** Buscador en pastilla (velo 11 %), como la SearchBar de Material 3 sin la vista expandida. */
 @Composable
 private fun Buscador(texto: String, onTextoChange: (String) -> Unit) {
     val focusManager = LocalFocusManager.current
     TextField(
         value = texto,
         onValueChange = onTextoChange,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .padding(top = 4.dp, bottom = 8.dp),
         singleLine = true,
-        placeholder = { Text("Buscar por lugar") },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        placeholder = { Text(stringResource(R.string.historial_buscar)) },
+        leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
         trailingIcon = {
             if (texto.isNotEmpty()) {
                 IconButton(onClick = { onTextoChange("") }) {
-                    Icon(Icons.Default.Clear, contentDescription = "Borrar búsqueda")
+                    Icon(Icons.Rounded.Clear, contentDescription = stringResource(R.string.historial_borrar_busqueda))
                 }
             }
         },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
-        shape = RoundedCornerShape(50),
+        shape = CircleShape,
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = VeloMedio,
-            unfocusedContainerColor = VeloMedio,
+            focusedContainerColor = SuperficieTonalAlta,
+            unfocusedContainerColor = SuperficieTonalAlta,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             cursorColor = Acento,
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            focusedPlaceholderColor = TextoSecundario,
-            unfocusedPlaceholderColor = TextoSecundario,
-            focusedLeadingIconColor = TextoSecundario,
-            unfocusedLeadingIconColor = TextoSecundario,
-            focusedTrailingIconColor = TextoSecundario,
-            unfocusedTrailingIconColor = TextoSecundario
+            focusedTextColor = TextoSuperficie,
+            unfocusedTextColor = TextoSuperficie,
+            focusedPlaceholderColor = TextoSuperficieVariante,
+            unfocusedPlaceholderColor = TextoSuperficieVariante,
+            focusedLeadingIconColor = TextoSuperficieVariante,
+            unfocusedLeadingIconColor = TextoSuperficieVariante,
+            focusedTrailingIconColor = TextoSuperficieVariante,
+            unfocusedTrailingIconColor = TextoSuperficieVariante
         )
     )
 }
 
+/** Una fila: Todas | Buceo | Apnea y, al final, el período como chip con menú. */
 @Composable
-private fun TituloMes(mes: YearMonth) {
+private fun Filtros(
+    tipo: TipoInmersion?,
+    onTipo: (TipoInmersion?) -> Unit,
+    periodo: PeriodoFiltro,
+    onPeriodo: (PeriodoFiltro) -> Unit
+) {
+    // Scroll horizontal por si la pantalla es angosta o la letra está agrandada
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        ChipFiltro(
+            texto = stringResource(R.string.historial_filtro_todas),
+            elegido = tipo == null,
+            onClick = { onTipo(null) }
+        )
+        TipoInmersion.entries.forEach { t ->
+            ChipFiltro(texto = t.nombre(), elegido = tipo == t, onClick = { onTipo(t) })
+        }
+        ChipPeriodo(periodo = periodo, onPeriodo = onPeriodo)
+    }
+}
+
+/** Chip con flechita que abre un menú con los períodos; queda "elegido" si filtra algo. */
+@Composable
+private fun ChipPeriodo(periodo: PeriodoFiltro, onPeriodo: (PeriodoFiltro) -> Unit) {
+    var abierto by rememberSaveable { mutableStateOf(false) }
+    val filtra = periodo != PeriodoFiltro.TODAS
+    Box {
+        FilterChip(
+            selected = filtra,
+            onClick = { abierto = true },
+            label = { Text(stringResource(periodo.etiqueta)) },
+            trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, contentDescription = null, modifier = Modifier.size(18.dp)) },
+            colors = FilterChipDefaults.filterChipColors(
+                containerColor = Color.Transparent,
+                labelColor = TextoSuperficieVariante,
+                iconColor = TextoSuperficieVariante,
+                selectedContainerColor = ContenedorSecundario,
+                selectedLabelColor = TextoSobreContenedorSecundario,
+                selectedTrailingIconColor = TextoSobreContenedorSecundario
+            ),
+            border = FilterChipDefaults.filterChipBorder(
+                enabled = true,
+                selected = filtra,
+                borderColor = ContornoFuerte,
+                selectedBorderColor = Color.Transparent,
+                borderWidth = 1.dp,
+                selectedBorderWidth = 0.dp
+            )
+        )
+        DropdownMenu(expanded = abierto, onDismissRequest = { abierto = false }) {
+            PeriodoFiltro.entries.forEach { opcion ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(opcion.etiqueta)) },
+                    onClick = {
+                        onPeriodo(opcion)
+                        abierto = false
+                    },
+                    trailingIcon = if (opcion == periodo) {
+                        { Icon(Icons.Rounded.Check, contentDescription = null) }
+                    } else {
+                        null
+                    },
+                    colors = MenuDefaults.itemColors(textColor = TextoSuperficie, trailingIconColor = Acento)
+                )
+            }
+        }
+    }
+}
+
+// ================================ LISTA ================================
+
+/** "Octubre 2026 · 3 inmersiones" en cian, como los encabezados de grupo del resto de la app. */
+@Composable
+private fun TituloMes(mes: YearMonth, cantidad: Int) {
     Text(
-        text = mes.format(FORMATO_MES_ANIO).replaceFirstChar { it.titlecase(LOCALE_ES) },
-        style = MaterialTheme.typography.labelLarge,
-        color = TextoSecundario,
-        modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 6.dp)
+        text = pluralStringResource(
+            R.plurals.historial_mes_cantidad,
+            cantidad,
+            mes.format(FORMATO_MES_ANIO).replaceFirstChar { it.titlecase(LOCALE_ES) },
+            cantidad
+        ),
+        style = MaterialTheme.typography.titleSmall,
+        color = Acento,
+        modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 8.dp)
     )
 }
 
@@ -244,14 +342,14 @@ private fun MensajeCentrado(
         Text(
             titulo,
             style = MaterialTheme.typography.titleMedium,
-            color = Color.White,
+            color = TextoSuperficie,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(4.dp))
         Text(
             detalle,
             style = MaterialTheme.typography.bodyMedium,
-            color = TextoSecundario,
+            color = TextoSuperficieVariante,
             textAlign = TextAlign.Center
         )
         if (accion != null) {
@@ -261,9 +359,15 @@ private fun MensajeCentrado(
 }
 
 // ==================================== FORMATOS ====================================
+
+/** "3 inmersiones de buceo con “pirámides” en el último mes" */
+@Composable
 private fun textoResumen(cantidad: Int, periodo: PeriodoFiltro, busqueda: String, tipo: TipoInmersion?): String {
-    val sustantivo = if (cantidad == 1) "inmersión" else "inmersiones"
-    val deTipo = tipo?.let { " de ${it.etiqueta.lowercase()}" }.orEmpty()
-    val conBusqueda = busqueda.trim().takeIf { it.isNotEmpty() }?.let { " con \"$it\"" }.orEmpty()
-    return "$cantidad $sustantivo$deTipo$conBusqueda ${periodo.descripcion}"
+    val partes = buildList {
+        add(pluralStringResource(R.plurals.historial_cantidad, cantidad, cantidad))
+        tipo?.let { add(stringResource(R.string.historial_resumen_tipo, it.nombre().lowercase(LOCALE_ES))) }
+        busqueda.trim().takeIf { it.isNotEmpty() }?.let { add(stringResource(R.string.historial_resumen_busqueda, it)) }
+        add(stringResource(periodo.descripcion))
+    }
+    return partes.joinToString(" ")
 }

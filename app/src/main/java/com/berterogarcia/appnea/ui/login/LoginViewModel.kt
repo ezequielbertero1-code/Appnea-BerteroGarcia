@@ -4,11 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.EstadoIntentos
 import com.berterogarcia.appnea.data.local.PoliticaIntentos
 import com.berterogarcia.appnea.data.local.PreferenciasLogin
 import com.berterogarcia.appnea.data.local.SessionManager
 import com.berterogarcia.appnea.data.repository.UsuarioRepository
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.pluralUi
+import com.berterogarcia.appnea.ui.components.textoUi
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,18 +21,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.seconds
 
 data class LoginUiState(
     val usuario: String = "",
     val password: String = "",
     /** true si el usuario se completó solo con el último que entró. */
     val usuarioRecordado: Boolean = false,
-    val errorUsuario: String? = null,
-    val errorPassword: String? = null,
-    val errorGeneral: String? = null,
+    val errorUsuario: TextoUi? = null,
+    val errorPassword: TextoUi? = null,
+    val errorGeneral: TextoUi? = null,
     /** Aviso naranja, ej: "Te quedan 2 intentos". */
-    val aviso: String? = null,
+    val aviso: TextoUi? = null,
     val cargando: Boolean = false,
     val exitoso: Boolean = false,
     /** Segundos que faltan para poder intentar de nuevo (0 = no bloqueado). */
@@ -78,8 +82,8 @@ class LoginViewModel(
 
         // El teclado del celular suele agregar un espacio al final al autocompletar.
         val usuario = s.usuario.trim()
-        val errorUsuario = if (usuario.isEmpty()) "Ingresá tu usuario." else null
-        val errorPassword = if (s.password.isEmpty()) "Ingresá tu contraseña." else null
+        val errorUsuario = if (usuario.isEmpty()) textoUi(R.string.login_error_usuario) else null
+        val errorPassword = if (s.password.isEmpty()) textoUi(R.string.login_error_password) else null
         if (errorUsuario != null || errorPassword != null) {
             _uiState.update { it.copy(errorUsuario = errorUsuario, errorPassword = errorPassword) }
             return
@@ -88,7 +92,7 @@ class LoginViewModel(
         _uiState.update { it.copy(cargando = true, errorGeneral = null, aviso = null) }
         viewModelScope.launch {
             val valido = runCatching { repository.validar(usuario, s.password) }.getOrElse {
-                _uiState.update { it.copy(cargando = false, errorGeneral = "No se pudo verificar el usuario. Intentá de nuevo.") }
+                _uiState.update { it.copy(cargando = false, errorGeneral = textoUi(R.string.login_error_verificar)) }
                 return@launch
             }
             if (valido) onLoginCorrecto(usuario) else onLoginIncorrecto()
@@ -115,8 +119,8 @@ class LoginViewModel(
                 cargando = false,
                 password = "",
                 // Mensaje genérico a propósito: no revela si el usuario existe.
-                errorGeneral = "Usuario o contraseña incorrectos.",
-                aviso = if (restantes in 1..2) "Te quedan $restantes intento(s) antes de un bloqueo temporal." else null
+                errorGeneral = textoUi(R.string.login_error_credenciales),
+                aviso = if (restantes in 1..2) pluralUi(R.plurals.login_intentos_restantes, restantes, restantes) else null
             )
         }
         actualizarBloqueo()

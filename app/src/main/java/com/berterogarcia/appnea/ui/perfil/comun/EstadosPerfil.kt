@@ -1,5 +1,8 @@
 package com.berterogarcia.appnea.ui.perfil.comun
 
+import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -8,16 +11,16 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-const val MENSAJE_SIN_SESION = "No hay una sesión activa. Cerrá sesión y volvé a ingresar."
-const val MENSAJE_ERROR_GUARDAR = "No se pudo guardar. Intentá de nuevo."
-const val MENSAJE_ERROR_CARGAR = "No se pudieron cargar los datos."
-const val MENSAJE_ERROR_ELIMINAR = "No se pudo eliminar. Intentá de nuevo."
+val MENSAJE_SIN_SESION: TextoUi = textoUi(R.string.perfil_error_sin_sesion)
+val MENSAJE_ERROR_GUARDAR: TextoUi = textoUi(R.string.perfil_error_guardar)
+val MENSAJE_ERROR_CARGAR: TextoUi = textoUi(R.string.perfil_error_cargar)
+val MENSAJE_ERROR_ELIMINAR: TextoUi = textoUi(R.string.perfil_error_eliminar)
 
 /** Estado de las pantallas de lista (equipamiento, certificados, contactos). */
 data class EstadoLista<T>(
     val cargando: Boolean = true,
     val items: List<T> = emptyList(),
-    val error: String? = null
+    val error: TextoUi? = null
 )
 
 /**

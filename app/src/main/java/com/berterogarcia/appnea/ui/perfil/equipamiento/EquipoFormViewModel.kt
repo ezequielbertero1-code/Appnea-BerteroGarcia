@@ -4,19 +4,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.EquipoEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_CARGAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_GUARDAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_SIN_SESION
 import com.berterogarcia.appnea.ui.perfil.comun.Validaciones
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 enum class CampoEquipo { CATEGORIA, MARCA_MODELO, TALLE, FECHA_COMPRA, MANTENIMIENTO, NOTAS }
 
@@ -31,10 +34,10 @@ data class EquipoFormUiState(
     val proximoMantenimiento: LocalDate? = null,
     val enUso: Boolean = true,
     val notas: String = "",
-    val errores: Map<CampoEquipo, String> = emptyMap(),
+    val errores: Map<CampoEquipo, TextoUi> = emptyMap(),
     val guardando: Boolean = false,
     val guardadoOk: Boolean = false,
-    val errorGeneral: String? = null,
+    val errorGeneral: TextoUi? = null,
     val bloqueado: Boolean = false,
     /** Se incrementa cada vez que se intenta guardar con errores: la UI lo usa para scrollear al error. */
     val intentoGuardado: Int = 0
@@ -71,7 +74,7 @@ class EquipoFormViewModel(
                 return@launch
             }
             if (equipo == null) {
-                _uiState.update { it.copy(cargando = false, bloqueado = true, errorGeneral = "El equipo ya no existe.") }
+                _uiState.update { it.copy(cargando = false, bloqueado = true, errorGeneral = textoUi(R.string.perfil_error_equipo_no_existe)) }
                 return@launch
             }
             _uiState.update {
@@ -134,18 +137,18 @@ class EquipoFormViewModel(
         }
     }
 
-    private fun validar(s: EquipoFormUiState): Map<CampoEquipo, String> = buildMap {
-        if (s.categoria == null) put(CampoEquipo.CATEGORIA, "Falta elegir la categoría.")
+    private fun validar(s: EquipoFormUiState): Map<CampoEquipo, TextoUi> = buildMap {
+        if (s.categoria == null) put(CampoEquipo.CATEGORIA, textoUi(R.string.perfil_error_equipo_categoria))
         when {
             s.marca.isBlank() && s.modelo.isBlank() ->
-                put(CampoEquipo.MARCA_MODELO, "Ingresá al menos la marca o el modelo.")
+                put(CampoEquipo.MARCA_MODELO, textoUi(R.string.perfil_error_equipo_marca))
             else -> (Validaciones.largoMaximo(s.marca, 40) ?: Validaciones.largoMaximo(s.modelo, 60))
                 ?.let { put(CampoEquipo.MARCA_MODELO, it) }
         }
         Validaciones.largoMaximo(s.talle, 30)?.let { put(CampoEquipo.TALLE, it) }
         Validaciones.noFutura(s.fechaCompra)?.let { put(CampoEquipo.FECHA_COMPRA, it) }
         Validaciones.noAnterior(
-            s.proximoMantenimiento, s.fechaCompra, "El service no puede ser anterior a la compra."
+            s.proximoMantenimiento, s.fechaCompra, textoUi(R.string.perfil_error_equipo_service)
         )?.let { put(CampoEquipo.MANTENIMIENTO, it) }
         Validaciones.largoMaximo(s.notas, 300)?.let { put(CampoEquipo.NOTAS, it) }
     }

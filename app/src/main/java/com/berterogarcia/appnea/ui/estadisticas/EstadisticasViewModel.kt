@@ -1,15 +1,22 @@
 package com.berterogarcia.appnea.ui.estadisticas
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.SesionApneaEntity
 import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.ui.entrenamiento.FACTORES_DISPONIBLES
+import java.time.LocalDate
+import java.time.YearMonth
+import kotlin.math.abs
+import kotlin.math.roundToInt
+import kotlin.time.Duration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,18 +25,13 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
-import java.time.LocalDate
-import java.time.YearMonth
-import kotlin.math.abs
-import kotlin.math.roundToInt
-import kotlin.time.Duration
 
 /** Período de las estadísticas. [meses] null = todo. */
-enum class PeriodoEstadisticas(val etiqueta: String, val meses: Long?) {
-    UN_MES("1 mes", 1),
-    TRES_MESES("3 meses", 3),
-    UN_ANIO("1 año", 12),
-    TODO("Todo", null);
+enum class PeriodoEstadisticas(@param:StringRes val etiqueta: Int, val meses: Long?) {
+    UN_MES(R.string.estadisticas_periodo_1_mes, 1),
+    TRES_MESES(R.string.estadisticas_periodo_3_meses, 3),
+    UN_ANIO(R.string.estadisticas_periodo_1_anio, 12),
+    TODO(R.string.estadisticas_periodo_todo, null);
 
     fun desde(hoy: LocalDate): LocalDate? = meses?.let { hoy.minusMonths(it) }
 

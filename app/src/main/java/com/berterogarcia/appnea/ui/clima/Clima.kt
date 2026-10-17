@@ -8,138 +8,39 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.berterogarcia.appnea.data.remote.emojiClima
-import com.berterogarcia.appnea.ui.components.BotonSecundario
-import com.berterogarcia.appnea.ui.condiciones.Semaforo
-import com.berterogarcia.appnea.ui.condiciones.colorAptitud
-import com.berterogarcia.appnea.ui.condiciones.direccion
-import com.berterogarcia.appnea.ui.condiciones.num
+import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
+import com.berterogarcia.appnea.ui.components.ChipFiltro
+import com.berterogarcia.appnea.ui.components.resolver
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorError
-import com.berterogarcia.appnea.ui.theme.FondoTarjeta
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
-
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 
 /**
- * Resumen chico del clima para Inicio: temperatura, viento, olas y semáforo para entrar
- * al agua. Toda la tarjeta abre la pantalla completa de Condiciones.
- */
-@Composable
-fun ClimaCompacto(
-    viewModel: ClimaViewModel,
-    onVerCondiciones: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val c = uiState.condiciones
-
-    Card(
-        onClick = onVerCondiciones,
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = FondoTarjeta, contentColor = Color.White)
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = if (uiState.buscandoUbicacion) "📍 Buscando tu ubicación…"
-                    else "📍 ${uiState.ubicacion.nombre ?: "Ubicación seleccionada"}",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = TextoSecundario,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                Text("Ver más ›", style = MaterialTheme.typography.labelLarge, color = Acento)
-            }
-            Spacer(Modifier.height(8.dp))
-
-            when {
-                c == null && uiState.cargando -> Row(verticalAlignment = Alignment.CenterVertically) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                    Spacer(Modifier.width(10.dp))
-                    Text("Cargando condiciones…", color = TextoSecundario)
-                }
-                c == null -> Column {
-                    Text(
-                        uiState.error ?: "Sin datos del clima.",
-                        color = ColorError,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    TextButton(onClick = { viewModel.cargarClima() }) {
-                        Text("Reintentar", color = Acento)
-                    }
-                }
-                else -> {
-                    val clima = c.climaActual
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(emojiClima(clima?.codigoClima, clima?.esDeDia ?: true), fontSize = 32.sp)
-                        Spacer(Modifier.width(10.dp))
-                        Text(
-                            num(clima?.temperaturaC, unidad = "°C"),
-                            fontSize = 26.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                "💨 ${num(clima?.vientoKmh, unidad = " km/h")} ${direccion(clima?.direccionVientoGrados)}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                "🌊 " + (c.marActual?.olaM?.let { "%.1f m".format(it) } ?: "-"),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Para entrar al agua: ", style = MaterialTheme.typography.bodyMedium)
-                        Semaforo(colorAptitud(c.aptitud.nivel), c.aptitud.nivel.texto)
-                    }
-                    if (uiState.cargando) {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(6.dp))
-            Text(
-                "Orientativo: evaluá siempre las condiciones reales en el lugar.",
-                style = MaterialTheme.typography.bodySmall,
-                color = TextoSecundario
-            )
-        }
-    }
-}
-
-/**
- * Elegir ubicación (GPS o Comodoro) y actualizar. Antes estaba en Inicio; ahora va arriba
- * de la pantalla de Condiciones.
+ * Lugar de las condiciones (arriba de la pantalla de Condiciones): nombre del lugar y chips para
+ * usar el GPS o Comodoro Rivadavia. El chip del lugar en uso queda marcado.
  */
 @Composable
 fun SelectorUbicacion(viewModel: ClimaViewModel, modifier: Modifier = Modifier) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val enComodoro = uiState.ubicacion == UBICACION_COMODORO_RIVADAVIA
 
     val lanzadorPermiso = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -148,29 +49,39 @@ fun SelectorUbicacion(viewModel: ClimaViewModel, modifier: Modifier = Modifier) 
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Rounded.LocationOn, contentDescription = null, tint = Acento, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = if (uiState.buscandoUbicacion) stringResource(R.string.clima_buscando_ubicacion)
+                else uiState.ubicacion.nombre
+                    ?: stringResource(if (enComodoro) R.string.clima_ubicacion_seleccionada else R.string.lugar_mi_ubicacion),
+                style = MaterialTheme.typography.titleSmall,
+                color = TextoSuperficie,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(top = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            BotonSecundario(
-                texto = "Mi ubicación",
-                enabled = !uiState.cargando,
+            ChipFiltro(
+                texto = stringResource(R.string.lugar_mi_ubicacion),
+                elegido = !enComodoro,
                 onClick = {
-                    lanzadorPermiso.launch(
+                    if (!uiState.cargando) lanzadorPermiso.launch(
                         arrayOf(
                             Manifest.permission.ACCESS_FINE_LOCATION,
                             Manifest.permission.ACCESS_COARSE_LOCATION
                         )
                     )
-                },
-                modifier = Modifier.weight(1f)
+                }
             )
-            BotonSecundario(
-                texto = "Comodoro",
-                enabled = !uiState.cargando,
-                onClick = { viewModel.usarComodoroRivadavia() },
-                modifier = Modifier.weight(1f)
+            ChipFiltro(
+                texto = stringResource(R.string.clima_comodoro),
+                elegido = enComodoro,
+                onClick = { if (!uiState.cargando) viewModel.usarComodoroRivadavia() }
             )
         }
 
@@ -179,14 +90,14 @@ fun SelectorUbicacion(viewModel: ClimaViewModel, modifier: Modifier = Modifier) 
         if (uiState.condiciones != null) {
             uiState.error?.let {
                 Text(
-                    it,
+                    it.resolver(),
                     color = ColorError,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
             if (uiState.cargando) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
+                LinearProgressIndicator(color = Acento, modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
             }
         }
     }

@@ -5,11 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.Condiciones
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
 import com.berterogarcia.appnea.data.local.Ubicacion
 import com.berterogarcia.appnea.data.local.UbicacionHelper
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -23,7 +26,7 @@ data class ClimaUiState(
     val cargando: Boolean = false,
     val buscandoUbicacion: Boolean = false,   // true mientras se espera el GPS
     val condiciones: Condiciones? = null,
-    val error: String? = null
+    val error: TextoUi? = null
 )
 
 /**
@@ -61,16 +64,15 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
                 it.copy(cargando = true, buscandoUbicacion = true, condiciones = null, error = null)
             }
 
-            val motivo: String?
+            val motivo: TextoUi?
             val ubicacion: Ubicacion?
             if (!UbicacionHelper.ubicacionActivada(appContext)) {
-                motivo = "La ubicación del teléfono está desactivada."
+                motivo = textoUi(R.string.clima_error_ubicacion_desactivada)
                 ubicacion = null
             } else {
                 ubicacion = UbicacionHelper.obtenerUbicacionActual(appContext)
                 motivo = if (ubicacion == null)
-                    "No se pudo obtener tu ubicación (probá cerca de una ventana o activá " +
-                            "\"Precisión de la ubicación de Google\" en Ajustes)."
+                    textoUi(R.string.clima_error_ubicacion)
                 else null
             }
             _uiState.update { it.copy(buscandoUbicacion = false) }
@@ -78,9 +80,10 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
             if (ubicacion == null) {
                 // Falló: vuelve a Comodoro y avisa por qué
                 _uiState.update { it.copy(ubicacion = UBICACION_COMODORO_RIVADAVIA) }
-                cargar(UBICACION_COMODORO_RIVADAVIA, aviso = "$motivo Se muestra Comodoro Rivadavia.")
+                cargar(UBICACION_COMODORO_RIVADAVIA, aviso = motivo?.let { textoUi(R.string.clima_vuelve_comodoro, it) })
             } else {
-                val mia = ubicacion.copy(nombre = "Mi ubicación")
+                // Sin nombre: la pantalla muestra "Mi ubicación" (strings.xml)
+                val mia = ubicacion.copy(nombre = null)
                 _uiState.update { it.copy(ubicacion = mia) }
                 cargar(mia)
             }
@@ -90,8 +93,7 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
     fun permisoDenegado() {
         _uiState.update {
             it.copy(
-                error = "Sin permiso de ubicación. Si lo rechazaste antes, habilitalo en " +
-                        "Ajustes > Apps > Appnea > Permisos."
+                error = textoUi(R.string.clima_error_permiso)
             )
         }
     }
@@ -102,7 +104,7 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
     }
 
     /** [aviso]: mensaje que queda visible al terminar (ej.: por qué se volvió a Comodoro). */
-    private suspend fun cargar(ubicacion: Ubicacion, aviso: String? = null) {
+    private suspend fun cargar(ubicacion: Ubicacion, aviso: TextoUi? = null) {
         _uiState.update { it.copy(cargando = true, error = null) }
         val resultado = CondicionesRepository.obtener(ubicacion)
         currentCoroutineContext().ensureActive()   // si se canceló mientras cargaba, no toca el estado
@@ -114,10 +116,10 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
                 _uiState.update {
                     it.copy(
                         cargando = false,
-                        error = listOfNotNull(
-                            aviso,
-                            "No se pudo obtener el clima. Revisá tu conexión a internet e intentá de nuevo."
-                        ).joinToString("\n")
+                        // Si había un aviso (ej. se volvió a Comodoro), va arriba del error de red
+                        error = textoUi(R.string.clima_error_red).let { red ->
+                            if (aviso != null) textoUi(R.string.clima_dos_mensajes, aviso, red) else red
+                        }
                     )
                 }
             }

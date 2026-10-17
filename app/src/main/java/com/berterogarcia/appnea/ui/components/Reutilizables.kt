@@ -1,7 +1,6 @@
 package com.berterogarcia.appnea.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,10 +15,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -27,29 +29,37 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.AvisoAcento
 import com.berterogarcia.appnea.ui.theme.AvisoFondo
 import com.berterogarcia.appnea.ui.theme.AvisoTexto
-import com.berterogarcia.appnea.ui.theme.BordeSuave
 import com.berterogarcia.appnea.ui.theme.ColorError
-import com.berterogarcia.appnea.ui.theme.FondoTarjeta
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
-import com.berterogarcia.appnea.ui.theme.VeloFuerte
-import com.berterogarcia.appnea.ui.theme.VeloSuave
+import com.berterogarcia.appnea.ui.theme.ContenedorSecundario
+import com.berterogarcia.appnea.ui.theme.ContornoFuerte
+import com.berterogarcia.appnea.ui.theme.SuperficieTonal
+import com.berterogarcia.appnea.ui.theme.TextoDeshabilitado
+import com.berterogarcia.appnea.ui.theme.TextoSobreContenedorSecundario
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 
+/**
+ * Campo de texto outlined de Material 3 (estilo "Appnea circular"): sin relleno, para que se vea
+ * el degradado de fondo, con contorno que pasa a cian con foco y a rojo con error.
+ * [ayuda]: texto de apoyo debajo del campo cuando no hay error ("Marcá el punto en el mapa…").
+ * [placeholder]: texto gris dentro del campo vacío ("Opcional", "--:--").
+ * [soloLectura]: no abre el teclado (lo usa el desplegable de [SelectorOpciones]).
+ */
 @Composable
 fun CampoTexto(
     valor: String,
@@ -64,51 +74,83 @@ fun CampoTexto(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     minLines: Int = 1,
     trailingIcon: (@Composable () -> Unit)? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    ayuda: String? = null,
+    placeholder: String? = null,
+    soloLectura: Boolean = false
 ) {
     OutlinedTextField(
         value = valor,
         onValueChange = onValorChange,
         label = { Text(etiqueta) },
+        placeholder = placeholder?.let { texto -> { Text(texto) } },
         trailingIcon = trailingIcon,
         visualTransformation = if (esPassword) PasswordVisualTransformation() else visualTransformation,
         isError = esError,
-        supportingText = { if (esError) Text(mensajeError) },
+        // Siempre presente (aunque vacío) para que el campo no salte de alto cuando aparece el error
+        supportingText = {
+            when {
+                esError -> Text(mensajeError)
+                ayuda != null -> Text(ayuda)
+            }
+        },
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         singleLine = minLines == 1,
         minLines = minLines,
         modifier = modifier,
         enabled = enabled,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = VeloFuerte,
-            unfocusedContainerColor = VeloSuave,
-            focusedBorderColor = Acento,
-            unfocusedBorderColor = BordeSuave,
-            focusedLabelColor = Acento,
-            unfocusedLabelColor = TextoTerciario,
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            cursorColor = Acento,
-            errorContainerColor = VeloFuerte,
-            errorBorderColor = ColorError,
-            errorLabelColor = ColorError,
-            errorTextColor = Color.White,
-            errorSupportingTextColor = ColorError,
-            errorCursorColor = ColorError
-        )
+        readOnly = soloLectura,
+        colors = coloresCampoTexto()
     )
 }
 
-// ============================ Tarjetas y datos ============================
-// Estilo tomado de la sección de clima de Inicio (Clima.kt), compartido por toda la app.
+/**
+ * Colores de los campos outlined de la app (CampoTexto, DatePickerField, TimePickerField, CampoFecha):
+ * sin relleno, contorno que pasa a cian con foco y a rojo con error.
+ */
+@Composable
+fun coloresCampoTexto(): TextFieldColors = OutlinedTextFieldDefaults.colors(
+    focusedContainerColor = Color.Transparent,
+    unfocusedContainerColor = Color.Transparent,
+    disabledContainerColor = Color.Transparent,
+    errorContainerColor = Color.Transparent,
+    focusedBorderColor = Acento,
+    unfocusedBorderColor = ContornoFuerte,
+    disabledBorderColor = TextoDeshabilitado,
+    errorBorderColor = ColorError,
+    focusedLabelColor = Acento,
+    unfocusedLabelColor = TextoSuperficieVariante,
+    disabledLabelColor = TextoDeshabilitado,
+    errorLabelColor = ColorError,
+    focusedTextColor = TextoSuperficie,
+    unfocusedTextColor = TextoSuperficie,
+    disabledTextColor = TextoDeshabilitado,
+    errorTextColor = TextoSuperficie,
+    focusedPlaceholderColor = TextoSuperficieVariante,
+    unfocusedPlaceholderColor = TextoSuperficieVariante,
+    focusedTrailingIconColor = TextoSuperficieVariante,
+    unfocusedTrailingIconColor = TextoSuperficieVariante,
+    errorTrailingIconColor = ColorError,
+    focusedSupportingTextColor = TextoSuperficieVariante,
+    unfocusedSupportingTextColor = TextoSuperficieVariante,
+    errorSupportingTextColor = ColorError,
+    cursorColor = Acento,
+    errorCursorColor = ColorError
+)
 
-/** Etiqueta gris arriba, valor en negrita abajo. */
+// ============================ Tarjetas y datos ============================
+// Estilo "Appnea circular": superficies tonales (velo blanco 7 %) con esquinas de 16 dp.
+// Los usan Detalle, Condiciones, Clima y Estadísticas.
+
+private val FormaTarjetaDato = RoundedCornerShape(16.dp)
+
+/** Etiqueta gris arriba, valor abajo. */
 @Composable
 fun DatoChico(etiqueta: String, valor: String) {
     Column {
-        Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
-        Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+        Text(etiqueta, style = MaterialTheme.typography.bodySmall, color = TextoSuperficieVariante)
+        Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = TextoSuperficie)
     }
 }
 
@@ -122,23 +164,29 @@ fun RowScope.Mosaico(
     valor: String,
     detalle: String = "",
     onClick: (() -> Unit)? = null,
-    colorValor: Color = Color.White,
+    colorValor: Color = TextoSuperficie,
     extra: (@Composable () -> Unit)? = null
 ) {
     Card(
         modifier = Modifier
             .weight(1f)
             .fillMaxHeight()   // solo tiene efecto si el Row tiene altura (ver FilaMosaicos)
-            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
-        colors = CardDefaults.cardColors(containerColor = FondoTarjeta, contentColor = Color.White)
+            .then(if (onClick != null) Modifier.clip(FormaTarjetaDato).clickable { onClick() } else Modifier),
+        shape = FormaTarjetaDato,
+        colors = CardDefaults.cardColors(containerColor = SuperficieTonal, contentColor = TextoSuperficie)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(titulo, style = MaterialTheme.typography.labelMedium, color = Acento)
-            Spacer(Modifier.height(4.dp))
-            Text(valor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = colorValor)
+        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
+            Text(titulo, style = MaterialTheme.typography.bodySmall, color = TextoSuperficieVariante)
+            Text(
+                valor,
+                fontSize = 20.sp,
+                lineHeight = 26.sp,
+                color = colorValor,
+                modifier = Modifier.padding(top = 2.dp)
+            )
             extra?.invoke()
             if (detalle.isNotBlank()) {
-                Text(detalle, style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
+                Text(detalle, style = MaterialTheme.typography.bodySmall, color = TextoSuperficieVariante)
             }
         }
     }
@@ -157,27 +205,40 @@ fun FilaMosaicos(contenido: @Composable RowScope.() -> Unit) {
     )
 }
 
-/** Tarjeta protagonista: emoji grande + número grande + subtítulo, con contenido extra. */
+/**
+ * Tarjeta protagonista: ícono (o emoji, en pantallas viejas) + número grande + subtítulo,
+ * con contenido extra a la derecha y abajo. [icono] tiene prioridad sobre [emoji].
+ */
 @Composable
 fun TarjetaHero(
     emoji: String,
     valor: String,
     subtitulo: String,
     modifier: Modifier = Modifier,
+    icono: (@Composable () -> Unit)? = null,
     derecha: @Composable ColumnScope.() -> Unit = {},
     abajo: @Composable ColumnScope.() -> Unit = {}
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = FondoTarjeta, contentColor = Color.White)
+        shape = FormaTarjetaDato,
+        colors = CardDefaults.cardColors(containerColor = SuperficieTonal, contentColor = TextoSuperficie)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(emoji, fontSize = 44.sp)
-                Spacer(Modifier.width(12.dp))
+                when {
+                    icono != null -> {
+                        icono()
+                        Spacer(Modifier.width(14.dp))
+                    }
+                    emoji.isNotBlank() -> {
+                        Text(emoji, fontSize = 40.sp)
+                        Spacer(Modifier.width(12.dp))
+                    }
+                }
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(valor, fontSize = 34.sp, fontWeight = FontWeight.Bold)
-                    Text(subtitulo, style = MaterialTheme.typography.bodyMedium)
+                    Text(valor, fontSize = 40.sp, lineHeight = 44.sp, color = TextoSuperficie)
+                    Text(subtitulo, style = MaterialTheme.typography.bodySmall, color = TextoSuperficieVariante)
                 }
                 Column(horizontalAlignment = Alignment.End, content = derecha)
             }
@@ -186,33 +247,34 @@ fun TarjetaHero(
     }
 }
 
-/** Aviso naranja con ícono de info (condiciones orientativas, perfil simulado, etc.). */
+/** Aviso con los colores claros de seguridad (condiciones orientativas, perfil simulado, etc.). */
 @Composable
 fun TarjetaAviso(titulo: String, texto: String, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
+        shape = FormaTarjetaDato,
         colors = CardDefaults.cardColors(containerColor = AvisoFondo)
     ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-            Icon(painterResource(R.drawable.ic_info), contentDescription = "Advertencia", tint = AvisoAcento)
-            Spacer(Modifier.width(8.dp))
-            Column {
-                Text(titulo, fontWeight = FontWeight.Bold, color = AvisoAcento)
-                Text(texto, style = MaterialTheme.typography.bodySmall, color = AvisoTexto)
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Rounded.Warning, contentDescription = null, tint = AvisoAcento, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(titulo, fontWeight = FontWeight.Bold, color = AvisoAcento, style = MaterialTheme.typography.titleSmall)
             }
+            Text(texto, style = MaterialTheme.typography.bodySmall, color = AvisoTexto, modifier = Modifier.padding(top = 6.dp))
         }
     }
 }
 
-/** Chips celestes. Si la lista está vacía muestra [vacio]. */
+/** Etiquetas tonales de solo lectura (equipamiento, características del agua). Si la lista está vacía muestra [vacio]. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Chips(items: List<String>, vacio: String) {
     if (items.isEmpty()) {
-        Text(vacio, color = TextoSecundario)
+        Text(vacio, style = MaterialTheme.typography.bodyMedium, color = TextoSuperficieVariante)
         return
     }
-    val forma = RoundedCornerShape(50)
+    val forma = RoundedCornerShape(8.dp)
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -221,10 +283,9 @@ fun Chips(items: List<String>, vacio: String) {
             Text(
                 t,
                 style = MaterialTheme.typography.labelLarge,
-                color = Acento,
+                color = TextoSobreContenedorSecundario,
                 modifier = Modifier
-                    .background(Acento.copy(alpha = 0.12f), forma)
-                    .border(1.dp, Acento.copy(alpha = 0.4f), forma)
+                    .background(ContenedorSecundario, forma)
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             )
         }

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.Fase
 import com.berterogarcia.appnea.data.local.SesionApneaEntity
 import com.berterogarcia.appnea.data.local.SonidoManager
@@ -14,6 +15,10 @@ import com.berterogarcia.appnea.data.local.TablasPredefinidas
 import com.berterogarcia.appnea.data.local.TipoFase
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.data.repository.TablaPersonalizadaRepository
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
+import java.time.LocalDate
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +26,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import kotlin.time.Duration.Companion.milliseconds
 
 enum class EtapaEntrenamiento { SELECCION, EN_CURSO, GUARDANDO }
 
@@ -62,7 +65,7 @@ data class EntrenamientoUiState(
     val sensaciones: String = "",
     val guardando: Boolean = false,
     val guardadoOk: Boolean = false,
-    val errorGuardado: String? = null
+    val errorGuardado: TextoUi? = null
 ) {
     val faseActual: Fase? get() = tablaSeleccionada?.fases?.getOrNull(indiceFase)
     val totalFases: Int get() = tablaSeleccionada?.fases?.size ?: 0
@@ -265,7 +268,7 @@ class EntrenamientoApneaViewModel(
             }.getOrDefault(false)
             _uiState.update {
                 if (ok) it.copy(guardando = false, guardadoOk = true)
-                else it.copy(guardando = false, errorGuardado = "No se pudo guardar la sesión. Probá de nuevo.")
+                else it.copy(guardando = false, errorGuardado = textoUi(R.string.entrenar_error_guardar))
             }
         }
     }

@@ -48,17 +48,17 @@ import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorBajamar
 import com.berterogarcia.appnea.ui.theme.Contorno
 import com.berterogarcia.appnea.ui.theme.Divisor
-import com.berterogarcia.appnea.ui.theme.FondoTarjeta
+import com.berterogarcia.appnea.ui.theme.FondoAbajo
+import com.berterogarcia.appnea.ui.theme.SuperficieTonalAlta
 import com.berterogarcia.appnea.ui.theme.TextoChip
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
-import com.berterogarcia.appnea.ui.theme.VeloMedio
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 import kotlin.math.abs
 
 // Gráficos dibujados a mano con Canvas, con el mismo estilo que GraficoPerfil (Detalle de inmersión):
 // líneas guía con Divisor, datos en Acento con relleno suave, el récord en ColorBajamar.
 
-private val estiloEje = TextStyle(color = TextoTerciario, fontSize = 11.sp)
+private val estiloEje = TextStyle(color = TextoSuperficieVariante, fontSize = 11.sp)
 private val estiloValor = TextStyle(color = TextoChip, fontSize = 11.sp)
 private val estiloRecord = TextStyle(color = ColorBajamar, fontSize = 12.sp, fontWeight = FontWeight.Bold)
 
@@ -165,7 +165,7 @@ fun GraficoLinea(
             if (n <= 40) {
                 valores.forEachIndexed { k, v ->
                     val c = Offset(g.x(k, n), y(v))
-                    drawCircle(FondoTarjeta, radius = 5.dp.toPx(), center = c)
+                    drawCircle(FondoAbajo, radius = 5.dp.toPx(), center = c)
                     drawCircle(Acento, radius = 3.dp.toPx(), center = c)
                 }
             }
@@ -263,7 +263,7 @@ fun BarraHorizontal(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-            Text(valor, style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
+            Text(valor, style = MaterialTheme.typography.bodySmall, color = TextoSuperficieVariante)
         }
         Box(
             Modifier
@@ -277,7 +277,7 @@ fun BarraHorizontal(
                     .height(8.dp)
                     .offset(y = 3.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(VeloMedio)
+                    .background(SuperficieTonalAlta)
             ) {
                 Box(
                     Modifier
@@ -295,7 +295,7 @@ fun BarraHorizontal(
                             .align(Alignment.CenterEnd)
                             .width(2.dp)
                             .fillMaxHeight()
-                            .background(Color.White.copy(alpha = 0.85f))
+                            .background(TextoSuperficie.copy(alpha = 0.85f))
                     )
                 }
             }

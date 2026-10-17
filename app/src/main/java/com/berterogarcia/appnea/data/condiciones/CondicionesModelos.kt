@@ -86,11 +86,11 @@ data class DiaAstro(
     val iluminacionPorc: Int,
     val edadLunaDias: Double,
     val fase: String,
-    val emojiFase: String,
     val proximaLunaNueva: LocalDate,
     val proximaLunaLlena: LocalDate,
 )
 
+/** [texto] se guarda en CondicionesRegistro.aptitudAgua: es una clave, no se traduce (ver Etiquetas.kt). */
 enum class Aptitud(val texto: String) {
     BUENA("Buenas"),
     REGULAR("Regulares"),
@@ -100,8 +100,14 @@ enum class Aptitud(val texto: String) {
 /** Semáforo de condiciones para entrar al agua (buceo y apnea). */
 data class AptitudAgua(
     val nivel: Aptitud,
-    val motivos: List<String>
+    val motivos: List<MotivoAptitud>
 )
+
+/** Qué empeoró el semáforo. El texto lo arma la pantalla (strings.xml); acá solo va el dato. */
+enum class TipoMotivo { OLAS, VIENTO, RAFAGAS, TORMENTA, LLUVIA, NIEBLA, CORRIENTE, TRANQUILO }
+
+/** Un motivo del semáforo con su [valor] ya formateado ("1,2" m, "25" km/h), si corresponde. */
+data class MotivoAptitud(val tipo: TipoMotivo, val valor: String? = null)
 
 /** Todo lo que muestra la pantalla de Condiciones para una ubicación. */
 data class Condiciones(

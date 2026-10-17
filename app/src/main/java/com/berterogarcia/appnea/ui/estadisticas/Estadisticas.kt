@@ -1,24 +1,23 @@
 package com.berterogarcia.appnea.ui.estadisticas
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,31 +28,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.ui.components.BarraHorizontal
+import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.ChipsSeleccionUnica
 import com.berterogarcia.appnea.ui.components.FilaMosaicos
 import com.berterogarcia.appnea.ui.components.GraficoBarras
 import com.berterogarcia.appnea.ui.components.GraficoLinea
+import com.berterogarcia.appnea.ui.components.IconoCirculo
 import com.berterogarcia.appnea.ui.components.Mosaico
+import com.berterogarcia.appnea.ui.components.NavegacionBarra
+import com.berterogarcia.appnea.ui.components.nombre
 import com.berterogarcia.appnea.ui.components.rememberProgresoDibujo
 import com.berterogarcia.appnea.ui.condiciones.TarjetaCondicion
 import com.berterogarcia.appnea.ui.entrenamiento.minSeg
 import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.BordeSuave
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
-import kotlinx.coroutines.launch
+import com.berterogarcia.appnea.ui.theme.ContornoFuerte
+import com.berterogarcia.appnea.ui.theme.Divisor
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.time.Duration
+import kotlinx.coroutines.launch
 
 private val LOCALE_ES: Locale = Locale.forLanguageTag("es-AR")
 private val FORMATO_DIA_MES: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM", LOCALE_ES)
@@ -66,6 +69,7 @@ const val PESTANIA_ENTRENAMIENTO = 1
  * Estadísticas de inmersiones y de entrenamiento. Se abre desde Cuenta, Inmersiones y Entrenar.
  * [pestaniaInicial]: 0 = Inmersiones, 1 = Entrenamiento.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EstadisticasScreen(
     viewModel: EstadisticasViewModel,
@@ -77,32 +81,29 @@ fun EstadisticasScreen(
     pestaniaInicial: Int = PESTANIA_INMERSIONES
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
-    val titulos = listOf("Inmersiones", "Entrenamiento")
+    val titulos = listOf(stringResource(R.string.estadisticas_tab_inmersiones), stringResource(R.string.estadisticas_tab_entrenamiento))
     val pagerState = rememberPagerState(initialPage = pestaniaInicial.coerceIn(0, 1)) { titulos.size }
     val scope = rememberCoroutineScope()
 
     Column(modifier = modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.padding(start = 4.dp, end = 16.dp, top = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        BarraSuperior(
+            titulo = stringResource(R.string.accion_estadisticas),
+            navegacion = NavegacionBarra.VOLVER,
+            onNavegacion = onVolver
+        )
+        PrimaryTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = Color.Transparent,
+            contentColor = Acento,
+            divider = { HorizontalDivider(color = Divisor) }
         ) {
-            IconButton(onClick = onVolver) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-            }
-            Text("Estadísticas", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        }
-        SecondaryTabRow(selectedTabIndex = pagerState.currentPage, containerColor = Color.Transparent) {
             titulos.forEachIndexed { index, titulo ->
                 Tab(
                     selected = pagerState.currentPage == index,
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                     text = { Text(titulo) },
-                    icon = {
-                        Icon(
-                            painterResource(if (index == PESTANIA_INMERSIONES) R.drawable.ic_apnea else R.drawable.ic_cronometro),
-                            contentDescription = titulo
-                        )
-                    }
+                    selectedContentColor = Acento,
+                    unselectedContentColor = TextoSuperficieVariante
                 )
             }
         }
@@ -112,9 +113,9 @@ fun EstadisticasScreen(
                 CircularProgressIndicator(color = Acento)
             }
             estado.error -> SinDatos(
-                emoji = "⚠️",
-                titulo = "No se pudieron cargar las estadísticas",
-                detalle = "Probá cerrar y volver a abrir la app."
+                icono = R.drawable.ic_ms_error,
+                titulo = stringResource(R.string.estadisticas_error_titulo),
+                detalle = stringResource(R.string.historial_error_detalle)
             )
             else -> HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
                 Column(
@@ -144,34 +145,35 @@ private fun PestaniaInmersiones(
 ) {
     if (estado.totalInmersiones == 0) {
         SinDatos(
-            emoji = "📊",
-            titulo = "Todavía no hay datos",
-            detalle = "Registrá tu primera inmersión y acá vas a ver tu progreso.",
-            accion = "+ Registrar inmersión",
+            icono = R.drawable.ic_ms_bar_chart,
+            titulo = stringResource(R.string.estadisticas_sin_datos_titulo),
+            detalle = stringResource(R.string.estadisticas_sin_datos_detalle),
+            accion = stringResource(R.string.estadisticas_registrar),
             onAccion = onRegistrarInmersion
         )
         return
     }
 
-    FiltroPeriodo(estado.periodo, viewModel::onPeriodoChange)
+    val todas = stringResource(R.string.historial_filtro_todas)
+    val tipos = TipoInmersion.entries.associateWith { it.nombre() }
     ChipsSeleccionUnica(
         opciones = listOf(null) + TipoInmersion.entries,
         seleccionada = estado.tipo,
-        etiqueta = { t -> t?.let { "${it.emoji} ${it.etiqueta}" } ?: "Todas" },
-        onSeleccion = viewModel::onTipoChange,
-        modifier = Modifier.padding(top = 6.dp, bottom = 12.dp)
+        etiqueta = { t -> t?.let { tipos.getValue(it) } ?: todas },
+        onSeleccion = viewModel::onTipoChange
     )
+    FiltroPeriodo(estado.periodo, viewModel::onPeriodoChange, Modifier.padding(top = 4.dp, bottom = 12.dp))
 
     val r = estado.inmersiones
     if (r.cantidad == 0) {
-        SinResultados("No hay inmersiones en este período.") { viewModel.onPeriodoChange(PeriodoEstadisticas.TODO) }
+        SinResultados(stringResource(R.string.estadisticas_sin_inmersiones_periodo)) { viewModel.onPeriodoChange(PeriodoEstadisticas.TODO) }
         return
     }
 
     FilaMosaicos {
-        Mosaico("Inmersiones", r.cantidad.toString())
+        Mosaico(stringResource(R.string.cuenta_kpi_inmersiones), r.cantidad.toString())
         Mosaico(
-            "Profundidad máx.",
+            stringResource(R.string.estadisticas_profundidad_max),
             r.record?.let { "${numero(it.profundidadMetros)} m" } ?: "-",
             detalle = r.record?.let { "${it.lugar} · ${it.fecha.format(FORMATO_DIA_MES)}" }.orEmpty(),
             colorValor = Acento,
@@ -179,13 +181,13 @@ private fun PestaniaInmersiones(
         )
     }
     FilaMosaicos {
-        Mosaico("Tiempo bajo el agua", duracionLarga(r.tiempoTotal))
-        Mosaico("Profundidad promedio", "${numero(r.profundidadPromedio)} m")
+        Mosaico(stringResource(R.string.estadisticas_tiempo_bajo_agua), duracionLarga(r.tiempoTotal))
+        Mosaico(stringResource(R.string.estadisticas_profundidad_promedio), "${numero(r.profundidadPromedio)} m")
     }
 
     val progresoLinea = rememberProgresoDibujo(r.serie)
-    TarjetaCondicion("Profundidad máxima por inmersión", modifier = Modifier.padding(top = 4.dp)) {
-        Subtitulo("metros · tocá un punto para ver la inmersión")
+    TarjetaCondicion(stringResource(R.string.estadisticas_grafico_profundidad), modifier = Modifier.padding(top = 4.dp)) {
+        Subtitulo(stringResource(R.string.estadisticas_grafico_profundidad_sub))
         GraficoLinea(
             valores = r.serie.map { it.profundidadMetros },
             etiquetasX = r.serie.map { it.fecha.format(FORMATO_DIA_MES) },
@@ -196,8 +198,8 @@ private fun PestaniaInmersiones(
     }
 
     val progresoBarras = rememberProgresoDibujo(r.porMes)
-    TarjetaCondicion("Inmersiones por mes") {
-        Subtitulo("últimos ${estado.periodo.mesesGrafico} meses")
+    TarjetaCondicion(stringResource(R.string.estadisticas_por_mes)) {
+        Subtitulo(stringResource(R.string.estadisticas_ultimos_meses, estado.periodo.mesesGrafico))
         GraficoBarras(
             valores = r.porMes.map { it.second.toFloat() },
             etiquetas = r.porMes.map { it.first.format(FORMATO_MES).removeSuffix(".") },
@@ -207,7 +209,7 @@ private fun PestaniaInmersiones(
     }
 
     if (r.lugares.isNotEmpty()) {
-        TarjetaCondicion("Lugares más visitados") {
+        TarjetaCondicion(stringResource(R.string.estadisticas_lugares)) {
             val maximo = r.lugares.first().cantidad.coerceAtLeast(1)
             r.lugares.forEach { lugar ->
                 BarraHorizontal(
@@ -230,10 +232,10 @@ private fun PestaniaEntrenamiento(
 ) {
     if (estado.totalSesiones == 0) {
         SinDatos(
-            emoji = "⏱️",
-            titulo = "Todavía no hay entrenamientos",
-            detalle = "Completá una tabla en Entrenar y guardala para ver tu progreso.",
-            accion = "Ir a Entrenar",
+            icono = R.drawable.ic_ms_timer,
+            titulo = stringResource(R.string.estadisticas_sin_entrenamientos_titulo),
+            detalle = stringResource(R.string.estadisticas_sin_entrenamientos_detalle),
+            accion = stringResource(R.string.estadisticas_ir_a_entrenar),
             onAccion = onIrAEntrenar
         )
         return
@@ -243,20 +245,20 @@ private fun PestaniaEntrenamiento(
 
     val r = estado.entrenamiento
     if (r.sesiones == 0) {
-        SinResultados("No hay entrenamientos en este período.") { viewModel.onPeriodoChange(PeriodoEstadisticas.TODO) }
+        SinResultados(stringResource(R.string.estadisticas_sin_entrenamientos_periodo)) { viewModel.onPeriodoChange(PeriodoEstadisticas.TODO) }
         return
     }
 
     FilaMosaicos {
-        Mosaico("Sesiones", r.sesiones.toString(), detalle = "${r.completas} completas")
-        Mosaico("Completadas", "${r.porcentajeCompletas} %")
-        Mosaico("Apnea más larga", minSeg(r.apneaMasLargaSegundos), colorValor = Acento)
+        Mosaico(stringResource(R.string.estadisticas_sesiones), r.sesiones.toString(), detalle = stringResource(R.string.estadisticas_completas, r.completas))
+        Mosaico(stringResource(R.string.estadisticas_completadas), "${r.porcentajeCompletas} %")
+        Mosaico(stringResource(R.string.estadisticas_apnea_mas_larga), minSeg(r.apneaMasLargaSegundos), colorValor = Acento)
     }
 
     if (r.serie.isNotEmpty()) {
         val progreso = rememberProgresoDibujo(r.serie)
-        TarjetaCondicion("Apnea más larga por sesión", modifier = Modifier.padding(top = 4.dp)) {
-            Subtitulo("minutos:segundos")
+        TarjetaCondicion(stringResource(R.string.estadisticas_grafico_apnea), modifier = Modifier.padding(top = 4.dp)) {
+            Subtitulo(stringResource(R.string.estadisticas_minutos_segundos))
             GraficoLinea(
                 valores = r.serie.map { it.marcaSegundos.toFloat() },
                 etiquetasX = r.serie.map { it.fecha.format(FORMATO_DIA_MES) },
@@ -266,32 +268,31 @@ private fun PestaniaEntrenamiento(
         }
     }
 
-    TarjetaCondicion("Qué influye en completar la tabla") {
+    TarjetaCondicion(stringResource(R.string.estadisticas_factores)) {
         if (r.factores.isEmpty()) {
             Text(
-                "Todavía no hay suficientes datos. Marcá los factores al terminar cada tabla: " +
-                    "un factor aparece cuando lo marcaste en $MIN_SESIONES_FACTOR sesiones o más.",
+                stringResource(R.string.estadisticas_factores_sin_datos, MIN_SESIONES_FACTOR),
                 style = MaterialTheme.typography.bodySmall,
-                color = TextoSecundario
+                color = TextoSuperficieVariante
             )
         } else {
-            Subtitulo("% de tablas completas cuando marcaste el factor · la rayita es tu promedio (${r.porcentajeCompletas} %)")
+            Subtitulo(stringResource(R.string.estadisticas_factores_sub, r.porcentajeCompletas))
             val promedio = r.porcentajeCompletas / 100f
             r.factores.forEach { f ->
                 BarraHorizontal(
                     etiqueta = f.factor,
-                    valor = "${f.porcentajeCompletas} % · ${f.sesiones} ses.",
+                    valor = stringResource(R.string.estadisticas_factor_valor, f.porcentajeCompletas, f.sesiones),
                     fraccion = f.porcentajeCompletas / 100f,
                     marca = promedio,
                     // Por debajo del promedio: gris, para que resalten los que ayudan
-                    color = if (f.porcentajeCompletas >= r.porcentajeCompletas) Acento else BordeSuave
+                    color = if (f.porcentajeCompletas >= r.porcentajeCompletas) Acento else ContornoFuerte
                 )
             }
             r.factorDestacado?.let { f ->
                 Text(
-                    "Con «${f.factor}» completaste el ${f.porcentajeCompletas} % de las tablas " +
-                        "(tu promedio es ${r.porcentajeCompletas} %).",
+                    stringResource(R.string.estadisticas_factor_destacado, f.factor, f.porcentajeCompletas, r.porcentajeCompletas),
                     style = MaterialTheme.typography.bodySmall,
+                    color = TextoSuperficie,
                     modifier = Modifier.padding(top = 10.dp)
                 )
             }
@@ -307,10 +308,11 @@ private fun FiltroPeriodo(
     onSeleccion: (PeriodoEstadisticas) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val etiquetas = PeriodoEstadisticas.entries.associateWith { stringResource(it.etiqueta) }
     ChipsSeleccionUnica(
         opciones = PeriodoEstadisticas.entries,
         seleccionada = seleccionado,
-        etiqueta = { it.etiqueta },
+        etiqueta = { etiquetas.getValue(it) },
         onSeleccion = onSeleccion,
         modifier = modifier
     )
@@ -321,15 +323,15 @@ private fun Subtitulo(texto: String) {
     Text(
         texto,
         style = MaterialTheme.typography.bodySmall,
-        color = TextoTerciario,
-        modifier = Modifier.padding(bottom = 6.dp)
+        color = TextoSuperficieVariante,
+        modifier = Modifier.padding(bottom = 8.dp)
     )
 }
 
 /** Pantalla vacía: no hay nada cargado todavía. */
 @Composable
 private fun SinDatos(
-    emoji: String,
+    @DrawableRes icono: Int,
     titulo: String,
     detalle: String,
     accion: String? = null,
@@ -339,13 +341,13 @@ private fun SinDatos(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(emoji, fontSize = 44.sp)
-        Spacer(Modifier.height(8.dp))
-        Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        IconoCirculo(painterResource(icono), modifier = Modifier.size(56.dp))
+        Spacer(Modifier.height(12.dp))
+        Text(titulo, style = MaterialTheme.typography.titleMedium, color = TextoSuperficie, textAlign = TextAlign.Center)
         Text(
             detalle,
             style = MaterialTheme.typography.bodyMedium,
-            color = TextoSecundario,
+            color = TextoSuperficieVariante,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 4.dp)
         )
@@ -359,8 +361,8 @@ private fun SinDatos(
 @Composable
 private fun SinResultados(texto: String, onVerTodo: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(texto, style = MaterialTheme.typography.bodyMedium, color = TextoSecundario, textAlign = TextAlign.Center)
-        TextButton(onClick = onVerTodo) { Text("Ver todo", color = Acento) }
+        Text(texto, style = MaterialTheme.typography.bodyMedium, color = TextoSuperficieVariante, textAlign = TextAlign.Center)
+        TextButton(onClick = onVerTodo) { Text(stringResource(R.string.estadisticas_ver_todo), color = Acento) }
     }
 }
 

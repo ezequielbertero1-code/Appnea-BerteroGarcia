@@ -23,12 +23,12 @@ import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorBajamar
 import com.berterogarcia.appnea.ui.theme.ColorRegular
 import com.berterogarcia.appnea.ui.theme.Contorno
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-private val estiloEje = TextStyle(color = TextoTerciario, fontSize = 11.sp)
+private val estiloEje = TextStyle(color = TextoSuperficieVariante, fontSize = 11.sp)
 
 private fun DrawScope.texto(medidor: TextMeasurer, t: String, x: Float, y: Float, estilo: TextStyle, centrado: Boolean = true) {
     val medida = medidor.measure(t, estilo)
@@ -115,7 +115,7 @@ fun GraficoMarea(
         // Ahora
         if (ahora != null && !ahora.isBefore(inicio) && ahora.isBefore(fin)) {
             val xa = x(ahora)
-            drawLine(TextoTerciario, Offset(xa, arriba), Offset(xa, abajo), strokeWidth = 1.5.dp.toPx())
+            drawLine(TextoSuperficieVariante, Offset(xa, arriba), Offset(xa, abajo), strokeWidth = 1.5.dp.toPx())
         }
 
         // Pleamares y bajamares

@@ -24,17 +24,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.Ubicacion
 import com.berterogarcia.appnea.data.local.UbicacionHelper
 import com.berterogarcia.appnea.ui.theme.ColorMalo
-import com.berterogarcia.appnea.ui.theme.FondoTarjeta
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.FondoIntermedio
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
+import java.util.Locale
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -42,7 +45,6 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
-import java.util.Locale
 
 /** Estilo gratuito de OpenFreeMap: sin API key ni registro. La atribución (ⓘ) la agrega MapLibre. */
 private const val ESTILO_MAPA = "https://tiles.openfreemap.org/styles/liberty"
@@ -115,13 +117,13 @@ fun MapaLibre(
         }
     }
 
-    Box(modifier.background(FondoTarjeta)) {
+    Box(modifier.background(FondoIntermedio)) {
         AndroidView(factory = { mapView }, modifier = Modifier.matchParentSize())
         if (fallo) {
             Text(
-                "No se pudo cargar el mapa (¿sin internet?)",
+                stringResource(R.string.mapa_error),
                 style = MaterialTheme.typography.bodySmall,
-                color = TextoSecundario,
+                color = TextoSuperficieVariante,
                 modifier = Modifier.align(Alignment.Center).padding(12.dp)
             )
         }
@@ -133,7 +135,7 @@ fun MapaLibre(
 fun PinMapa(modifier: Modifier = Modifier, tamanio: Dp = 36.dp) {
     Icon(
         Icons.Filled.Place,
-        contentDescription = "Lugar marcado",
+        contentDescription = stringResource(R.string.mapa_lugar_marcado),
         tint = ColorMalo,
         modifier = modifier.offset(y = -tamanio / 2).size(tamanio)
     )

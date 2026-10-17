@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.local.EquipoEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.perfil.comun.EstadoLista
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_ELIMINAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_SIN_SESION
@@ -35,8 +36,8 @@ class EquipamientoViewModel(
         }
 
     /** Errores puntuales de acciones (ej: falló un borrado). La UI lo muestra y lo limpia. */
-    private val _mensaje = MutableStateFlow<String?>(null)
-    val mensaje: StateFlow<String?> = _mensaje.asStateFlow()
+    private val _mensaje = MutableStateFlow<TextoUi?>(null)
+    val mensaje: StateFlow<TextoUi?> = _mensaje.asStateFlow()
 
     fun eliminar(id: Long) {
         val u = usuario ?: return

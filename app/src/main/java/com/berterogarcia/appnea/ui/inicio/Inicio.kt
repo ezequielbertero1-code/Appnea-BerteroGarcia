@@ -1,13 +1,12 @@
 package com.berterogarcia.appnea.ui.inicio
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -15,11 +14,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,29 +33,53 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.ui.clima.ClimaCompacto
+import com.berterogarcia.appnea.data.condiciones.Aptitud
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
-import com.berterogarcia.appnea.ui.components.BotonSecundario
-import com.berterogarcia.appnea.ui.components.TarjetaInmersion
+import com.berterogarcia.appnea.ui.components.Avatar
+import com.berterogarcia.appnea.ui.components.BarraSuperior
+import com.berterogarcia.appnea.ui.components.EncabezadoGrupo
+import com.berterogarcia.appnea.ui.components.FilaInmersion
+import com.berterogarcia.appnea.ui.components.GrupoLista
+import com.berterogarcia.appnea.ui.components.descripcionClima
+import com.berterogarcia.appnea.ui.components.nombre
+import com.berterogarcia.appnea.ui.components.resolver
+import com.berterogarcia.appnea.ui.condiciones.colorAptitud
+import com.berterogarcia.appnea.ui.condiciones.colorIconoClima
+import com.berterogarcia.appnea.ui.condiciones.direccion
+import com.berterogarcia.appnea.ui.condiciones.iconoClima
+import com.berterogarcia.appnea.ui.condiciones.num
 import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorError
+import com.berterogarcia.appnea.ui.theme.ContenedorPrimarioFin
 import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.SuperficieTonal
+import com.berterogarcia.appnea.ui.theme.TextoSobreAcentoFuerte
 import com.berterogarcia.appnea.ui.theme.TextoSobreResaltada
-import androidx.compose.ui.res.stringResource
-import com.berterogarcia.appnea.ui.components.TituloPantalla
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
+import java.util.Locale
+
+private val LOCALE_ES: Locale = Locale.forLanguageTag("es-AR")
 
 /**
- * Inicio: la acción principal (registrar una inmersión) va primero, después las últimas
- * inmersiones y al final un resumen chico del clima que abre Condiciones.
+ * Inicio (estilo "Appnea circular", Material 3):
+ * TopAppBar con saludo y avatar → tarjeta para registrar → últimas inmersiones en lista
+ * agrupada → resumen del clima, que abre Condiciones.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InicioScreen(
     nombreUsuario: String?,
@@ -62,147 +92,252 @@ fun InicioScreen(
     modifier: Modifier = Modifier
 ) {
     val estado by inicioViewModel.uiState.collectAsStateWithLifecycle()
+    // "gianfranco" → "Gianfranco"; null si no hay usuario guardado
+    val nombre = nombreUsuario?.trim()?.takeIf { it.isNotEmpty() }
+        ?.replaceFirstChar { it.titlecase(LOCALE_ES) }
+    val descripcionCuenta = stringResource(R.string.inicio_ir_a_cuenta)
 
+    Column(modifier = modifier.fillMaxSize()) {
+        BarraSuperior(
+            titulo = if (nombre == null) stringResource(R.string.inicio_saludo_sin_nombre)
+            else stringResource(R.string.inicio_saludo, nombre),
+            acciones = {
+                IconButton(
+                    onClick = { onIrA(AppDestinations.CUENTA) },
+                    modifier = Modifier.semantics { contentDescription = descripcionCuenta }
+                ) {
+                    Avatar(inicial = nombre?.take(1))
+                }
+            }
+        )
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+        ) {
+            // ======================= ACCIÓN PRINCIPAL =======================
+            TarjetaRegistrar(
+                onRegistrar = onNuevaInmersion,
+                onEntrenar = { onIrA(AppDestinations.ENTRENAMIENTO) }
+            )
+
+            // ======================= ÚLTIMAS INMERSIONES =======================
+            val e = estado
+            EncabezadoGrupo(
+                titulo = stringResource(R.string.inicio_ultimas),
+                accion = if (e != null && e.total > 0) stringResource(R.string.inicio_ver_todas) else null,
+                onAccion = { onIrA(AppDestinations.INMERSION) }
+            )
+            when {
+                e == null -> CircularProgressIndicator(
+                    color = Acento,
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+                e.error -> MensajeVacio(stringResource(R.string.inicio_error_inmersiones))
+                e.ultimas.isEmpty() -> MensajeVacio(stringResource(R.string.inicio_sin_inmersiones))
+                else -> GrupoLista {
+                    e.ultimas.forEachIndexed { indice, inmersion ->
+                        FilaInmersion(
+                            inmersion = inmersion,
+                            indice = indice,
+                            total = e.ultimas.size,
+                            onClick = { onVerDetalleInmersion(inmersion.id) }
+                        )
+                    }
+                }
+            }
+
+            // ======================= CLIMA (resumen) =======================
+            EncabezadoGrupo(
+                titulo = stringResource(R.string.inicio_condiciones_hoy),
+                accion = stringResource(R.string.inicio_ver_detalle),
+                onAccion = onVerCondiciones
+            )
+            TarjetaClimaHoy(viewModel = climaViewModel, onVerCondiciones = onVerCondiciones)
+        }
+    }
+}
+
+// ================================ Componentes de Inicio ================================
+
+/** Tarjeta destacada con degradado: botón cian "Registrar" + botón translúcido "Entrenar". */
+@Composable
+private fun TarjetaRegistrar(onRegistrar: () -> Unit, onEntrenar: () -> Unit) {
+    val forma = RoundedCornerShape(28.dp)
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        // Mismo título que Entrenar, Inmersiones y Cuenta
-        TituloPantalla(
-            titulo = if (nombreUsuario.isNullOrBlank()) stringResource(R.string.inicio_saludo_sin_nombre)
-            else stringResource(R.string.inicio_saludo, nombreUsuario),
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        // ======================= ACCIÓN PRINCIPAL =======================
-        TarjetaNuevaInmersion(onClick = onNuevaInmersion)
-
-        Spacer(Modifier.height(12.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            BotonSecundario(
-                texto = "Entrenar",
-                icono = painterResource(R.drawable.ic_cronometro),
-                onClick = { onIrA(AppDestinations.ENTRENAMIENTO) },
-                modifier = Modifier.weight(1f)
-            )
-            BotonSecundario(
-                texto = "Aprender",
-                icono = painterResource(R.drawable.ic_informate),
-                onClick = { onIrA(AppDestinations.APRENDER) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // ======================= ÚLTIMAS INMERSIONES =======================
-        Spacer(Modifier.height(24.dp))
-        val e = estado
-        EncabezadoSeccion(
-            titulo = "Tus últimas inmersiones",
-            accion = if (e != null && e.total > 0) "Ver todas (${e.total})" else null,
-            onAccion = { onIrA(AppDestinations.INMERSION) }
-        )
-        when {
-            e == null -> CircularProgressIndicator(
-                modifier = Modifier
-                    .padding(vertical = 16.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-            e.error -> TextoSecundarioCentrado(
-                "No se pudieron cargar tus inmersiones. Probá cerrar y volver a abrir la app."
-            )
-            e.ultimas.isEmpty() -> TextoSecundarioCentrado(
-                "Todavía no registraste inmersiones.\nTocá \"Registrar inmersión\" para cargar la primera."
-            )
-            else -> e.ultimas.forEach { inmersion ->
-                TarjetaInmersion(
-                    inmersion = inmersion,
-                    onClick = { onVerDetalleInmersion(inmersion.id) },
-                    compacta = true
-                )
-            }
-        }
-
-        // ======================= CLIMA (resumen) =======================
-        Spacer(Modifier.height(24.dp))
-        EncabezadoSeccion(titulo = "Condiciones de hoy")
-        ClimaCompacto(viewModel = climaViewModel, onVerCondiciones = onVerCondiciones)
-    }
-}
-
-
-@Composable
-private fun TarjetaNuevaInmersion(onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = FondoTarjetaResaltada,
-            contentColor = Color.White
-        ),
-        border = BorderStroke(1.dp, Acento.copy(alpha = 0.45f))
-    ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            // Círculo cian con el "+": es el único lugar con cian lleno
-            Icon(
-                painter = painterResource(R.drawable.ic_agregar),
-                contentDescription = null, // el texto de al lado ya lo describe
-                tint = Color.White,
-                modifier = Modifier.size(40.dp)
-            )
-            Spacer(Modifier.width(14.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "Registrar inmersión",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    "Buceo o apnea",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextoSobreResaltada
-                )
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = Acento
-            )
-        }
-    }
-}
-
-@Composable
-private fun EncabezadoSeccion(titulo: String, accion: String? = null, onAccion: () -> Unit = {}) {
-    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .clip(forma)
+            .background(Brush.linearGradient(listOf(FondoTarjetaResaltada, ContenedorPrimarioFin)))
+            .padding(18.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text(
-            text = titulo,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f)
-        )
-        if (accion != null) {
-            TextButton(onClick = onAccion) { Text(accion, color = Acento) }
+        Column {
+            Text(
+                stringResource(R.string.inicio_registrar_titulo),
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White
+            )
+            Text(
+                stringResource(R.string.inicio_registrar_subtitulo),
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextoSobreResaltada,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Botón en pastilla relleno de cian: la acción principal de toda la pantalla
+            Button(
+                onClick = onRegistrar,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Acento,
+                    contentColor = TextoSobreAcentoFuerte
+                ),
+                contentPadding = ButtonDefaults.ButtonWithIconContentPadding
+            ) {
+                Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                Text(stringResource(R.string.inicio_boton_registrar))
+            }
+            Button(
+                onClick = onEntrenar,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White.copy(alpha = 0.12f),
+                    contentColor = Color.White
+                ),
+                contentPadding = ButtonDefaults.ButtonWithIconContentPadding
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_ms_timer),
+                    contentDescription = null,
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                )
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                Text(stringResource(R.string.inicio_boton_entrenar))
+            }
         }
     }
 }
 
+/** Texto centrado sobre superficie tonal, para "cargando mal" o "todavía no hay nada". */
 @Composable
-private fun TextoSecundarioCentrado(texto: String) {
+private fun MensajeVacio(texto: String) {
     Text(
         text = texto,
         style = MaterialTheme.typography.bodyMedium,
-        color = TextoSecundario,
+        color = TextoSuperficieVariante,
         textAlign = TextAlign.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(SuperficieTonal)
+            .padding(16.dp)
     )
+}
+
+/** Resumen del clima: temperatura grande, lugar + viento y el semáforo para entrar al agua. */
+@Composable
+private fun TarjetaClimaHoy(viewModel: ClimaViewModel, onVerCondiciones: () -> Unit) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val c = uiState.condiciones
+
+    Card(
+        onClick = onVerCondiciones,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = SuperficieTonal, contentColor = Color.White)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            when {
+                c == null && uiState.cargando -> Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Acento,
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(stringResource(R.string.inicio_cargando_clima), color = TextoSuperficieVariante)
+                }
+                c == null -> Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        uiState.error?.resolver() ?: stringResource(R.string.inicio_sin_clima),
+                        color = ColorError,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = { viewModel.cargarClima() }) {
+                        Text(stringResource(R.string.inicio_reintentar), color = Acento)
+                    }
+                }
+                else -> {
+                    val clima = c.climaActual
+                    val lugar = if (uiState.buscandoUbicacion) stringResource(R.string.inicio_buscando_ubicacion)
+                    else uiState.ubicacion.nombre ?: stringResource(R.string.inicio_ubicacion_seleccionada)
+                    // "12 km/h SO"; sin dirección queda "12 km/h"; sin dato de viento, "-"
+                    val viento = clima?.vientoKmh?.let { v ->
+                        "${num(v)} km/h ${direccion(clima.direccionVientoGrados)}".removeSuffix(" -")
+                    } ?: "-"
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        val esDeDia = clima?.esDeDia ?: true
+                        Icon(
+                            painterResource(iconoClima(clima?.codigoClima, esDeDia)),
+                            contentDescription = clima?.codigoClima?.let { descripcionClima(it) },
+                            tint = colorIconoClima(clima?.codigoClima, esDeDia),
+                            modifier = Modifier.size(44.dp)
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(num(clima?.temperaturaC, unidad = "°"), fontSize = 40.sp, lineHeight = 44.sp)
+                            Text(
+                                stringResource(R.string.inicio_clima_detalle, lugar, viento),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextoSuperficieVariante,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        InsigniaAptitud(c.aptitud.nivel)
+                    }
+                    if (uiState.cargando) {
+                        LinearProgressIndicator(
+                            color = Acento,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Insignia del semáforo: ✓ verde si están buenas, ⚠ amarillo/rojo si no. */
+@Composable
+private fun InsigniaAptitud(nivel: Aptitud) {
+    val color = colorAptitud(nivel)
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(color.copy(alpha = 0.16f))
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(
+            if (nivel == Aptitud.BUENA) Icons.Rounded.CheckCircle else Icons.Rounded.Warning,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(14.dp)
+        )
+        Text(nivel.nombre(), style = MaterialTheme.typography.labelMedium, color = color)
+    }
 }

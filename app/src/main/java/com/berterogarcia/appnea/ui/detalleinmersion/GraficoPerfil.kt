@@ -23,10 +23,10 @@ import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorBajamar
 import com.berterogarcia.appnea.ui.theme.Contorno
 import com.berterogarcia.appnea.ui.theme.Divisor
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 import kotlin.math.roundToInt
 
-private val estiloEje = TextStyle(color = TextoTerciario, fontSize = 11.sp)
+private val estiloEje = TextStyle(color = TextoSuperficieVariante, fontSize = 11.sp)
 
 private fun DrawScope.texto(
     medidor: TextMeasurer, t: String, x: Float, y: Float,

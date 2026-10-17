@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.EquipoEntity
@@ -17,12 +18,8 @@ import com.berterogarcia.appnea.data.local.UbicacionHelper
 import com.berterogarcia.appnea.data.local.descripcion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.PerfilRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -30,15 +27,21 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 enum class Campo { FECHA, LUGAR, PROFUNDIDAD, PARADA, TIEMPO_FONDO, HORA_ENTRADA, HORA_SALIDA, LASTRE, PROTECCION, TEMP_AIRE, TEMP_AGUA, VISIBILIDAD }
 
-enum class Etapa(val titulo: String, val campos: Set<Campo>) {
-    GENERAL("Datos generales", setOf(Campo.FECHA, Campo.LUGAR, Campo.HORA_ENTRADA, Campo.HORA_SALIDA)),
-    INMERSION("Inmersión", setOf(Campo.PROFUNDIDAD, Campo.TIEMPO_FONDO, Campo.PARADA)),
-    CONDICIONES("Condiciones", setOf(Campo.TEMP_AIRE, Campo.TEMP_AGUA, Campo.VISIBILIDAD)),
-    EQUIPO("Equipo", setOf(Campo.LASTRE, Campo.PROTECCION)),
-    NOTAS("Notas", emptySet())
+enum class Etapa(val campos: Set<Campo>) {
+    GENERAL(setOf(Campo.FECHA, Campo.LUGAR, Campo.HORA_ENTRADA, Campo.HORA_SALIDA)),
+    INMERSION(setOf(Campo.PROFUNDIDAD, Campo.TIEMPO_FONDO, Campo.PARADA)),
+    CONDICIONES(setOf(Campo.TEMP_AIRE, Campo.TEMP_AGUA, Campo.VISIBILIDAD)),
+    EQUIPO(setOf(Campo.LASTRE, Campo.PROTECCION)),
+    NOTAS(emptySet())
 }
 
 private val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy", Locale.US)
@@ -88,7 +91,7 @@ data class NuevaInmersionUiState(
     val latitud: Double? = null,          // lugar marcado (mapa o GPS); null = sin marcar
     val longitud: Double? = null,
     val buscandoUbicacion: Boolean = false,
-    val avisoUbicacion: String? = null,
+    val avisoUbicacion: TextoUi? = null,
     val profundidadMetros: String = "",
     val paradaSeguridadMin: String = "",
     val tiempoFondo: String = "",
@@ -107,11 +110,11 @@ data class NuevaInmersionUiState(
     val comentarios: String = "",
     val guardadoOk: Boolean = false,
     val guardando: Boolean = false,
-    val errores: Map<Campo, String> = emptyMap(),
+    val errores: Map<Campo, TextoUi> = emptyMap(),
     val editando: Boolean = false,          // true = se está editando una inmersión existente
     val cargandoEdicion: Boolean = false,   // leyendo la inmersión a editar
-    val errorCarga: String? = null,         // no se pudo leer la inmersión a editar
-    val errorGuardado: String? = null,
+    val errorCarga: TextoUi? = null,         // no se pudo leer la inmersión a editar
+    val errorGuardado: TextoUi? = null,
 ) {
     /** Equipo que se ofrece según el tipo (en Apnea sin regulador, chaleco ni tubo). */
     val equipoVisible: List<EquipoEntity>
@@ -195,7 +198,7 @@ class NuevaInmersionViewModel(
             val i = runCatching { repository.obtenerPorId(id).first() }.getOrNull()
             if (i == null) {
                 _uiState.update {
-                    it.copy(cargandoEdicion = false, errorCarga = "No se encontró la inmersión para editar.")
+                    it.copy(cargandoEdicion = false, errorCarga = textoUi(R.string.nueva_error_no_encontrada))
                 }
                 return@launch
             }
@@ -279,8 +282,8 @@ class NuevaInmersionViewModel(
                 else it.copy(
                     buscandoUbicacion = false,
                     avisoUbicacion = if (!UbicacionHelper.ubicacionActivada(appContext))
-                        "Activá la ubicación del teléfono y probá de nuevo."
-                    else "No se pudo obtener tu ubicación. Probá marcándola en el mapa."
+                        textoUi(R.string.nueva_aviso_activar_ubicacion)
+                    else textoUi(R.string.nueva_aviso_sin_ubicacion)
                 )
             }
             // Si el campo Lugar está vacío, se completa con el nombre encontrado
@@ -295,7 +298,7 @@ class NuevaInmersionViewModel(
     }
 
     fun permisoUbicacionDenegado() = _uiState.update {
-        it.copy(avisoUbicacion = "Sin permiso de ubicación. Podés marcar el lugar en el mapa.")
+        it.copy(avisoUbicacion = textoUi(R.string.nueva_aviso_sin_permiso))
     }
     fun onProfundidadChange(v: String) = _uiState.update { it.copy(profundidadMetros = v) }
     fun onParadaChange(v: String) = _uiState.update { it.copy(paradaSeguridadMin = v.filter { c -> c.isDigit() || c == '.'}) }
@@ -420,52 +423,52 @@ class NuevaInmersionViewModel(
             }.getOrDefault(false)
             _uiState.update {
                 if (ok) it.copy(guardadoOk = true, guardando = false)
-                else it.copy(guardando = false, errorGuardado = "No se pudo guardar. Probá de nuevo.")
+                else it.copy(guardando = false, errorGuardado = textoUi(R.string.nueva_error_guardar))
             }
         }
     }
 
-    private fun validar(s: NuevaInmersionUiState): Map<Campo, String> {
-        val errores = mutableMapOf<Campo, String>()
-        if (s.fecha.isBlank()) errores[Campo.FECHA] = "Ingresá una fecha."
-        if (s.lugar.isBlank()) errores[Campo.LUGAR] = "Ingresá un lugar."
-        if (s.profundidadMetros.toFloatOrNull() == null) errores[Campo.PROFUNDIDAD] = "Profundidad inválida."
+    private fun validar(s: NuevaInmersionUiState): Map<Campo, TextoUi> {
+        val errores = mutableMapOf<Campo, TextoUi>()
+        if (s.fecha.isBlank()) errores[Campo.FECHA] = textoUi(R.string.nueva_error_fecha)
+        if (s.lugar.isBlank()) errores[Campo.LUGAR] = textoUi(R.string.nueva_error_lugar)
+        if (s.profundidadMetros.toFloatOrNull() == null) errores[Campo.PROFUNDIDAD] = textoUi(R.string.nueva_error_profundidad)
 
         // La parada de seguridad solo existe en buceo con tanque
         if (s.tipo == TipoInmersion.BUCEO) {
             val parada = s.paradaSeguridadMin.toFloatOrNull()
-            if (parada == null || parada < 3f) errores[Campo.PARADA] = "Mínimo 3 minutos."
+            if (parada == null || parada < 3f) errores[Campo.PARADA] = textoUi(R.string.nueva_error_parada)
         }
 
-        if (!REGEX_TIEMPO_FONDO.matches(s.tiempoFondo)) errores[Campo.TIEMPO_FONDO] = "Formato esperado mm:ss."
+        if (!REGEX_TIEMPO_FONDO.matches(s.tiempoFondo)) errores[Campo.TIEMPO_FONDO] = textoUi(R.string.nueva_error_tiempo)
 
         val horaEntrada = s.horaEntrada.takeIf { it.isNotBlank() }
             ?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
         val horaSalida = s.horaSalida.takeIf { it.isNotBlank() }
             ?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
 
-        if (horaEntrada == null) errores[Campo.HORA_ENTRADA] = "Elegí la hora de entrada"
-        if (horaSalida == null) errores[Campo.HORA_SALIDA] = "Elegí la hora de salida"
+        if (horaEntrada == null) errores[Campo.HORA_ENTRADA] = textoUi(R.string.nueva_error_hora_entrada)
+        if (horaSalida == null) errores[Campo.HORA_SALIDA] = textoUi(R.string.nueva_error_hora_salida)
         if (horaEntrada != null && horaSalida != null && horaEntrada.isAfter(horaSalida)) {
-            errores[Campo.HORA_SALIDA] = "Debe ser posterior a la hora de entrada"
+            errores[Campo.HORA_SALIDA] = textoUi(R.string.nueva_error_salida_anterior)
         }
 
         val lastre = s.lastreKg.toFloatOrNull()
-        if (lastre == null || lastre < 0f) errores[Campo.LASTRE] = "Lastre minimo 0kg."
+        if (lastre == null || lastre < 0f) errores[Campo.LASTRE] = textoUi(R.string.nueva_error_lastre)
 
         val proteccion = s.proteccionMm.toFloatOrNull()
-        if (proteccion == null || proteccion < 0f) errores[Campo.PROTECCION] = "Proteccion minima 0mm."
+        if (proteccion == null || proteccion < 0f) errores[Campo.PROTECCION] = textoUi(R.string.nueva_error_proteccion)
 
         val temperaturaAire = s.temperaturaAireC.toFloatOrNull()
-        if (temperaturaAire == null || temperaturaAire < -20f) errores[Campo.TEMP_AIRE] = "Temperatura mínima -20°C."
-        else if (temperaturaAire > 45f) errores[Campo.TEMP_AIRE] = "Temperatura máxima 45°C."
+        if (temperaturaAire == null || temperaturaAire < -20f) errores[Campo.TEMP_AIRE] = textoUi(R.string.nueva_error_temp_minima, -20)
+        else if (temperaturaAire > 45f) errores[Campo.TEMP_AIRE] = textoUi(R.string.nueva_error_temp_maxima, 45)
 
         val temperaturaAgua = s.temperaturaAguaC.toFloatOrNull()
-        if (temperaturaAgua == null || temperaturaAgua < -2f) errores[Campo.TEMP_AGUA] = "Temperatura mínima -2°C."
-        else if (temperaturaAgua > 40f) errores[Campo.TEMP_AGUA] = "Temperatura máxima 40°C."
+        if (temperaturaAgua == null || temperaturaAgua < -2f) errores[Campo.TEMP_AGUA] = textoUi(R.string.nueva_error_temp_minima, -2)
+        else if (temperaturaAgua > 40f) errores[Campo.TEMP_AGUA] = textoUi(R.string.nueva_error_temp_maxima, 40)
 
         val visibilidad = s.visibilidadMetros.toFloatOrNull()
-        if (visibilidad == null || visibilidad < 0f) errores[Campo.VISIBILIDAD] = "Visibilidad minima 0m."
+        if (visibilidad == null || visibilidad < 0f) errores[Campo.VISIBILIDAD] = textoUi(R.string.nueva_error_visibilidad)
         return errores
     }
 

@@ -1,6 +1,5 @@
 package com.berterogarcia.appnea.ui.entrenamiento
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,51 +10,54 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SecondaryTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.ui.components.BotonPeligro
+import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.BotonSecundario
+import com.berterogarcia.appnea.ui.components.EncabezadoGrupo
+import com.berterogarcia.appnea.ui.components.FilaLista
+import com.berterogarcia.appnea.ui.components.GrupoLista
+import com.berterogarcia.appnea.ui.components.Insignia
 import com.berterogarcia.appnea.ui.components.MantenerPantallaEncendida
+import com.berterogarcia.appnea.ui.components.SelectorSegmentado
+import com.berterogarcia.appnea.ui.components.TipoInsignia
 import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.FondoTarjeta
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
-import com.berterogarcia.appnea.ui.components.TituloPantalla
-import com.berterogarcia.appnea.ui.components.BotonVerEstadisticas
-import androidx.compose.ui.res.stringResource
 
 private val HH_MM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
+/** Modos de la pestaña Entrenar (botones segmentados del encabezado). */
+private enum class ModoEntrenar { TABLAS, LIBRE }
+
 /**
  * Pestaña Entrenar.
- * - Elegir tabla / Libre: con pestañas.
- * - En curso y Resultado: a pantalla completa (sin pestañas ni barra), para no salir sin querer.
+ * - Elegir tabla / Libre: barra superior + botones segmentados (y se puede deslizar entre los dos).
+ * - En curso y Resultado: a pantalla completa (sin barra de navegación), para no salir sin querer.
  *
- * [onVerEstadisticas] y [onGuardarIntentos] quedan preparados para la pantalla de
- * Estadísticas: mientras sean null no se muestran.
+ * [onVerEstadisticas] y [onGuardarIntentos] son opcionales: mientras sean null no se muestran.
  */
 @Composable
 fun CronometroScreen(
@@ -95,46 +97,44 @@ private fun PestaniasEntrenar(
     onVerEstadisticas: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
-    val titulos = listOf("Tablas", "Libre")
-    val pagerState = rememberPagerState(initialPage = 0) { titulos.size }
+    val modos = ModoEntrenar.entries
+    val pagerState = rememberPagerState(initialPage = 0) { modos.size }
     val scope = rememberCoroutineScope()
+    val etiquetas = mapOf(
+        ModoEntrenar.TABLAS to stringResource(R.string.entrenar_modo_tablas),
+        ModoEntrenar.LIBRE to stringResource(R.string.entrenar_modo_libre)
+    )
 
     Column(modifier = modifier.fillMaxSize()) {
-        // Mismos márgenes que Inmersiones (16 dp a cada lado) para que el botón quede en el mismo lugar
-        TituloPantalla(
+        BarraSuperior(
             titulo = stringResource(R.string.titulo_entrenar),
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            accion = onVerEstadisticas?.let { { BotonVerEstadisticas(onClick = it) } }
-        )
-        SecondaryTabRow(
-            selectedTabIndex = pagerState.currentPage,
-            containerColor = Color.Transparent
-        ) {
-            titulos.forEachIndexed { index, titulo ->
-                Tab(
-                    selected = pagerState.currentPage == index,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                    text = { Text(titulo) },
-                    icon = {
+            acciones = {
+                if (onVerEstadisticas != null) {
+                    IconButton(onClick = onVerEstadisticas) {
                         Icon(
-                            painter = painterResource(
-                                if (index == 0) R.drawable.ic_entrenamiento else R.drawable.ic_cronometro
-                            ),
-                            contentDescription = titulo
+                            painterResource(R.drawable.ic_ms_insights),
+                            contentDescription = stringResource(R.string.accion_estadisticas)
                         )
                     }
-                )
+                }
             }
-        }
+        )
+        SelectorSegmentado(
+            opciones = modos,
+            seleccionada = modos[pagerState.currentPage],
+            etiqueta = { etiquetas.getValue(it) },
+            onSeleccion = { modo -> modo?.let { scope.launch { pagerState.animateScrollToPage(it.ordinal) } } },
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-            when (page) {
-                0 -> SeleccionTablaScreen(
+            when (modos[page]) {
+                ModoEntrenar.TABLAS -> SeleccionTablaScreen(
                     estado = estado,
                     viewModel = entrenamientoViewModel,
                     onCrearTabla = onCrearTabla,
                     modifier = Modifier.fillMaxSize()
                 )
-                1 -> CronometroLibre(
+                ModoEntrenar.LIBRE -> CronometroLibre(
                     viewModel = cronometroViewModel,
                     onGuardarIntentos = onGuardarIntentos,
                     modifier = Modifier.fillMaxSize()
@@ -146,7 +146,7 @@ private fun PestaniasEntrenar(
 
 // ================================ CRONÓMETRO LIBRE ================================
 
-/** Apnea estática libre. El aviso de seguridad se muestra SIEMPRE (acá no hay tilde). */
+/** Apnea estática libre. El aviso de seguridad se muestra SIEMPRE (acá no hay "acompañado"). */
 @Composable
 private fun CronometroLibre(
     viewModel: CronometroViewModel,
@@ -175,109 +175,114 @@ private fun CronometroLibre(
             modifier = Modifier.size(200.dp)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Apnea estática", style = MaterialTheme.typography.bodySmall, color = TextoSecundario)
+                Text(
+                    stringResource(R.string.entrenar_apnea_estatica).uppercase(),
+                    style = MaterialTheme.typography.labelMedium,
+                    letterSpacing = 0.6.sp,
+                    color = TextoSuperficieVariante
+                )
                 Row {
                     Text(
                         minSeg((estado.transcurridoMs / 1000L).toInt()),
                         fontSize = 46.sp,
-                        fontWeight = FontWeight.Bold,
+                        color = TextoSuperficie,
                         modifier = Modifier.alignByBaseline()
                     )
                     Text(
                         ".${(estado.transcurridoMs % 1000L) / 100L}",
-                        fontSize = 22.sp,
-                        color = TextoSecundario,
+                        fontSize = 26.sp,
+                        color = TextoSuperficieVariante,
                         modifier = Modifier.alignByBaseline()
                     )
                 }
                 if (mejor != null) {
                     Text(
-                        "mejor de hoy: ${minSeg((mejor / 1000L).toInt())}",
+                        stringResource(R.string.entrenar_mejor_de_hoy, minSeg((mejor / 1000L).toInt())),
                         style = MaterialTheme.typography.bodySmall,
-                        color = TextoSecundario
+                        color = TextoSuperficieVariante
                     )
                 }
             }
         }
         Text(
-            "El anillo da una vuelta por minuto",
+            stringResource(R.string.entrenar_anillo_minuto),
             style = MaterialTheme.typography.labelSmall,
-            color = TextoTerciario,
+            color = TextoSuperficieVariante,
             modifier = Modifier.padding(top = 6.dp)
         )
 
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             BotonSecundario(
-                texto = "Reiniciar",
+                texto = stringResource(R.string.entrenar_reiniciar),
                 onClick = viewModel::onReiniciar,
                 enabled = estado.corriendo || estado.transcurridoMs > 0L,
+                icono = painterResource(R.drawable.ic_ms_restart_alt),
                 modifier = Modifier.weight(1f)
             )
             if (estado.corriendo) {
-                BotonPeligro(texto = "Parar", onClick = viewModel::onParar, modifier = Modifier.weight(1f))
+                BotonPrincipal(
+                    texto = stringResource(R.string.entrenar_parar),
+                    onClick = viewModel::onParar,
+                    icono = painterResource(R.drawable.ic_ms_stop),
+                    modifier = Modifier.weight(1f)
+                )
             } else {
-                BotonPrincipal(texto = "Iniciar", onClick = viewModel::onIniciar, modifier = Modifier.weight(1f))
+                BotonPrincipal(
+                    texto = stringResource(R.string.entrenar_iniciar_libre),
+                    onClick = viewModel::onIniciar,
+                    icono = rememberVectorPainter(Icons.Rounded.PlayArrow),
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
 
         if (estado.intentos.isNotEmpty() && mejor != null) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Intentos de hoy",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
-                // Preparado para Estadísticas: aparece cuando se conecte onGuardarIntentos
-                if (onGuardarIntentos != null) {
-                    TextButton(onClick = { onGuardarIntentos(estado.intentos) }) { Text("Guardar", color = Acento) }
+            EncabezadoGrupo(
+                titulo = stringResource(R.string.entrenar_intentos_hoy),
+                // Aparece cuando se conecte onGuardarIntentos
+                accion = if (onGuardarIntentos != null) stringResource(R.string.accion_guardar) else null,
+                onAccion = { onGuardarIntentos?.invoke(estado.intentos) }
+            )
+            GrupoLista {
+                estado.intentos.forEachIndexed { i, intento ->
+                    FilaIntento(intento = intento, mejorMs = mejor, indice = i, total = estado.intentos.size)
                 }
-            }
-            estado.intentos.forEach { intento ->
-                FilaIntento(intento = intento, mejorMs = mejor)
             }
         }
     }
 }
 
 @Composable
-private fun FilaIntento(intento: IntentoApnea, mejorMs: Long) {
+private fun FilaIntento(intento: IntentoApnea, mejorMs: Long, indice: Int, total: Int) {
     val esMejor = intento.duracionMs == mejorMs
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 6.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(FondoTarjeta)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                "#${intento.numero} · ${intento.hora.format(HH_MM)}",
-                style = MaterialTheme.typography.labelSmall,
-                color = TextoSecundario
-            )
-            Text(
-                "${minSeg((intento.duracionMs / 1000L).toInt())}.${(intento.duracionMs % 1000L) / 100L}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+    val tiempo = "${minSeg((intento.duracionMs / 1000L).toInt())}.${(intento.duracionMs % 1000L) / 100L}"
+    FilaLista(
+        titulo = "#${intento.numero} · ${intento.hora.format(HH_MM)}",
+        indice = indice,
+        total = total,
+        fin = {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (esMejor) {
+                    Insignia(
+                        texto = stringResource(R.string.entrenar_mejor),
+                        tipo = TipoInsignia.ADVERTENCIA,
+                        icono = rememberVectorPainter(Icons.Rounded.Star)
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(tiempo, style = MaterialTheme.typography.titleMedium, color = TextoSuperficie)
+                    if (!esMejor) {
+                        Text(
+                            "−${minSeg(((mejorMs - intento.duracionMs) / 1000L).toInt())}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextoSuperficieVariante
+                        )
+                    }
+                }
+            }
         }
-        if (esMejor) {
-            Text("★ Mejor", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Acento)
-        } else {
-            Text(
-                "−${minSeg(((mejorMs - intento.duracionMs) / 1000L).toInt())}",
-                style = MaterialTheme.typography.labelMedium,
-                color = TextoSecundario
-            )
-        }
-    }
+    )
 }

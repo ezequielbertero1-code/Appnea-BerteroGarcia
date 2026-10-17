@@ -1,6 +1,9 @@
 package com.berterogarcia.appnea.ui.perfil.comun
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
 import com.berterogarcia.appnea.ui.theme.ColorError
 import com.berterogarcia.appnea.ui.theme.ColorOk
@@ -30,25 +33,27 @@ fun estadoVencimiento(
 data class Insignia(val texto: String, val color: Color)
 
 
+@Composable
 fun insigniaVencimiento(fecha: LocalDate?, hoy: LocalDate = LocalDate.now()): Insignia? =
     when (estadoVencimiento(fecha, hoy)) {
         EstadoVencimiento.SIN_FECHA -> null
-        EstadoVencimiento.VENCIDO -> Insignia("Vencido", ColorError)
+        EstadoVencimiento.VENCIDO -> Insignia(stringResource(R.string.vencimiento_vencido), ColorError)
         EstadoVencimiento.POR_VENCER -> {
             val dias = fecha?.let { ChronoUnit.DAYS.between(hoy, it) } ?: 0L
             val texto = when (dias) {
-                0L -> "Vence hoy"
-                1L -> "Vence mañana"
-                else -> "Vence en $dias días"
+                0L -> stringResource(R.string.vencimiento_hoy)
+                1L -> stringResource(R.string.vencimiento_manana)
+                else -> stringResource(R.string.vencimiento_en_dias, dias)
             }
             Insignia(texto, ColorAdvertencia)
         }
-        EstadoVencimiento.VIGENTE -> Insignia("Vigente", ColorOk)
+        EstadoVencimiento.VIGENTE -> Insignia(stringResource(R.string.vencimiento_vigente), ColorOk)
     }
 
+@Composable
 fun insigniaMantenimiento(fecha: LocalDate?, hoy: LocalDate = LocalDate.now()): Insignia? =
     when (estadoVencimiento(fecha, hoy)) {
         EstadoVencimiento.SIN_FECHA, EstadoVencimiento.VIGENTE -> null
-        EstadoVencimiento.VENCIDO -> Insignia("Service atrasado", ColorError)
-        EstadoVencimiento.POR_VENCER -> Insignia("Service pronto", ColorAdvertencia)
+        EstadoVencimiento.VENCIDO -> Insignia(stringResource(R.string.service_atrasado), ColorError)
+        EstadoVencimiento.POR_VENCER -> Insignia(stringResource(R.string.service_pronto), ColorAdvertencia)
     }

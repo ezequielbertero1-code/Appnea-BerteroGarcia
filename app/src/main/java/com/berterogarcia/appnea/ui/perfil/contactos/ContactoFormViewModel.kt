@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_CARGAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_GUARDAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_SIN_SESION
@@ -31,10 +34,10 @@ data class ContactoFormUiState(
     /** true si al abrir ya era el principal: no se puede "desmarcar" (siempre tiene que haber uno). */
     val eraPrincipal: Boolean = false,
     val notas: String = "",
-    val errores: Map<CampoContacto, String> = emptyMap(),
+    val errores: Map<CampoContacto, TextoUi> = emptyMap(),
     val guardando: Boolean = false,
     val guardadoOk: Boolean = false,
-    val errorGeneral: String? = null,
+    val errorGeneral: TextoUi? = null,
     val bloqueado: Boolean = false
 ) {
     val puedeGuardar: Boolean get() = !cargando && !bloqueado
@@ -71,7 +74,7 @@ class ContactoFormViewModel(
                         it.copy(cargando = false, esPrimerContacto = cantidad == 0, esPrincipal = cantidad == 0)
                     }
                     existente == null -> _uiState.update {
-                        it.copy(cargando = false, bloqueado = true, errorGeneral = "El contacto ya no existe.")
+                        it.copy(cargando = false, bloqueado = true, errorGeneral = textoUi(R.string.perfil_error_contacto_no_existe))
                     }
                     else -> _uiState.update {
                         it.copy(
@@ -135,8 +138,8 @@ class ContactoFormViewModel(
         }
     }
 
-    private fun validar(s: ContactoFormUiState): Map<CampoContacto, String> = buildMap {
-        (Validaciones.obligatorio(s.nombre, "el nombre") ?: Validaciones.largoMaximo(s.nombre, 60))
+    private fun validar(s: ContactoFormUiState): Map<CampoContacto, TextoUi> = buildMap {
+        (Validaciones.obligatorio(s.nombre, textoUi(R.string.campo_el_nombre)) ?: Validaciones.largoMaximo(s.nombre, 60))
             ?.let { put(CampoContacto.NOMBRE, it) }
         Validaciones.largoMaximo(s.relacion, 40)?.let { put(CampoContacto.RELACION, it) }
         Validaciones.telefono(s.telefono, obligatorio = true)?.let { put(CampoContacto.TELEFONO, it) }

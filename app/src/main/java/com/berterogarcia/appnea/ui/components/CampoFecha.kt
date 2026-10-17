@@ -5,14 +5,13 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -25,13 +24,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.BordeSuave
-import com.berterogarcia.appnea.ui.theme.ColorError
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
-import com.berterogarcia.appnea.ui.theme.VeloFuerte
-import com.berterogarcia.appnea.ui.theme.VeloSuave
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import com.berterogarcia.appnea.R
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -82,7 +77,7 @@ fun CampoFecha(
         readOnly = true,
         singleLine = true,
         label = { Text(etiqueta) },
-        placeholder = { Text("dd/mm/aaaa") },
+        placeholder = { Text(stringResource(R.string.campo_formato_fecha)) },
         isError = esError,
         supportingText = { if (esError && mensajeError != null) Text(mensajeError) },
         interactionSource = interaccion,
@@ -90,16 +85,16 @@ fun CampoFecha(
             Row {
                 if (permitirBorrar && fecha != null) {
                     IconButton(onClick = { onFechaChange(null) }) {
-                        Icon(Icons.Default.Clear, contentDescription = "Borrar fecha")
+                        Icon(Icons.Rounded.Clear, contentDescription = stringResource(R.string.campo_borrar_fecha))
                     }
                 }
                 IconButton(onClick = { mostrarDialogo = true }) {
-                    Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
+                    Icon(painterResource(R.drawable.ic_ms_calendar_month), contentDescription = stringResource(R.string.campo_elegir_fecha))
                 }
             }
         },
         modifier = modifier,
-        colors = coloresCampoFecha()
+        colors = coloresCampoTexto()
     )
 
     if (mostrarDialogo) {
@@ -129,10 +124,10 @@ fun CampoFecha(
                         mostrarDialogo = false
                     },
                     enabled = estado.selectedDateMillis != null
-                ) { Text("Aceptar") }
+                ) { Text(stringResource(R.string.accion_aceptar)) }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarDialogo = false }) { Text("Cancelar") }
+                TextButton(onClick = { mostrarDialogo = false }) { Text(stringResource(R.string.accion_cancelar)) }
             }
         ) {
             DatePicker(state = estado)
@@ -143,27 +138,3 @@ fun CampoFecha(
 private fun LocalDate.aMillisUtc(): Long = atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
 private fun Long.aLocalDateUtc(): LocalDate = Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDate()
-
-/** Mismos colores que CampoTexto / DatePickerField para que todos los formularios se vean igual. */
-@Composable
-private fun coloresCampoFecha() = OutlinedTextFieldDefaults.colors(
-    focusedContainerColor = VeloFuerte,
-    unfocusedContainerColor = VeloSuave,
-    focusedBorderColor = Acento,
-    unfocusedBorderColor = BordeSuave,
-    focusedLabelColor = Acento,
-    unfocusedLabelColor = TextoTerciario,
-    focusedTextColor = Color.White,
-    unfocusedTextColor = Color.White,
-    focusedPlaceholderColor = BordeSuave,
-    unfocusedPlaceholderColor = BordeSuave,
-    cursorColor = Acento,
-    focusedTrailingIconColor = Acento,
-    unfocusedTrailingIconColor = TextoTerciario,
-    errorContainerColor = VeloFuerte,
-    errorBorderColor = ColorError,
-    errorLabelColor = ColorError,
-    errorTextColor = Color.White,
-    errorSupportingTextColor = ColorError,
-    errorTrailingIconColor = ColorError
-)

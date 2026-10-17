@@ -1,36 +1,31 @@
 package com.berterogarcia.appnea.ui.entrenamiento
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
@@ -40,19 +35,30 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.Fase
 import com.berterogarcia.appnea.data.local.TablaPersonalizadaEntity
 import com.berterogarcia.appnea.data.local.TipoFase
 import com.berterogarcia.appnea.data.repository.TablaPersonalizadaRepository
+import com.berterogarcia.appnea.ui.components.BarraAccionesInferior
+import com.berterogarcia.appnea.ui.components.BarraSuperior
+import com.berterogarcia.appnea.ui.components.BotonContorno
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.CampoTexto
+import com.berterogarcia.appnea.ui.components.FilaLista
+import com.berterogarcia.appnea.ui.components.GrupoLista
+import com.berterogarcia.appnea.ui.components.IconoCirculo
+import com.berterogarcia.appnea.ui.components.NavegacionBarra
 import com.berterogarcia.appnea.ui.components.SelectorSegmentado
+import com.berterogarcia.appnea.ui.components.Stepper
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.TonoIcono
+import com.berterogarcia.appnea.ui.components.resolver
+import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorError
-import com.berterogarcia.appnea.ui.theme.FondoTarjeta
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -72,7 +78,7 @@ data class CrearTablaUiState(
     val duracionNueva: Int = 120,
     val guardando: Boolean = false,
     val guardadoOk: Boolean = false,
-    val error: String? = null
+    val error: TextoUi? = null
 ) {
     val tieneApnea: Boolean get() = fases.any { it.tipo == TipoFase.APNEA }
     val puedeGuardar: Boolean get() = nombre.isNotBlank() && tieneApnea && !guardando
@@ -131,7 +137,7 @@ class CrearTablaViewModel(private val repository: TablaPersonalizadaRepository) 
             }.getOrDefault(false)
             _uiState.update {
                 if (ok) it.copy(guardando = false, guardadoOk = true)
-                else it.copy(guardando = false, error = "No se pudo guardar la tabla. Probá de nuevo.")
+                else it.copy(guardando = false, error = textoUi(R.string.crear_tabla_error_guardar))
             }
         }
     }
@@ -154,6 +160,8 @@ fun CrearTablaScreen(
     modifier: Modifier = Modifier
 ) {
     val s by viewModel.uiState.collectAsStateWithLifecycle()
+    // Las etiquetas se resuelven acá: el selector recibe una función común (no @Composable)
+    val etiquetas = TipoFase.entries.associateWith { etiquetaFase(it) }
 
     LaunchedEffect(s.guardadoOk) { if (s.guardadoOk) onCerrar() }
 
@@ -161,164 +169,184 @@ fun CrearTablaScreen(
         modifier = modifier
             .fillMaxSize()
             .imePadding()
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onCerrar) { Icon(Icons.Filled.Close, contentDescription = "Cerrar") }
-            Text("Nueva tabla", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        }
+        BarraSuperior(
+            titulo = stringResource(R.string.crear_tabla_titulo),
+            navegacion = NavegacionBarra.CERRAR,
+            onNavegacion = onCerrar
+        )
 
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        Column(
+            Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+        ) {
             CampoTexto(
                 valor = s.nombre,
                 onValorChange = viewModel::onNombreChange,
-                etiqueta = "Nombre",
+                etiqueta = stringResource(R.string.crear_tabla_nombre),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Done
                 ),
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                modifier = Modifier.fillMaxWidth()
             )
 
             if (s.fases.isEmpty()) {
                 Text(
-                    "Todavía no agregaste fases. Empezá con una preparación.",
+                    stringResource(R.string.crear_tabla_sin_fases),
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextoSecundario,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    color = TextoSuperficieVariante,
+                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
                 )
             } else {
-                TiraFases(s.fases, alto = 9.dp, modifier = Modifier.padding(top = 8.dp))
-                Row(Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 6.dp)) {
+                Row(Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, bottom = 8.dp)) {
                     Text(
-                        "${s.fases.size} fases · ${s.fases.count { it.tipo == TipoFase.APNEA }} apneas",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TextoSecundario,
+                        stringResource(
+                            R.string.crear_tabla_resumen,
+                            s.fases.size,
+                            s.fases.count { it.tipo == TipoFase.APNEA }
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextoSuperficieVariante,
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        "Total ${minSeg(s.fases.sumOf { it.duracionSegundos })}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TextoSecundario
+                        stringResource(R.string.tabla_total, minSeg(s.fases.sumOf { it.duracionSegundos })),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextoSuperficieVariante
                     )
                 }
-                s.fases.forEachIndexed { i, fase ->
-                    FilaFaseEditable(
-                        numero = i + 1,
-                        fase = fase,
-                        onMenos = { viewModel.onAjustarFase(i, -PASO_SEG) },
-                        onMas = { viewModel.onAjustarFase(i, PASO_SEG) },
-                        onQuitar = { viewModel.onQuitarFase(i) }
-                    )
+                TiraFases(s.fases, alto = 8.dp, modifier = Modifier.padding(bottom = 10.dp))
+                GrupoLista {
+                    s.fases.forEachIndexed { i, fase ->
+                        FilaFaseEditable(
+                            numero = i + 1,
+                            fase = fase,
+                            indice = i,
+                            total = s.fases.size,
+                            onMenos = { viewModel.onAjustarFase(i, -PASO_SEG) },
+                            onMas = { viewModel.onAjustarFase(i, PASO_SEG) },
+                            onQuitar = { viewModel.onQuitarFase(i) }
+                        )
+                    }
                 }
+                Text(
+                    stringResource(R.string.crear_tabla_ayuda_pasos, PASO_SEG),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextoSuperficieVariante,
+                    modifier = Modifier.padding(start = 4.dp, top = 6.dp)
+                )
             }
 
-            if (s.puedeRepetir) {
-                TextButton(
-                    onClick = viewModel::onRepetirUltimas,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 6.dp)
-                        .border(1.dp, Acento.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
-                ) { Text("⟳ Repetir última apnea + descanso", color = Acento) }
-            }
-
+            // ---- Agregar fase ----
             Text(
-                "Agregar fase",
+                stringResource(R.string.crear_tabla_agregar_fase),
                 style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                color = Acento,
+                modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 8.dp)
             )
             SelectorSegmentado(
                 opciones = TipoFase.entries,
                 seleccionada = s.tipoNueva,
-                etiqueta = ::etiquetaFase,
+                etiqueta = { etiquetas.getValue(it) },
                 onSeleccion = { tipo -> tipo?.let(viewModel::onTipoNuevaChange) }
             )
             Row(
-                Modifier.fillMaxWidth().padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SelectorPaso(
+                Stepper(
                     valor = minSeg(s.duracionNueva),
                     onMenos = { viewModel.onDuracionNuevaPaso(-PASO_SEG) },
                     onMas = { viewModel.onDuracionNuevaPaso(PASO_SEG) },
-                    descripcion = "duración de la fase nueva",
+                    descripcionMenos = stringResource(R.string.crear_tabla_restar_nueva, PASO_SEG),
+                    descripcionMas = stringResource(R.string.crear_tabla_sumar_nueva, PASO_SEG)
+                )
+                BotonContorno(
+                    texto = stringResource(R.string.crear_tabla_agregar),
+                    onClick = viewModel::onAgregar,
+                    icono = rememberVectorPainter(Icons.Rounded.Add),
                     modifier = Modifier.weight(1f)
                 )
-                BotonSecundario(texto = "+ Agregar", onClick = viewModel::onAgregar, modifier = Modifier.weight(1f))
             }
-            Text(
-                "Los botones − / + suman o restan 15 s.",
-                style = MaterialTheme.typography.labelSmall,
-                color = TextoTerciario,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(top = 6.dp)
-            )
+            if (s.puedeRepetir) {
+                BotonSecundario(
+                    texto = stringResource(R.string.crear_tabla_repetir),
+                    onClick = viewModel::onRepetirUltimas,
+                    icono = painterResource(R.drawable.ic_ms_repeat),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                )
+            }
+
+            // Por qué no se puede guardar todavía (o el error si falló)
+            val pista = when {
+                s.error != null -> s.error?.resolver()
+                s.nombre.isBlank() -> stringResource(R.string.crear_tabla_pista_nombre)
+                !s.tieneApnea -> stringResource(R.string.crear_tabla_pista_apnea)
+                else -> null
+            }
+            pista?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (s.error != null) ColorError else TextoSuperficieVariante,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
+                )
+            }
         }
 
-        // Por qué no se puede guardar todavía (o el error si falló)
-        val pista = when {
-            s.error != null -> s.error
-            s.nombre.isBlank() -> "Poné un nombre para la tabla."
-            !s.tieneApnea -> "Agregá al menos una apnea."
-            else -> null
-        }
-        pista?.let {
-            Text(
-                it,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (s.error != null) ColorError else TextoTerciario,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        BarraAccionesInferior {
+            BotonPrincipal(
+                texto = stringResource(if (s.guardando) R.string.accion_guardando else R.string.crear_tabla_guardar),
+                onClick = viewModel::onGuardar,
+                enabled = s.puedeGuardar,
+                cargando = s.guardando,
+                modifier = Modifier.weight(1f)
             )
         }
-        BotonPrincipal(
-            texto = if (s.guardando) "Guardando…" else "Guardar tabla",
-            onClick = viewModel::onGuardar,
-            enabled = s.puedeGuardar,
-            cargando = s.guardando,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-        )
     }
 }
 
+/** Fase de la tabla en armado: ícono del tipo, nombre, stepper −/+ y botón para quitarla. */
 @Composable
 private fun FilaFaseEditable(
     numero: Int,
     fase: Fase,
+    indice: Int,
+    total: Int,
     onMenos: () -> Unit,
     onMas: () -> Unit,
     onQuitar: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 6.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(FondoTarjeta)
-            .padding(start = 12.dp, top = 6.dp, bottom = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            Modifier
-                .size(10.dp)
-                .clip(RoundedCornerShape(3.dp))
-                .background(colorFase(fase.tipo))
-        )
-        Spacer(Modifier.width(10.dp))
-        Column(Modifier.weight(1f)) {
-            Text(etiquetaFase(fase.tipo), style = MaterialTheme.typography.bodyMedium)
-            Text("Fase $numero", style = MaterialTheme.typography.labelSmall, color = TextoTerciario)
+    FilaLista(
+        titulo = etiquetaFase(fase.tipo),
+        subtitulo = stringResource(R.string.crear_tabla_fase_n, numero),
+        indice = indice,
+        total = total,
+        inicio = {
+            IconoCirculo(
+                painterResource(iconoFase(fase.tipo)),
+                tono = if (fase.tipo == TipoFase.APNEA) TonoIcono.APNEA else TonoIcono.NORMAL,
+                modifier = Modifier.size(32.dp)
+            )
+        },
+        fin = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Stepper(
+                    valor = minSeg(fase.duracionSegundos),
+                    onMenos = onMenos,
+                    onMas = onMas,
+                    descripcionMenos = stringResource(R.string.crear_tabla_restar_fase, PASO_SEG, numero),
+                    descripcionMas = stringResource(R.string.crear_tabla_sumar_fase, PASO_SEG, numero)
+                )
+                IconButton(onClick = onQuitar) {
+                    Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.crear_tabla_quitar_fase, numero))
+                }
+            }
         }
-        SelectorPaso(
-            valor = minSeg(fase.duracionSegundos),
-            onMenos = onMenos,
-            onMas = onMas,
-            descripcion = "duración de la fase $numero"
-        )
-        IconButton(onClick = onQuitar) {
-            Icon(Icons.Filled.Close, contentDescription = "Quitar fase $numero", tint = TextoTerciario)
-        }
-    }
+    )
 }

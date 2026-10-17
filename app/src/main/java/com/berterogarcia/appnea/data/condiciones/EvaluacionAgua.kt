@@ -5,40 +5,43 @@ import kotlin.math.roundToInt
 /** Semáforo para entrar al agua (buceo y apnea) con los datos de una hora. */
 fun evaluarAptitudAgua(clima: HoraClima?, mar: HoraMar?): AptitudAgua {
     var nivel = Aptitud.BUENA
-    val motivos = mutableListOf<String>()
-    fun empeorar(a: Aptitud, motivo: String) {
+    val motivos = mutableListOf<MotivoAptitud>()
+    fun empeorar(a: Aptitud, motivo: MotivoAptitud) {
         if (a.ordinal > nivel.ordinal) nivel = a
         motivos += motivo
     }
 
     val ola = mar?.olaM
     if (ola != null) {
-        if (ola >= 1.5) empeorar(Aptitud.MALA, "Olas de ${"%.1f".format(ola)} m")
-        else if (ola >= 0.8) empeorar(Aptitud.REGULAR, "Olas de ${"%.1f".format(ola)} m")
+        val motivo = MotivoAptitud(TipoMotivo.OLAS, "%.1f".format(ola))
+        if (ola >= 1.5) empeorar(Aptitud.MALA, motivo)
+        else if (ola >= 0.8) empeorar(Aptitud.REGULAR, motivo)
     }
     val viento = clima?.vientoKmh
     if (viento != null) {
-        if (viento >= 30) empeorar(Aptitud.MALA, "Viento de ${viento.roundToInt()} km/h")
-        else if (viento >= 20) empeorar(Aptitud.REGULAR, "Viento de ${viento.roundToInt()} km/h")
+        val motivo = MotivoAptitud(TipoMotivo.VIENTO, viento.roundToInt().toString())
+        if (viento >= 30) empeorar(Aptitud.MALA, motivo)
+        else if (viento >= 20) empeorar(Aptitud.REGULAR, motivo)
     }
     val rafagas = clima?.rafagasKmh
     if (rafagas != null) {
-        if (rafagas >= 50) empeorar(Aptitud.MALA, "Ráfagas de ${rafagas.roundToInt()} km/h")
-        else if (rafagas >= 35) empeorar(Aptitud.REGULAR, "Ráfagas de ${rafagas.roundToInt()} km/h")
+        val motivo = MotivoAptitud(TipoMotivo.RAFAGAS, rafagas.roundToInt().toString())
+        if (rafagas >= 50) empeorar(Aptitud.MALA, motivo)
+        else if (rafagas >= 35) empeorar(Aptitud.REGULAR, motivo)
     }
     val codigo = clima?.codigoClima
     if (codigo != null) {
-        if (codigo >= 95) empeorar(Aptitud.MALA, "Tormenta eléctrica")
-        else if (codigo in 61..67 || codigo in 80..82) empeorar(Aptitud.REGULAR, "Lluvia")
+        if (codigo >= 95) empeorar(Aptitud.MALA, MotivoAptitud(TipoMotivo.TORMENTA))
+        else if (codigo in 61..67 || codigo in 80..82) empeorar(Aptitud.REGULAR, MotivoAptitud(TipoMotivo.LLUVIA))
     }
     val visibilidad = clima?.visibilidadM
     if (visibilidad != null && visibilidad < 1000) {
-        empeorar(Aptitud.REGULAR, "Poca visibilidad en superficie (niebla)")
+        empeorar(Aptitud.REGULAR, MotivoAptitud(TipoMotivo.NIEBLA))
     }
     val corriente = mar?.corrienteKmh
     if (corriente != null && corriente >= 2.5) {
-        empeorar(Aptitud.REGULAR, "Corriente de ${"%.1f".format(corriente)} km/h")
+        empeorar(Aptitud.REGULAR, MotivoAptitud(TipoMotivo.CORRIENTE, "%.1f".format(corriente)))
     }
-    if (motivos.isEmpty()) motivos += "Viento y mar tranquilos"
+    if (motivos.isEmpty()) motivos += MotivoAptitud(TipoMotivo.TRANQUILO)
     return AptitudAgua(nivel, motivos)
 }

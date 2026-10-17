@@ -141,16 +141,6 @@ object Astronomia {
         else -> "Menguante"
     }
 
-    fun emojiFase(elongacion: Double): String = when {
-        elongacion < 10 || elongacion >= 350 -> "🌑"
-        elongacion < 80 -> "🌒"
-        elongacion < 100 -> "🌓"
-        elongacion < 170 -> "🌔"
-        elongacion < 190 -> "🌕"
-        elongacion < 260 -> "🌖"
-        elongacion < 280 -> "🌗"
-        else -> "🌘"
-    }
 
     /** Primer día (desde [desde]) en que la elongación cruza [objetivo] grados. */
     private fun proximaFase(desde: LocalDate, zona: ZoneId, objetivo: Double): LocalDate {
@@ -228,7 +218,6 @@ object Astronomia {
             iluminacionPorc = iluminacionPorc(elong),
             edadLunaDias = elong / 360.0 * MES_SINODICO,
             fase = nombreFase(elong),
-            emojiFase = emojiFase(elong),
             proximaLunaNueva = proximaFase(fecha, zona, 0.0),
             proximaLunaLlena = proximaFase(fecha, zona, 180.0)
         )

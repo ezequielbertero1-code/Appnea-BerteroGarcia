@@ -1,21 +1,17 @@
 package com.berterogarcia.appnea.ui.components
 
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.BordeSuave
-import com.berterogarcia.appnea.ui.theme.TextoSobreAcento
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 
+/**
+ * Selección MÚLTIPLE con título (estado del mar...). En el estilo "Appnea circular" la selección
+ * múltiple se hace con FilterChips en vez de checkboxes sueltos: ver [ChipsSeleccionMultiple].
+ */
 @Composable
 fun CheckboxGroup(
     titulo: String,
@@ -25,23 +21,14 @@ fun CheckboxGroup(
 ) {
     Text(
         text = titulo,
-        color = Color.White,
-        fontWeight = FontWeight.SemiBold
+        color = TextoSuperficie,
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 4.dp)
     )
-    FlowRow(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)) {
-        opciones.forEach { opcion ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = opcion in seleccionadas,
-                    onCheckedChange = { checked -> onCambio(opcion, checked) },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = Acento,
-                        uncheckedColor = BordeSuave,
-                        checkmarkColor = TextoSobreAcento
-                    )
-                )
-                Text(text = opcion, color = Color.White)
-            }
-        }
-    }
+    ChipsSeleccionMultiple(
+        opciones = opciones,
+        seleccionadas = seleccionadas,
+        onCambio = onCambio,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
 }

@@ -4,18 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_CARGAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_GUARDAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_SIN_SESION
 import com.berterogarcia.appnea.ui.perfil.comun.Validaciones
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 enum class CampoDatos { NOMBRE, APELLIDO, EMAIL, TELEFONO, FECHA_NACIMIENTO, CIUDAD, COMPANERO }
 
@@ -28,10 +31,10 @@ data class DatosPersonalesUiState(
     val fechaNacimiento: LocalDate? = null,
     val ciudad: String = "",
     val companeroHabitual: String = "",
-    val errores: Map<CampoDatos, String> = emptyMap(),
+    val errores: Map<CampoDatos, TextoUi> = emptyMap(),
     val guardando: Boolean = false,
     val guardadoOk: Boolean = false,
-    val errorGeneral: String? = null,
+    val errorGeneral: TextoUi? = null,
     /** true si no hay sesión o falló la carga: no se deja guardar para no pisar datos con un form vacío. */
     val bloqueado: Boolean = false
 ) {
@@ -123,8 +126,8 @@ class DatosPersonalesViewModel(
         }
     }
 
-    private fun validar(s: DatosPersonalesUiState): Map<CampoDatos, String> = buildMap {
-        (Validaciones.obligatorio(s.nombre, "tu nombre") ?: Validaciones.largoMaximo(s.nombre, 60))
+    private fun validar(s: DatosPersonalesUiState): Map<CampoDatos, TextoUi> = buildMap {
+        (Validaciones.obligatorio(s.nombre, textoUi(R.string.campo_tu_nombre)) ?: Validaciones.largoMaximo(s.nombre, 60))
             ?.let { put(CampoDatos.NOMBRE, it) }
         Validaciones.largoMaximo(s.apellido, 60)?.let { put(CampoDatos.APELLIDO, it) }
         Validaciones.email(s.email)?.let { put(CampoDatos.EMAIL, it) }

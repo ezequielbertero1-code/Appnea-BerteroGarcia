@@ -1,9 +1,11 @@
 package com.berterogarcia.appnea.ui.historial
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
@@ -20,12 +22,15 @@ import java.text.Normalizer
 import java.time.LocalDate
 import java.time.YearMonth
 
-/** Filtros de período de la bitácora. [descripcion] completa el texto "3 inmersiones …". */
-enum class PeriodoFiltro(val etiqueta: String, val descripcion: String) {
-    TODAS("Todas", "registradas"),
-    SIETE_DIAS("7 días", "en los últimos 7 días"),
-    UN_MES("1 mes", "en el último mes"),
-    TRES_MESES("3 meses", "en los últimos 3 meses");
+/**
+ * Filtros de período de la bitácora. [etiqueta] va en el chip y en su menú; [descripcion]
+ * completa el texto "3 inmersiones …".
+ */
+enum class PeriodoFiltro(@param:StringRes val etiqueta: Int, @param:StringRes val descripcion: Int) {
+    TODAS(R.string.periodo_todas, R.string.periodo_todas_desc),
+    SIETE_DIAS(R.string.periodo_7_dias, R.string.periodo_7_dias_desc),
+    UN_MES(R.string.periodo_1_mes, R.string.periodo_1_mes_desc),
+    TRES_MESES(R.string.periodo_3_meses, R.string.periodo_3_meses_desc);
 
     /** Primera fecha incluida en el período (null = sin límite). */
     fun desde(hoy: LocalDate): LocalDate? = when (this) {

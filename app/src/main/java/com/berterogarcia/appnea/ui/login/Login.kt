@@ -15,13 +15,10 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,29 +32,32 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.CampoPassword
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.alPresionarEnter
+import com.berterogarcia.appnea.ui.components.resolver
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
 import com.berterogarcia.appnea.ui.theme.ColorError
-import com.berterogarcia.appnea.ui.theme.FondoTarjeta
-import com.berterogarcia.appnea.ui.theme.TextoSecundario
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 
-
+/**
+ * Ingreso (estilo "Appnea circular"): logo en contenedor redondeado, campos directamente sobre el
+ * degradado, botón cian de ancho completo y "Creá una" abajo.
+ */
 @Composable
 fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistroClick: () -> Unit) {
     val s by viewModel.uiState.collectAsStateWithLifecycle()
@@ -91,123 +91,125 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistr
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Encabezado()
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(36.dp))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = FondoTarjeta, contentColor = Color.White)
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                Text(
-                    text = if (s.usuarioRecordado) "Hola de nuevo, ${s.usuario}" else stringResource(R.string.login_button),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                // Usuario: Enter (teclado físico) o "Siguiente" → pasa a contraseña.
-                CampoTexto(
-                    valor = s.usuario,
-                    onValorChange = viewModel::onUsuarioChange,
-                    etiqueta = stringResource(R.string.login_username),
-                    esError = s.errorUsuario != null,
-                    mensajeError = s.errorUsuario.orEmpty(),
-                    enabled = s.habilitado,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(onNext = { irAPassword() }),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .alPresionarEnter(irAPassword)
-                )
-
-                // Contraseña: Enter o "Listo" → intenta iniciar sesión. El ojo muestra/oculta.
-                CampoPassword(
-                    valor = s.password,
-                    onValorChange = viewModel::onPasswordChange,
-                    etiqueta = stringResource(R.string.login_password),
-                    esError = s.errorPassword != null,
-                    mensajeError = s.errorPassword.orEmpty(),
-                    enabled = s.habilitado,
-                    imeAction = ImeAction.Done,
-                    onImeAction = intentarLogin,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focoPassword)
-                        .alPresionarEnter(intentarLogin)
-                )
-
-                MensajesEstado(s)
-
-                BotonPrincipal(
-                    texto = when {
-                        s.cargando -> "Ingresando…"
-                        s.bloqueado -> "Esperá ${s.bloqueadoSegundos} s"
-                        else -> stringResource(R.string.login_button)
-                    },
-                    onClick = intentarLogin,
-                    enabled = s.habilitado,
-                    cargando = s.cargando,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                )
-
-                if (s.usuarioRecordado) {
-                    TextButton(
-                        onClick = viewModel::usarOtraCuenta,
-                        enabled = s.habilitado,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    ) {
-                        Text("¿No sos ${s.usuario}? Usar otra cuenta", color = TextoSecundario)
+        Column(Modifier.fillMaxWidth()) {
+            Text(
+                text = if (s.usuarioRecordado) stringResource(R.string.login_hola_de_nuevo, s.usuario)
+                else stringResource(R.string.login_button),
+                style = MaterialTheme.typography.titleMedium,
+                color = TextoSuperficie,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+            if (s.usuarioRecordado) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.login_no_sos, s.usuario),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextoSuperficieVariante,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                    TextButton(onClick = viewModel::usarOtraCuenta, enabled = s.habilitado) {
+                        Text(stringResource(R.string.login_usar_otra_cuenta), color = Acento)
                     }
                 }
+            } else {
+                Spacer(Modifier.height(12.dp))
             }
+
+            // Usuario: Enter (teclado físico) o "Siguiente" → pasa a contraseña.
+            CampoTexto(
+                valor = s.usuario,
+                onValorChange = viewModel::onUsuarioChange,
+                etiqueta = stringResource(R.string.login_username),
+                esError = s.errorUsuario != null,
+                mensajeError = s.errorUsuario?.resolver().orEmpty(),
+                enabled = s.habilitado,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = { irAPassword() }),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .alPresionarEnter(irAPassword)
+            )
+
+            // Contraseña: Enter o "Listo" → intenta iniciar sesión. El ojo muestra/oculta.
+            CampoPassword(
+                valor = s.password,
+                onValorChange = viewModel::onPasswordChange,
+                etiqueta = stringResource(R.string.login_password),
+                esError = s.errorPassword != null,
+                mensajeError = s.errorPassword?.resolver().orEmpty(),
+                enabled = s.habilitado,
+                imeAction = ImeAction.Done,
+                onImeAction = intentarLogin,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focoPassword)
+                    .alPresionarEnter(intentarLogin)
+            )
+
+            MensajesEstado(s)
+
+            BotonPrincipal(
+                texto = when {
+                    s.cargando -> stringResource(R.string.login_ingresando)
+                    s.bloqueado -> stringResource(R.string.login_espera, s.bloqueadoSegundos)
+                    else -> stringResource(R.string.login_button)
+                },
+                onClick = intentarLogin,
+                enabled = s.habilitado,
+                cargando = s.cargando,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
+            )
         }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(top = 24.dp)
         ) {
-            Text("¿No tenés cuenta?", color = TextoSecundario)
+            Text(stringResource(R.string.login_sin_cuenta), color = TextoSuperficieVariante)
             TextButton(onClick = onRegistroClick, enabled = !s.cargando) {
-                Text("Creá una", color = Acento, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.login_crear_cuenta), color = Acento)
             }
         }
     }
 }
 
-/** Logo + nombre de la app + frase. */
+/** Logo en contenedor redondeado + nombre de la app + frase. */
 @Composable
 private fun Encabezado() {
+    val forma = RoundedCornerShape(28.dp)
     Box(
         modifier = Modifier
-            .size(96.dp)
-            .clip(CircleShape)
+            .size(88.dp)
+            .clip(forma)
             .background(colorResource(R.color.ic_launcher_background))
-            .border(1.dp, Acento.copy(alpha = 0.4f), CircleShape),
+            .border(1.dp, Acento.copy(alpha = 0.35f), forma),
         contentAlignment = Alignment.Center
     ) {
         // El foreground de un ícono adaptativo trae margen (el logo ocupa el centro del lienzo):
-        // lo agrandamos un poco para que llene el círculo.
+        // lo agrandamos un poco para que llene el contenedor.
         Image(
             painter = painterResource(R.mipmap.ic_launcher_foreground),
-            contentDescription = "Logo de AppneaMe",
+            contentDescription = stringResource(R.string.login_logo),
             modifier = Modifier
                 .fillMaxSize()
                 .scale(1.4f)
         )
     }
-    Spacer(Modifier.height(16.dp))
+    Spacer(Modifier.height(20.dp))
     Text(
         text = stringResource(R.string.app_name).trim(),
-        style = MaterialTheme.typography.headlineLarge,
-        fontWeight = FontWeight.Bold,
-        color = Color.White
+        fontSize = 32.sp,
+        lineHeight = 38.sp,
+        color = TextoSuperficie
     )
     Text(
-        text = "Tu bitácora de apnea y buceo",
+        text = stringResource(R.string.login_lema),
         style = MaterialTheme.typography.bodyMedium,
-        color = TextoSecundario,
+        color = TextoSuperficieVariante,
         textAlign = TextAlign.Center
     )
 }
@@ -215,10 +217,10 @@ private fun Encabezado() {
 /** Error general, aviso de intentos restantes o bloqueo temporal. */
 @Composable
 private fun MensajesEstado(s: LoginUiState) {
-    val errorGeneral = s.errorGeneral
-    val aviso = s.aviso
+    val errorGeneral = s.errorGeneral?.resolver()
+    val aviso = s.aviso?.resolver()
     val (texto, color) = when {
-        s.bloqueado -> "Demasiados intentos fallidos. Podés volver a intentar en ${formatearEspera(s.bloqueadoSegundos)}." to ColorAdvertencia
+        s.bloqueado -> stringResource(R.string.login_bloqueado, formatearEspera(s.bloqueadoSegundos)) to ColorAdvertencia
         errorGeneral != null -> errorGeneral to ColorError
         else -> return
     }
@@ -226,9 +228,9 @@ private fun MensajesEstado(s: LoginUiState) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(color.copy(alpha = 0.12f))
-            .padding(10.dp)
+            .padding(12.dp)
     ) {
         Text(texto, color = color, style = MaterialTheme.typography.bodyMedium)
         if (!s.bloqueado && aviso != null) {

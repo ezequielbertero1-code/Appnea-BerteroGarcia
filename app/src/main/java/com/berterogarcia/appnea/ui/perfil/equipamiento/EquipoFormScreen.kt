@@ -1,30 +1,27 @@
 package com.berterogarcia.appnea.ui.perfil.equipamiento
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.ui.components.CampoFecha
 import com.berterogarcia.appnea.ui.components.CampoTexto
+import com.berterogarcia.appnea.ui.components.FilaConSwitch
 import com.berterogarcia.appnea.ui.components.SelectorOpciones
+import com.berterogarcia.appnea.ui.components.nombre
+import com.berterogarcia.appnea.ui.components.resolver
 import com.berterogarcia.appnea.ui.perfil.comun.CargandoPerfil
 import com.berterogarcia.appnea.ui.perfil.comun.FormularioPerfil
-import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
 import java.time.LocalDate
 
 @Composable
@@ -47,22 +44,23 @@ fun EquipoFormScreen(
     val siguiente = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next)
 
     FormularioPerfil(
-        titulo = if (s.esEdicion) "Editar equipo" else "Nuevo equipo",
+        titulo = stringResource(if (s.esEdicion) R.string.perfil_equipo_editar else R.string.perfil_equipo_nuevo),
         onVolver = onVolver,
         guardando = s.guardando,
         habilitado = s.puedeGuardar,
         onGuardar = viewModel::guardar,
-        errorGeneral = s.errorGeneral,
+        errorGeneral = s.errorGeneral?.resolver(),
         modifier = modifier
     ) {
+        val categorias = CategoriaEquipo.entries.associateWith { it.nombre() }
         SelectorOpciones(
-            titulo = "Categoría *",
+            titulo = stringResource(R.string.perfil_equipo_categoria),
             opciones = CategoriaEquipo.entries,
             seleccionada = s.categoria,
-            etiqueta = { it.etiqueta },
+            etiqueta = { categorias.getValue(it) },
             onSeleccion = viewModel::onCategoriaChange,
-            mensajeError = s.errores[CampoEquipo.CATEGORIA],
-            ayuda = "Elegí a qué categoría pertenece.",
+            mensajeError = s.errores[CampoEquipo.CATEGORIA]?.resolver(),
+            ayuda = stringResource(R.string.perfil_equipo_categoria_ayuda),
             intentoGuardado = s.intentoGuardado,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -70,7 +68,7 @@ fun EquipoFormScreen(
         CampoTexto(
             valor = s.marca,
             onValorChange = viewModel::onMarcaChange,
-            etiqueta = "Marca",
+            etiqueta = stringResource(R.string.perfil_equipo_marca),
             esError = CampoEquipo.MARCA_MODELO in s.errores,
             mensajeError = "", // el mensaje se muestra una sola vez, debajo de "Modelo"
             keyboardOptions = siguiente,
@@ -79,67 +77,57 @@ fun EquipoFormScreen(
         CampoTexto(
             valor = s.modelo,
             onValorChange = viewModel::onModeloChange,
-            etiqueta = "Modelo",
+            etiqueta = stringResource(R.string.perfil_equipo_modelo),
             esError = CampoEquipo.MARCA_MODELO in s.errores,
-            mensajeError = s.errores[CampoEquipo.MARCA_MODELO].orEmpty(),
+            mensajeError = s.errores[CampoEquipo.MARCA_MODELO]?.resolver().orEmpty(),
             keyboardOptions = siguiente,
             modifier = Modifier.fillMaxWidth()
         )
         CampoTexto(
             valor = s.talle,
             onValorChange = viewModel::onTalleChange,
-            etiqueta = "Talle / medida / espesor (ej: L, 42-43, 5 mm)",
+            etiqueta = stringResource(R.string.perfil_equipo_talle),
             esError = CampoEquipo.TALLE in s.errores,
-            mensajeError = s.errores[CampoEquipo.TALLE].orEmpty(),
+            mensajeError = s.errores[CampoEquipo.TALLE]?.resolver().orEmpty(),
             keyboardOptions = siguiente,
             modifier = Modifier.fillMaxWidth()
         )
         CampoFecha(
-            etiqueta = "Fecha de compra",
+            etiqueta = stringResource(R.string.perfil_equipo_compra),
             fecha = s.fechaCompra,
             onFechaChange = viewModel::onFechaCompraChange,
             maxima = LocalDate.now(),
             esError = CampoEquipo.FECHA_COMPRA in s.errores,
-            mensajeError = s.errores[CampoEquipo.FECHA_COMPRA],
+            mensajeError = s.errores[CampoEquipo.FECHA_COMPRA]?.resolver(),
             modifier = Modifier.fillMaxWidth()
         )
         CampoFecha(
-            etiqueta = "Próximo service / revisión",
+            etiqueta = stringResource(R.string.perfil_equipo_service),
             fecha = s.proximoMantenimiento,
             onFechaChange = viewModel::onMantenimientoChange,
             minima = s.fechaCompra,
             esError = CampoEquipo.MANTENIMIENTO in s.errores,
-            mensajeError = s.errores[CampoEquipo.MANTENIMIENTO],
+            mensajeError = s.errores[CampoEquipo.MANTENIMIENTO]?.resolver(),
             modifier = Modifier.fillMaxWidth()
         )
         CampoTexto(
             valor = s.notas,
             onValorChange = viewModel::onNotasChange,
-            etiqueta = "Notas",
+            etiqueta = stringResource(R.string.perfil_notas),
             esError = CampoEquipo.NOTAS in s.errores,
-            mensajeError = s.errores[CampoEquipo.NOTAS].orEmpty(),
+            mensajeError = s.errores[CampoEquipo.NOTAS]?.resolver().orEmpty(),
             minLines = 3,
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp)
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("En uso")
-                Text(
-                    "Desactivalo si lo vendiste o ya no lo usás (queda en el historial).",
-                    color = TextoTerciario
-                )
-            }
-            Switch(
-                checked = s.enUso,
-                onCheckedChange = viewModel::onEnUsoChange,
-                colors = SwitchDefaults.colors(checkedTrackColor = Acento)
-            )
-        }
+        FilaConSwitch(
+            titulo = stringResource(R.string.perfil_equipo_en_uso),
+            subtitulo = stringResource(R.string.perfil_equipo_en_uso_ayuda),
+            activado = s.enUso,
+            onCambio = viewModel::onEnUsoChange,
+            indice = 0,
+            total = 1,
+            modifier = Modifier.padding(top = 12.dp)
+        )
     }
 }

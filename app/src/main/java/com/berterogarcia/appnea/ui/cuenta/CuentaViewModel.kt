@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import java.util.Locale
 import kotlin.time.Duration
 
 // [CAMBIO] Se eliminó PerfilSimulado / perfilDeEjemplo: ahora los datos salen de la base.
@@ -56,7 +57,7 @@ data class ResumenPerfil(
  */
 data class EstadisticasCuenta(
     val inmersiones: Int = 0,
-    val profundidadMaxima: String = "-",
+    val profundidadMaxima: String = "-",   // solo el número ("22,3"): la unidad la pone la pantalla
     val tiempoTotalFondo: String = "-",
     val sesionesEntrenamiento: Int = 0,
     val sesionesCompletas: Int = 0,
@@ -106,7 +107,7 @@ class CuentaViewModel(
         EstadisticasCuenta(
             inmersiones = inmersiones.size,
             profundidadMaxima = inmersiones.maxOfOrNull { it.profundidadMetros }
-                ?.let { "${"%.1f".format(it)} m" } ?: "-",
+                ?.let { "%.1f".format(Locale.forLanguageTag("es-AR"), it) } ?: "-",
             tiempoTotalFondo = if (inmersiones.isEmpty()) "-"
             else "${fondoTotal.inWholeMinutes} min",
             sesionesEntrenamiento = sesiones.size,

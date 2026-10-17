@@ -1,39 +1,29 @@
 package com.berterogarcia.appnea.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.FondoTarjetaResaltada
-import com.berterogarcia.appnea.ui.theme.TextoChip
-import com.berterogarcia.appnea.ui.theme.TextoTerciario
-import com.berterogarcia.appnea.ui.theme.VeloMedio
-
-private val FormaExterior = RoundedCornerShape(14.dp)
-private val FormaOpcion = RoundedCornerShape(11.dp)
+import com.berterogarcia.appnea.ui.theme.ContenedorSecundario
+import com.berterogarcia.appnea.ui.theme.ContornoFuerte
+import com.berterogarcia.appnea.ui.theme.TextoDeshabilitado
+import com.berterogarcia.appnea.ui.theme.TextoSobreContenedorSecundario
+import com.berterogarcia.appnea.ui.theme.TextoSuperficie
+import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 
 /**
- * Selector de UNA sola opción con botones pegados: Buceo | Apnea, Dulce | Salada...
- * Para TalkBack se anuncia como un grupo de radio buttons.
+ * Selector de UNA sola opción con botones segmentados de Material 3: Buceo | Apnea, Tablas | Libre...
+ * La opción elegida lleva relleno tonal y tilde. Para TalkBack se anuncia como grupo de radio buttons.
  *
  * [permitirNinguna]: si es true, tocar la opción elegida la desmarca (campos opcionales).
  */
@@ -50,53 +40,36 @@ fun <T> SelectorSegmentado(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (titulo != null) {
-            Row {
-                Text(titulo, color = Color.White, style = MaterialTheme.typography.bodyMedium)
+            Row(modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)) {
+                Text(titulo, color = TextoSuperficie, style = MaterialTheme.typography.titleSmall)
                 if (ayuda != null) {
-                    Text(" · $ayuda", color = TextoTerciario, style = MaterialTheme.typography.bodyMedium)
+                    Text(" · $ayuda", color = TextoSuperficieVariante, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 6.dp)
-                .background(VeloMedio, FormaExterior)
-                .padding(4.dp)
-                .selectableGroup(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            opciones.forEach { opcion ->
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            opciones.forEachIndexed { indice, opcion ->
                 val elegida = opcion == seleccionada
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = 44.dp)   // área táctil mínima recomendada
-                        .clip(FormaOpcion)
-                        .then(
-                            if (elegida) Modifier
-                                .background(FondoTarjetaResaltada)
-                                .border(1.dp, Acento.copy(alpha = 0.55f), FormaOpcion)
-                            else Modifier
-                        )
-                        .selectable(
-                            selected = elegida,
-                            role = Role.RadioButton,
-                            onClick = {
-                                when {
-                                    !elegida -> onSeleccion(opcion)
-                                    permitirNinguna -> onSeleccion(null)
-                                }
-                            }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = etiqueta(opcion),
-                        color = if (elegida) Color.White else TextoChip,
-                        fontWeight = if (elegida) FontWeight.Bold else FontWeight.Normal,
-                        style = MaterialTheme.typography.bodyLarge
+                SegmentedButton(
+                    selected = elegida,
+                    onClick = {
+                        when {
+                            !elegida -> onSeleccion(opcion)
+                            permitirNinguna -> onSeleccion(null)
+                        }
+                    },
+                    shape = SegmentedButtonDefaults.itemShape(index = indice, count = opciones.size),
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = ContenedorSecundario,
+                        activeContentColor = TextoSobreContenedorSecundario,
+                        activeBorderColor = ContornoFuerte,
+                        inactiveContainerColor = Color.Transparent,
+                        inactiveContentColor = TextoSuperficie,
+                        inactiveBorderColor = ContornoFuerte,
+                        disabledInactiveContentColor = TextoDeshabilitado
                     )
+                ) {
+                    Text(etiqueta(opcion), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
