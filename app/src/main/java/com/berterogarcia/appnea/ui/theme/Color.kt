@@ -34,6 +34,8 @@ val ColorMalo = Color(0xffff6b6b)
 val ColorBajamar = Color(0xffff8a65)
 val ColorError = ColorMalo                     // mismo rojo, nombre para formularios
 val ColorAdvertencia = Color(0xffffb74d)       // naranja: service pendiente, fuerza media…
+val ColorEntrenaDescanso = Color(0xff735cdd)    // entrenamiento: fase de descanso y sesión completada (violeta)
+val ColorEntrenaApnea = Color(0xff46acc2)       // entrenamiento: fase de apnea (celeste)
 val ColorOk = Color(0xff81c784)                // verde suave: vigente, contraseña fuerte
 
 // ---- Tarjetas de aviso de seguridad (fondo claro) ----

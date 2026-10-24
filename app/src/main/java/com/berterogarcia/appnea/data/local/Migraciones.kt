@@ -23,7 +23,8 @@ object Migraciones {
     fun todas(usuarioSesion: () -> String?): Array<Migration> = arrayOf(
         De6a7(usuarioSesion),
         De7a8,
-        De8a9
+        De8a9,
+        De9a10
     )
 
     /**
@@ -162,6 +163,28 @@ object Migraciones {
             db.execSQL("ALTER TABLE `inmersiones` ADD COLUMN `longitud` REAL")
             db.execSQL("UPDATE `inmersiones` SET `tipo` = 'APNEA' WHERE LOWER(`actividad`) LIKE '%apnea%'")
             db.execSQL("UPDATE `equipamiento` SET `categoria` = 'OTRO' WHERE `categoria` = 'ARPON'")
+        }
+    }
+
+    /**
+     * v9 → v10: lastreKg, proteccionMm y visibilidadMetros pasan a aceptar null (SQLite no
+     * permite quitar el NOT NULL de una columna, así que se recrea la tabla) y se agregan
+     * `visibilidad` (escala) y `apnea` (JSON). Las inmersiones existentes conservan todos sus
+     * datos; las nuevas columnas quedan en null.
+     */
+    object De9a10 : Migration(9, 10) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `inmersiones_nueva` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha` INTEGER NOT NULL, `lugar` TEXT NOT NULL, `profundidadMetros` REAL NOT NULL, `paradaSeguridadMin` REAL NOT NULL, `tiempoFondo` INTEGER NOT NULL, `horaEntrada` INTEGER NOT NULL, `horaSalida` INTEGER NOT NULL, `caracteristicasAgua` TEXT NOT NULL, `lastreKg` REAL, `proteccionMm` REAL, `equipamiento` TEXT NOT NULL, `temperaturaAireC` REAL NOT NULL, `temperaturaAguaC` REAL NOT NULL, `visibilidad` TEXT, `visibilidadMetros` REAL, `actividad` TEXT NOT NULL, `comentarios` TEXT NOT NULL, `condiciones` TEXT, `nombreUsuario` TEXT NOT NULL, `tipo` TEXT NOT NULL, `latitud` REAL, `longitud` REAL, `apnea` TEXT, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )"
+            )
+            val columnas = "`id`, `fecha`, `lugar`, `profundidadMetros`, `paradaSeguridadMin`, `tiempoFondo`, " +
+                "`horaEntrada`, `horaSalida`, `caracteristicasAgua`, `lastreKg`, `proteccionMm`, " +
+                "`equipamiento`, `temperaturaAireC`, `temperaturaAguaC`, `visibilidadMetros`, `actividad`, " +
+                "`comentarios`, `condiciones`, `nombreUsuario`, `tipo`, `latitud`, `longitud`"
+            db.execSQL("INSERT INTO `inmersiones_nueva` ($columnas) SELECT $columnas FROM `inmersiones`")
+            db.execSQL("DROP TABLE `inmersiones`")
+            db.execSQL("ALTER TABLE `inmersiones_nueva` RENAME TO `inmersiones`")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_inmersiones_nombreUsuario` ON `inmersiones` (`nombreUsuario`)")
         }
     }
 }

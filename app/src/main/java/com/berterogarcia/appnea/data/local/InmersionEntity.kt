@@ -34,12 +34,15 @@ data class InmersionEntity(
     val horaEntrada: LocalTime,        // hh:mm
     val horaSalida: LocalTime,         // hh:mm
     val caracteristicasAgua: Set<String>,
-    val lastreKg: Float,
-    val proteccionMm: Float,
+    // [CAMBIO v10] Lastre y protección extra son opcionales: null = no usó
+    val lastreKg: Float?,
+    val proteccionMm: Float?,
     val equipamiento: Set<String>,
     val temperaturaAireC: Float,
     val temperaturaAguaC: Float,
-    val visibilidadMetros: Float,
+    // [CAMBIO v10] Visibilidad: escala de 5 niveles + metros opcionales
+    val visibilidad: Visibilidad? = null,
+    val visibilidadMetros: Float? = null,
     val actividad: String,
     val comentarios: String,
     // Condiciones (clima, mar, marea, luna) guardadas automáticamente al registrar
@@ -51,5 +54,7 @@ data class InmersionEntity(
     val tipo: TipoInmersion = TipoInmersion.BUCEO,
     // Lugar marcado en el mapa (null en las inmersiones viejas o si no se marcó)
     val latitud: Double? = null,
-    val longitud: Double? = null
+    val longitud: Double? = null,
+    // [NUEVO v10] Datos de apnea (null en buceo)
+    val apnea: RegistroApnea? = null
 )

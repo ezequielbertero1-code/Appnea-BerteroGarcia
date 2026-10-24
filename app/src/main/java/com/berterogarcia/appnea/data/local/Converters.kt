@@ -68,4 +68,17 @@ class Converters {
     fun toCondiciones(value: String?): CondicionesRegistro? =
         value?.let { CondicionesRegistro.desdeJson(it) }
 
+    // Visibilidad <-> nombre (null si no se indicó o no se reconoce)
+    @TypeConverter
+    fun fromVisibilidad(value: Visibilidad?): String? = value?.name
+
+    @TypeConverter
+    fun toVisibilidad(value: String?): Visibilidad? = Visibilidad.desdeNombre(value)
+
+    // RegistroApnea <-> JSON (null en buceo)
+    @TypeConverter
+    fun fromRegistroApnea(value: RegistroApnea?): String? = value?.aJson()
+
+    @TypeConverter
+    fun toRegistroApnea(value: String?): RegistroApnea? = value?.let { RegistroApnea.desdeJson(it) }
 }

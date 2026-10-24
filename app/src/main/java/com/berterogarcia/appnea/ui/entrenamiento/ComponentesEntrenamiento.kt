@@ -57,7 +57,8 @@ import com.berterogarcia.appnea.data.local.TablaApnea
 import com.berterogarcia.appnea.data.local.TipoFase
 import com.berterogarcia.appnea.ui.components.formaEnGrupo
 import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.ColorBueno
+import com.berterogarcia.appnea.ui.theme.ColorEntrenaApnea
+import com.berterogarcia.appnea.ui.theme.ColorEntrenaDescanso
 import com.berterogarcia.appnea.ui.theme.ColorError
 import com.berterogarcia.appnea.ui.theme.Contorno
 import com.berterogarcia.appnea.ui.theme.SuperficieTonal
@@ -70,8 +71,8 @@ import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 /** Color de cada tipo de fase. Todos salen de la paleta (Color.kt). */
 fun colorFase(tipo: TipoFase): Color = when (tipo) {
     TipoFase.PREPARACION -> Contorno   // blanco translúcido
-    TipoFase.APNEA -> Acento           // cian
-    TipoFase.DESCANSO -> ColorBueno    // verde
+    TipoFase.APNEA -> ColorEntrenaApnea       // celeste
+    TipoFase.DESCANSO -> ColorEntrenaDescanso // violeta
 }
 
 @Composable

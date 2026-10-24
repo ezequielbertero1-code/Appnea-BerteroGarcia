@@ -177,7 +177,7 @@ fun CuentaScreen(
                     ),
                     indice = 3, total = filas,
                     onClick = onVerEstadisticas,
-                    inicio = { IconoCirculo(painterResource(R.drawable.ic_ms_insights), tono = TonoIcono.APNEA) },
+                    inicio = { IconoCirculo(painterResource(R.drawable.ic_ms_bar_chart), tono = TonoIcono.APNEA) },
                     fin = { Chevron() }
                 )
                 FilaLista(

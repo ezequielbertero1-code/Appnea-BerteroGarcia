@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.ui.theme.AvisoAcento
@@ -42,14 +43,14 @@ import com.berterogarcia.appnea.ui.theme.AvisoTexto
  * claros originales (AvisoFondo/Acento/Texto). Arranca cerrado y recuerda si se abrió.
  */
 @Composable
-fun AvisoSeguridadApnea(modifier: Modifier = Modifier) {
+fun AvisoSeguridadApnea(modifier: Modifier = Modifier, separacionInferior: Dp = 16.dp) {
     var expandido by rememberSaveable { mutableStateOf(false) }
     val accion = stringResource(if (expandido) R.string.accion_contraer else R.string.accion_expandir)
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
+            .padding(bottom = separacionInferior)
             .clip(RoundedCornerShape(16.dp))
             .background(AvisoFondo)
             .clickable(onClickLabel = accion) { expandido = !expandido }

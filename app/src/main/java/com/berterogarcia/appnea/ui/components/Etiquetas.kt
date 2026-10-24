@@ -9,6 +9,7 @@ import com.berterogarcia.appnea.data.condiciones.TipoMotivo
 import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.TipoCertificado
 import com.berterogarcia.appnea.data.local.TipoInmersion
+import com.berterogarcia.appnea.data.local.Visibilidad
 import com.berterogarcia.appnea.ui.registro.FuerzaPassword
 
 // ============================ Etiquetas de datos para mostrar ============================
@@ -21,6 +22,17 @@ fun TipoInmersion.nombre(): String = stringResource(
     when (this) {
         TipoInmersion.BUCEO -> R.string.tipo_buceo
         TipoInmersion.APNEA -> R.string.tipo_apnea
+    }
+)
+
+@Composable
+fun Visibilidad.nombre(): String = stringResource(
+    when (this) {
+        Visibilidad.NULA -> R.string.visibilidad_nula
+        Visibilidad.MALA -> R.string.visibilidad_mala
+        Visibilidad.BUENA -> R.string.visibilidad_buena
+        Visibilidad.MUY_BUENA -> R.string.visibilidad_muy_buena
+        Visibilidad.EXCELENTE -> R.string.visibilidad_excelente
     }
 )
 

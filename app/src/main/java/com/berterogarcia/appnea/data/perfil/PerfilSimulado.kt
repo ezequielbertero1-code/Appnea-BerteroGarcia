@@ -75,6 +75,13 @@ data class PuntoPerfil(val segundo: Int, val profundidadM: Double)
  *       velocidades y el fondo queda en 0 (perfil en "V").
  *     - Si tiempoFondo es 0, se usa solo bajada + subida a 1 m/s.
  *
+ *  3b. Apnea con varias bajadas (inmersión con [InmersionEntity.apnea]):
+ *     Se dibuja un ciclo bajada ─▶ fondo ─▶ subida POR CADA bajada, con una pausa en
+ *     superficie entre una y otra ([PAUSA_SUPERFICIE_S], SUPUESTO).
+ *     - Con el detalle cargado, cada ciclo usa la profundidad y el tiempo de esa bajada.
+ *     - Sin detalle (solo cantidad y máxima) se dibujan N ciclos a la profundidad máxima,
+ *       a 1 m/s y sin fondo.
+ *
  *  4. Fondo plano:
  *     Durante el tramo de fondo la profundidad es constante e igual a la máxima.
  *     En la realidad el buzo se mueve por el fondo y la profundidad varía; acá se
@@ -126,6 +133,9 @@ object PerfilSimulado {
     /** SUPUESTO: velocidad de bajada y subida en apnea, en m/s. */
     const val VELOCIDAD_APNEA = 1.0
 
+    /** SUPUESTO: descanso en superficie entre dos bajadas de apnea, en segundos. */
+    const val PAUSA_SUPERFICIE_S = 90.0
+
     /** SUPUESTO: profundidad a la que se hace la parada de seguridad, en metros. */
     private const val PROF_PARADA_M = 5.0
 
@@ -159,8 +169,23 @@ object PerfilSimulado {
 
     // Apnea: tiempoFondo = duración total de la apnea (bajar + quedarse + subir)
     private fun tramosApnea(i: InmersionEntity): List<Tramo> {
-        val prof = i.profundidadMetros.toDouble()
-        val total = i.tiempoFondo.inWholeSeconds.toDouble()
+        val registro = i.apnea
+        if (registro != null && registro.cantidadBajadas > 0) {
+            val ciclos = if (registro.bajadas.isNotEmpty()) {
+                registro.bajadas.map { cicloApnea(it.profundidadMetros.toDouble(), it.tiempoSegundos.toDouble()) }
+            } else {
+                List(registro.cantidadBajadas) { cicloApnea(registro.profundidadMaximaMetros.toDouble(), 0.0) }
+            }
+            // Pausa en superficie entre ciclos (no antes del primero ni después del último)
+            return ciclos.flatMapIndexed { n, c ->
+                if (n == 0) c else listOf(Tramo(0.0, 0.0, PAUSA_SUPERFICIE_S)) + c
+            }
+        }
+        return cicloApnea(i.profundidadMetros.toDouble(), i.tiempoFondo.inWholeSeconds.toDouble())
+    }
+
+    // Una bajada: bajar ─▶ fondo ─▶ subir. [total] = duración completa (0 = solo bajar y subir)
+    private fun cicloApnea(prof: Double, total: Double): List<Tramo> {
         var bajada = prof / VELOCIDAD_APNEA
         var subida = prof / VELOCIDAD_APNEA
         val fondo = when {

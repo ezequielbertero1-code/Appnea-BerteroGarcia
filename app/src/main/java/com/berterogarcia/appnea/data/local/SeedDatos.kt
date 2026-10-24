@@ -98,6 +98,7 @@ object SeedDatos {
             equipamiento = setOf("Semi seco", "Guantes", "Botas", "Casco"),
             temperaturaAireC = 8f,
             temperaturaAguaC = 9f,
+            visibilidad = Visibilidad.BUENA,
             visibilidadMetros = 6f,
             actividad = "Buceo recreativo",
             comentarios = "Mucha vida en el fondo, lobos marinos cerca del bote."
@@ -111,14 +112,21 @@ object SeedDatos {
             horaEntrada = LocalTime.of(15, 0),
             horaSalida = LocalTime.of(16, 20),
             caracteristicasAgua = setOf("Salada", "Orilla", "Olas"),
-            lastreKg = 6f,
+            lastreKg = null,       // apnea: sin lastre extra
             proteccionMm = 7f,
             equipamiento = setOf("Dos piezas", "Guantes", "Botas", "Casco"),
             temperaturaAireC = 11f,
             temperaturaAguaC = 10f,
+            visibilidad = Visibilidad.BUENA,
             visibilidadMetros = 4f,
             actividad = "Apnea",
             tipo = TipoInmersion.APNEA,
+            apnea = RegistroApnea(
+                cantidadBajadas = 4,
+                profundidadMaximaMetros = 8.5f,
+                sincope = false,
+                bajadas = listOf(BajadaApnea(5f, 25), BajadaApnea(7f, 30), BajadaApnea(8f, 20), BajadaApnea(8.5f, 30))
+            ),
             comentarios = "Series de peso constante con boya y compañero en superficie."
         ),
         InmersionEntity(
@@ -135,6 +143,7 @@ object SeedDatos {
             equipamiento = setOf("Semi seco", "Guantes", "Botas", "Casco"),
             temperaturaAireC = 12f,
             temperaturaAguaC = 10f,
+            visibilidad = Visibilidad.MUY_BUENA,
             visibilidadMetros = 9f,
             actividad = "Buceo recreativo",
             comentarios = "Corriente leve de norte a sur, buena visibilidad."

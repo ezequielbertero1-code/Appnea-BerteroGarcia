@@ -21,7 +21,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     // v5: condiciones guardadas en inmersiones y salidas de pesca
     // v6: perfil, equipamiento, certificados y contactos de emergencia
     // v7: inmersiones, sesiones, salidas de pesca y tablas pasan a ser de cada usuario
-    version = 9,
+    // v10: lastre/protección/visibilidad opcionales, escala de visibilidad y datos de apnea
+    version = 10,
     // [CAMBIO] Room guarda el esquema de cada versión en app/schemas/ (configurado en
     // app/build.gradle.kts). Hace falta para escribir migraciones y para usar AutoMigration.
     // Esa carpeta SE COMMITEA.

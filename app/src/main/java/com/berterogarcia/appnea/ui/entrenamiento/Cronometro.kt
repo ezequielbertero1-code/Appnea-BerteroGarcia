@@ -112,7 +112,7 @@ private fun PestaniasEntrenar(
                 if (onVerEstadisticas != null) {
                     IconButton(onClick = onVerEstadisticas) {
                         Icon(
-                            painterResource(R.drawable.ic_ms_insights),
+                            painterResource(R.drawable.ic_ms_bar_chart),
                             contentDescription = stringResource(R.string.accion_estadisticas)
                         )
                     }

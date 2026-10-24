@@ -75,10 +75,10 @@ object UddfExporter {
                     bloque("informationafterdive") {
                         dato("lowesttemperature", kelvin(i.temperaturaAguaC))
                         dato("greatestdepth", numero(i.profundidadMetros))
-                        dato("visibility", numero(i.visibilidadMetros))
+                        i.visibilidadMetros?.let { dato("visibility", numero(it)) }
                         dato("diveduration", duracionSegundos(i).toString())
                         bloque("equipmentused") {
-                            dato("leadquantity", numero(i.lastreKg))
+                            i.lastreKg?.let { dato("leadquantity", numero(it)) }
                             equipo.forEach { vacio("link", "ref" to it.id) }
                         }
                         bloque("notes") { notas(i).forEach { dato("para", it) } }
@@ -95,9 +95,18 @@ object UddfExporter {
     // Datos que UDDF no tiene como campo propio van como líneas de <notes>
     private fun notas(i: InmersionEntity): List<String> = buildList {
         if (i.actividad.isNotBlank()) add("Actividad: ${i.actividad}")
-        add("Tiempo de fondo: ${formatearDuracion(i.tiempoFondo.inWholeSeconds.toInt())}")
+        if (i.apnea == null || i.tiempoFondo.inWholeSeconds > 0)
+            add("Tiempo de fondo: ${formatearDuracion(i.tiempoFondo.inWholeSeconds.toInt())}")
         add("Parada de seguridad: ${numero(i.paradaSeguridadMin)} min")
-        add("Protección: ${numero(i.proteccionMm)} mm")
+        i.proteccionMm?.let { add("Protección: ${numero(it)} mm") }
+        i.visibilidad?.let { add("Visibilidad (escala): ${it.name.lowercase().replace('_', ' ')}") }
+        i.apnea?.let { a ->
+            add("Apnea: ${a.cantidadBajadas} bajadas, profundidad máxima ${numero(a.profundidadMaximaMetros)} m")
+            a.bajadas.forEachIndexed { n, b ->
+                add("Bajada ${n + 1}: ${numero(b.profundidadMetros)} m, ${formatearDuracion(b.tiempoSegundos)}")
+            }
+            add("Síncope: ${if (a.sincope) "sí" else "no"}")
+        }
         if (i.equipamiento.isNotEmpty()) add("Equipamiento: ${i.equipamiento.joinToString()}")
         if (i.caracteristicasAgua.isNotEmpty()) add("Agua: ${i.caracteristicasAgua.joinToString()}")
         if (PerfilSimulado.generar(i).isNotEmpty())

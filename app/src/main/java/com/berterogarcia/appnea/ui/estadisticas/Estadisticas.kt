@@ -49,6 +49,7 @@ import com.berterogarcia.appnea.ui.components.rememberProgresoDibujo
 import com.berterogarcia.appnea.ui.condiciones.TarjetaCondicion
 import com.berterogarcia.appnea.ui.entrenamiento.minSeg
 import com.berterogarcia.appnea.ui.theme.Acento
+import com.berterogarcia.appnea.ui.theme.ColorError
 import com.berterogarcia.appnea.ui.theme.ContornoFuerte
 import com.berterogarcia.appnea.ui.theme.Divisor
 import com.berterogarcia.appnea.ui.theme.TextoSuperficie
@@ -183,6 +184,15 @@ private fun PestaniaInmersiones(
     FilaMosaicos {
         Mosaico(stringResource(R.string.estadisticas_tiempo_bajo_agua), duracionLarga(r.tiempoTotal))
         Mosaico(stringResource(R.string.estadisticas_profundidad_promedio), "${numero(r.profundidadPromedio)} m")
+    }
+    if (r.inmersionesApnea > 0) {
+        FilaMosaicos {
+            Mosaico(stringResource(R.string.estadisticas_bajadas), r.bajadasTotales.toString())
+            Mosaico(
+                stringResource(R.string.estadisticas_sincopes), r.sincopes.toString(),
+                colorValor = if (r.sincopes > 0) ColorError else TextoSuperficie
+            )
+        }
     }
 
     val progresoLinea = rememberProgresoDibujo(r.serie)

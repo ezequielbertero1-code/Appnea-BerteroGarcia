@@ -53,7 +53,11 @@ data class ResumenInmersiones(
     /** Ordenadas de la más vieja a la más nueva (para la línea). */
     val serie: List<InmersionEntity> = emptyList(),
     val porMes: List<Pair<YearMonth, Int>> = emptyList(),
-    val lugares: List<LugarFrecuente> = emptyList()
+    val lugares: List<LugarFrecuente> = emptyList(),
+    /** Inmersiones de apnea con registro de bajadas (las viejas no lo tienen). */
+    val inmersionesApnea: Int = 0,
+    val bajadasTotales: Int = 0,
+    val sincopes: Int = 0
 )
 
 data class ResumenEntrenamiento(
@@ -165,7 +169,10 @@ internal fun resumirInmersiones(
         else filtradas.map { it.profundidadMetros }.average().toFloat(),
         serie = filtradas,
         porMes = porMes,
-        lugares = lugares
+        lugares = lugares,
+        inmersionesApnea = filtradas.count { it.apnea != null },
+        bajadasTotales = filtradas.sumOf { it.apnea?.cantidadBajadas ?: 0 },
+        sincopes = filtradas.count { it.apnea?.sincope == true }
     )
 }
 

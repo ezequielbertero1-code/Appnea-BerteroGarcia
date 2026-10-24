@@ -66,6 +66,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.Aptitud
+import com.berterogarcia.appnea.data.local.RegistroApnea
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.Ubicacion
 import com.berterogarcia.appnea.data.local.formatearDuracion
@@ -302,13 +303,16 @@ private fun PestanaGeneral(i: InmersionEntity) {
         add(Triple(R.drawable.ic_ms_login, stringResource(R.string.detalle_entrada), i.horaEntrada.format(HH_MM)))
         add(Triple(R.drawable.ic_ms_logout, stringResource(R.string.detalle_salida), i.horaSalida.format(HH_MM)))
         add(Triple(R.drawable.ic_ms_schedule, stringResource(R.string.detalle_en_el_agua), duracion(minutosEnAgua(i))))
-        add(
-            Triple(
-                R.drawable.ic_ms_timer,
-                stringResource(if (apnea) R.string.detalle_tiempo_apnea else R.string.detalle_tiempo_fondo),
-                fondo
+        // Apnea sin detalle de bajadas: no hay tiempo total (se guarda en 0), no se muestra "00:00"
+        if (!apnea || i.tiempoFondo.inWholeSeconds > 0) {
+            add(
+                Triple(
+                    R.drawable.ic_ms_timer,
+                    stringResource(if (apnea) R.string.detalle_tiempo_apnea else R.string.detalle_tiempo_fondo),
+                    fondo
+                )
             )
-        )
+        }
     }
     val conParada = !apnea
     val total = filas.size + if (conParada) 1 else 0
@@ -329,6 +333,8 @@ private fun PestanaGeneral(i: InmersionEntity) {
             )
         }
     }
+
+    i.apnea?.let { TarjetaApnea(it) }
 
     TarjetaUbicacion(i)   // no muestra nada si la inmersión no tiene coordenadas
 
@@ -352,6 +358,65 @@ private fun PestanaGeneral(i: InmersionEntity) {
                     fontStyle = FontStyle.Italic,
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextoSuperficieVariante
+                )
+            }
+        }
+    }
+}
+
+/** Resumen de apnea (bajadas, máxima, tiempos) + síncope y, si se cargó, el detalle de cada bajada. */
+@Composable
+private fun TarjetaApnea(a: RegistroApnea) {
+    val r = a.resumen()
+    EncabezadoGrupo(titulo = stringResource(R.string.detalle_apnea_titulo))
+    FilaMosaicos {
+        Mosaico(stringResource(R.string.nueva_resumen_bajadas), r.cantidad.toString())
+        Mosaico(stringResource(R.string.nueva_resumen_prof_max), "${r.profundidadMaximaMetros.limpio()} m")
+    }
+    if (r.tiempoTotalSegundos != null) {
+        FilaMosaicos {
+            Mosaico(
+                stringResource(R.string.nueva_resumen_mejor),
+                stringResource(R.string.nueva_resumen_mejor_numero, (r.indiceMejorBajada ?: 0) + 1),
+                stringResource(
+                    R.string.nueva_resumen_mejor_detalle,
+                    r.profundidadMaximaMetros.limpio(),
+                    formatearDuracion(r.tiempoMejorBajadaSegundos ?: 0)
+                )
+            )
+            Mosaico(stringResource(R.string.nueva_resumen_tiempo_total), formatearDuracion(r.tiempoTotalSegundos))
+        }
+        FilaMosaicos {
+            Mosaico(stringResource(R.string.nueva_resumen_promedio), formatearDuracion(r.tiempoPromedioSegundos ?: 0))
+            Mosaico(
+                stringResource(R.string.detalle_apnea_sincope),
+                stringResource(if (a.sincope) R.string.detalle_apnea_sincope_si else R.string.detalle_apnea_sincope_no),
+                colorValor = if (a.sincope) ColorError else TextoSuperficie
+            )
+        }
+    } else {
+        FilaMosaicos {
+            Mosaico(
+                stringResource(R.string.detalle_apnea_sincope),
+                stringResource(if (a.sincope) R.string.detalle_apnea_sincope_si else R.string.detalle_apnea_sincope_no),
+                colorValor = if (a.sincope) ColorError else TextoSuperficie
+            )
+        }
+    }
+    if (a.bajadas.isNotEmpty()) {
+        GrupoLista(modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)) {
+            a.bajadas.forEachIndexed { n, b ->
+                FilaLista(
+                    titulo = stringResource(R.string.detalle_apnea_bajada, n + 1),
+                    subtitulo = if (n == r.indiceMejorBajada) stringResource(R.string.nueva_bajada_mejor) else null,
+                    indice = n,
+                    total = a.bajadas.size,
+                    fin = {
+                        Text(
+                            "${b.profundidadMetros.limpio()} m · ${formatearDuracion(b.tiempoSegundos)}",
+                            style = MaterialTheme.typography.titleMedium, color = TextoSuperficie
+                        )
+                    }
                 )
             }
         }
@@ -462,9 +527,17 @@ private fun PestanaGrafico(i: InmersionEntity, perfil: List<PuntoPerfil>) {
 
 @Composable
 private fun PestanaEquipo(i: InmersionEntity) {
-    FilaMosaicos {
-        Mosaico(stringResource(R.string.detalle_lastre), "${i.lastreKg.limpio()} kg", stringResource(R.string.detalle_lastre_detalle))
-        Mosaico(stringResource(R.string.detalle_proteccion), "${i.proteccionMm.limpio()} mm", stringResource(R.string.detalle_proteccion_detalle))
+    // Lastre y protección extra son opcionales: si no se usaron, no se muestra nada
+    if (i.lastreKg != null || i.proteccionMm != null) {
+        FilaMosaicos {
+            i.lastreKg?.let {
+                Mosaico(stringResource(R.string.detalle_lastre), "${it.limpio()} kg", stringResource(R.string.detalle_lastre_detalle))
+            }
+            i.proteccionMm?.let {
+                Mosaico(stringResource(R.string.detalle_proteccion), "${it.limpio()} mm", stringResource(R.string.detalle_proteccion_detalle))
+            }
+            if (i.lastreKg == null || i.proteccionMm == null) Spacer(Modifier.weight(1f))
+        }
     }
     TarjetaCondicion(stringResource(R.string.detalle_equipamiento)) {
         Chips(i.equipamiento.toList(), vacio = stringResource(R.string.detalle_sin_equipamiento))
@@ -502,16 +575,17 @@ private fun PestanaCondiciones(i: InmersionEntity) {
             },
             abajo = {
                 Spacer(Modifier.height(14.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    DatoChico(stringResource(R.string.detalle_viento), c.vientoKmh?.let { "${num(it)} ${direccion(c.direccionVientoGrados)}" } ?: "-")
-                    DatoChico(stringResource(R.string.detalle_rafagas), num(c.rafagasKmh, unidad = " km/h"))
-                    DatoChico(stringResource(R.string.detalle_humedad), num(c.humedadPorc?.toDouble(), unidad = "%"))
+                // Tres columnas del mismo ancho: así Ráfagas queda justo arriba de Olas
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Box(Modifier.weight(1f)) { DatoChico(stringResource(R.string.detalle_viento), c.vientoKmh?.let { "${num(it)} ${direccion(c.direccionVientoGrados)}" } ?: "-") }
+                    Box(Modifier.weight(1f)) { DatoChico(stringResource(R.string.detalle_rafagas), num(c.rafagasKmh, unidad = " km/h")) }
+                    Box(Modifier.weight(1f)) { DatoChico(stringResource(R.string.detalle_humedad), num(c.humedadPorc?.toDouble(), unidad = "%")) }
                 }
                 Spacer(Modifier.height(10.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    DatoChico(stringResource(R.string.detalle_presion), num(c.presionHpa, unidad = " hPa"))
-                    DatoChico(stringResource(R.string.detalle_olas), c.olaM?.let { num(it, 1, " m") } ?: "-")
-                    DatoChico(stringResource(R.string.detalle_agua), c.temperaturaAguaC?.let { num(it, 1, "°C") } ?: "-")
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Box(Modifier.weight(1f)) { DatoChico(stringResource(R.string.detalle_presion), num(c.presionHpa, unidad = " hPa")) }
+                    Box(Modifier.weight(1f)) { DatoChico(stringResource(R.string.detalle_olas), c.olaM?.let { num(it, 1, " m") } ?: "-") }
+                    Box(Modifier.weight(1f)) { DatoChico(stringResource(R.string.detalle_agua), c.temperaturaAguaC?.let { num(it, 1, "°C") } ?: "-") }
                 }
                 if (aptitud != null) {
                     Spacer(Modifier.height(12.dp))
@@ -545,7 +619,13 @@ private fun PestanaCondiciones(i: InmersionEntity) {
                 c.corrienteKmh?.let { num(it, 1, " km/h") } ?: stringResource(R.string.detalle_sin_datos),
                 stringResource(R.string.detalle_al_entrar)
             )
-            Mosaico(stringResource(R.string.detalle_visibilidad), "${i.visibilidadMetros.limpio()} m", stringResource(R.string.detalle_cargada_por_vos))
+            val escala = i.visibilidad?.nombre()
+            val metros = i.visibilidadMetros?.let { "${it.limpio()} m" }
+            Mosaico(
+                stringResource(R.string.detalle_visibilidad),
+                escala ?: metros ?: "—",
+                if (escala != null && metros != null) metros else stringResource(R.string.detalle_cargada_por_vos)
+            )
         }
     } else {
         TarjetaCondicion {
@@ -557,8 +637,10 @@ private fun PestanaCondiciones(i: InmersionEntity) {
     TarjetaCondicion(stringResource(R.string.detalle_tu_registro)) {
         Chips(i.caracteristicasAgua.toList(), vacio = stringResource(R.string.detalle_sin_caracteristicas))
         Spacer(Modifier.height(10.dp))
-        FilaDato(stringResource(R.string.nueva_temp_aire), "${i.temperaturaAireC.limpio()} °C")
-        FilaDato(stringResource(R.string.nueva_temp_agua), "${i.temperaturaAguaC.limpio()} °C")
+        FilaDato(
+            stringResource(R.string.detalle_temperaturas),
+            "${i.temperaturaAireC.limpio()} °C · ${i.temperaturaAguaC.limpio()} °C"
+        )
     }
 
     if (c != null && !c.conDatosOnline) {

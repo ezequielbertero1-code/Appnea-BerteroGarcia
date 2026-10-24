@@ -174,8 +174,8 @@ object SeedDemo {
         clima: Clima?,
         registro: Registro = Registro.CON_INTERNET,
         equipamiento: Set<String> = if (tipo == TipoInmersion.APNEA) EQUIPO_APNEA else EQUIPO_BUCEO,
-        lastre: Float = if (tipo == TipoInmersion.APNEA) 5f else 10f,
-        proteccion: Float = if (tipo == TipoInmersion.APNEA) 5f else 7f,
+        lastre: Float? = if (tipo == TipoInmersion.APNEA) 5f else 10f,
+        proteccion: Float? = if (tipo == TipoInmersion.APNEA) 5f else 7f,
         conUbicacion: Boolean = true
     ): InmersionEntity {
         val fecha = hoy.minusDays(diasAtras)
@@ -200,12 +200,14 @@ object SeedDemo {
                 )
             }
         }
+        // Apnea: los días pares tienen el detalle de cada bajada; los impares solo cantidad + máxima
+        val registroApnea = if (tipo == TipoInmersion.APNEA) registroApnea(diasAtras, profundidad, fondo) else null
         return InmersionEntity(
             fecha = fecha,
             lugar = sitio.nombre,
             profundidadMetros = profundidad,
             paradaSeguridadMin = if (tipo == TipoInmersion.APNEA) 0f else 3f,
-            tiempoFondo = fondo,
+            tiempoFondo = registroApnea?.let { (it.bajadas.sumOf { b -> b.tiempoSegundos }).seconds } ?: fondo,
             horaEntrada = entrada,
             horaSalida = entrada.plusMinutes(minutosEnAgua),
             caracteristicasAgua = agua,
@@ -214,6 +216,13 @@ object SeedDemo {
             equipamiento = equipamiento,
             temperaturaAireC = tempAire,
             temperaturaAguaC = tempAgua,
+            visibilidad = when {
+                visibilidad < 1f -> Visibilidad.NULA
+                visibilidad < 3f -> Visibilidad.MALA
+                visibilidad < 8f -> Visibilidad.BUENA
+                visibilidad < 15f -> Visibilidad.MUY_BUENA
+                else -> Visibilidad.EXCELENTE
+            },
             visibilidadMetros = visibilidad,
             actividad = actividad,
             comentarios = comentarios,
@@ -221,8 +230,22 @@ object SeedDemo {
             nombreUsuario = USUARIO,
             tipo = tipo,
             latitud = if (conUbicacion) sitio.lat else null,
-            longitud = if (conUbicacion) sitio.lon else null
+            longitud = if (conUbicacion) sitio.lon else null,
+            apnea = registroApnea
         )
+    }
+
+    private fun registroApnea(diasAtras: Long, profundidad: Float, fondo: Duration): RegistroApnea {
+        val cantidad = 3 + (diasAtras % 3).toInt()
+        val sincope = diasAtras == 90L
+        if (diasAtras % 2L != 0L) return RegistroApnea(cantidad, profundidad, sincope)
+        val porBajada = (fondo.inWholeSeconds / cantidad).toInt().coerceAtLeast(20)
+        val bajadas = List(cantidad) { n ->
+            // Cada bajada es un poco más profunda; la última llega a la máxima
+            val prof = profundidad * (0.55f + 0.45f * n / (cantidad - 1))
+            BajadaApnea((prof * 2).toInt() / 2f, porBajada + (n % 2) * 5)
+        }
+        return RegistroApnea(cantidad, bajadas.maxOf { it.profundidadMetros }, sincope, bajadas)
     }
 
     private fun inmersiones(hoy: LocalDate): List<InmersionEntity> {
@@ -252,7 +275,8 @@ object SeedDemo {
             inmersion(hoy, 22, PIRAMIDES, apnea, 9f, 95.seconds, LocalTime.of(10, 45), 70,
                 setOf("Salada", "Bote", "Olas"), 15f, 12f, 10f, "Apnea recreativa",
                 "Lobos marinos jugando alrededor. Mucho oleaje en superficie.",
-                Clima(15.0, 22.0, 230.0, 2, 1.1, 12.0, "Pleamar 11:15", "Regulares")),
+                Clima(15.0, 22.0, 230.0, 2, 1.1, 12.0, "Pleamar 11:15", "Regulares"),
+                lastre = null, proteccion = null),
             inmersion(hoy, 28, CALETA_OLIVIA, buceo, 10f, 36.minutes, LocalTime.of(14, 15), 45,
                 setOf("Salada", "Orilla", "Resaca"), 12f, 10f, 3f, "Buceo de orilla",
                 "Poca visibilidad por la resaca. Salida corta.",

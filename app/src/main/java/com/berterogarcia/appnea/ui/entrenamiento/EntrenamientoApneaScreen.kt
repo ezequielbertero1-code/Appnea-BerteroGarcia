@@ -64,7 +64,7 @@ import com.berterogarcia.appnea.ui.components.OcultarBarraNavegacion
 import com.berterogarcia.appnea.ui.components.ProgresoPorPasos
 import com.berterogarcia.appnea.ui.components.resolver
 import com.berterogarcia.appnea.ui.theme.Acento
-import com.berterogarcia.appnea.ui.theme.ColorBueno
+import com.berterogarcia.appnea.ui.theme.ColorEntrenaDescanso
 import com.berterogarcia.appnea.ui.theme.ColorError
 import com.berterogarcia.appnea.ui.theme.SuperficieTonal
 import com.berterogarcia.appnea.ui.theme.TextoSuperficie
@@ -93,7 +93,8 @@ fun SeleccionTablaScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            if (!estado.acompanado) AvisoSeguridadApnea(Modifier.padding(top = 8.dp))
+            // El encabezado "Tablas" ya trae su propio espacio superior
+            if (!estado.acompanado) AvisoSeguridadApnea(Modifier.padding(top = 8.dp), separacionInferior = 0.dp)
 
             EncabezadoGrupo(titulo = stringResource(R.string.entrenar_tablas))
             GrupoLista {
@@ -423,7 +424,7 @@ fun ResultadoEntrenamiento(
 private fun TarjetaResultado(estado: EntrenamientoUiState) {
     val forma = RoundedCornerShape(16.dp)
     val fondo = if (estado.completada) {
-        Modifier.background(Brush.linearGradient(listOf(ColorBueno.copy(alpha = 0.22f), ColorBueno.copy(alpha = 0.06f))), forma)
+        Modifier.background(Brush.linearGradient(listOf(ColorEntrenaDescanso.copy(alpha = 0.22f), ColorEntrenaDescanso.copy(alpha = 0.06f))), forma)
     } else {
         Modifier.background(SuperficieTonal, forma)
     }
@@ -438,7 +439,7 @@ private fun TarjetaResultado(estado: EntrenamientoUiState) {
         Icon(
             painterResource(if (estado.completada) R.drawable.ic_ms_emoji_events else R.drawable.ic_ms_pan_tool),
             contentDescription = null,
-            tint = if (estado.completada) ColorBueno else TextoSuperficieVariante,
+            tint = if (estado.completada) ColorEntrenaDescanso else TextoSuperficieVariante,
             modifier = Modifier.size(40.dp)
         )
         Text(

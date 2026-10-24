@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.InmersionEntity
@@ -62,7 +63,12 @@ private fun subtituloInmersion(i: InmersionEntity, conTemperaturaAgua: Boolean):
         }
         ?.takeIf { it.isNotEmpty() }
     val tiempo = if (i.tipo == TipoInmersion.APNEA) {
-        i.tiempoFondo.toComponents { minutos, segundos, _ -> "%d:%02d".format(minutos, segundos) }
+        // Sin el detalle de bajadas no hay tiempo total (0): se muestra la cantidad de bajadas
+        if (i.tiempoFondo.inWholeSeconds > 0) {
+            i.tiempoFondo.toComponents { minutos, segundos, _ -> "%d:%02d".format(minutos, segundos) }
+        } else {
+            i.apnea?.let { pluralStringResource(R.plurals.apnea_bajadas, it.cantidadBajadas, it.cantidadBajadas) }
+        }
     } else {
         "${i.tiempoFondo.inWholeMinutes} min"
     }

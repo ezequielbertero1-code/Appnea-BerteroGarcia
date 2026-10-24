@@ -27,6 +27,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.AvisoAcento
@@ -77,21 +79,28 @@ fun CampoTexto(
     enabled: Boolean = true,
     ayuda: String? = null,
     placeholder: String? = null,
-    soloLectura: Boolean = false
+    soloLectura: Boolean = false,
+    /** Tamaño del texto escrito y de la etiqueta; Unspecified = el de siempre. Para filas compactas. */
+    tamanoTexto: TextUnit = TextUnit.Unspecified,
+    /** false = sin el espacio reservado para el error/ayuda (filas compactas; el error se muestra aparte). */
+    conTextoApoyo: Boolean = true
 ) {
     OutlinedTextField(
         value = valor,
         onValueChange = onValorChange,
-        label = { Text(etiqueta) },
+        textStyle = LocalTextStyle.current.copy(fontSize = tamanoTexto),
+        label = { Text(etiqueta, fontSize = tamanoTexto, maxLines = 1) },
         placeholder = placeholder?.let { texto -> { Text(texto) } },
         trailingIcon = trailingIcon,
         visualTransformation = if (esPassword) PasswordVisualTransformation() else visualTransformation,
         isError = esError,
         // Siempre presente (aunque vacío) para que el campo no salte de alto cuando aparece el error
-        supportingText = {
-            when {
-                esError -> Text(mensajeError)
-                ayuda != null -> Text(ayuda)
+        supportingText = if (!conTextoApoyo) null else {
+            {
+                when {
+                    esError -> Text(mensajeError)
+                    ayuda != null -> Text(ayuda)
+                }
             }
         },
         keyboardOptions = keyboardOptions,
