@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.data.auth.CuentaGoogle
 import com.berterogarcia.appnea.data.auth.ResultadoGoogle
 import com.berterogarcia.appnea.data.local.EstadoIntentos
 import com.berterogarcia.appnea.data.local.PoliticaIntentos
@@ -37,6 +38,8 @@ data class LoginUiState(
     val cargando: Boolean = false,
     /** Esperando a Google (selector de cuentas) o guardando la cuenta. */
     val cargandoGoogle: Boolean = false,
+    /** Cuenta de Google que entra por primera vez: la pantalla la manda al registro. */
+    val cuentaParaRegistro: CuentaGoogle? = null,
     val exitoso: Boolean = false,
     /** Segundos que faltan para poder intentar de nuevo (0 = no bloqueado). */
     val bloqueadoSegundos: Int = 0
@@ -110,12 +113,18 @@ class LoginViewModel(
         viewModelScope.launch {
             when (val resultado = pedirCuenta()) {
                 is ResultadoGoogle.Ok -> {
-                    val usuario = runCatching { cuentaGoogleRepository.entrar(resultado.cuenta) }.getOrElse {
+                    val cuenta = resultado.cuenta
+                    val existe = runCatching { cuentaGoogleRepository.existe(cuenta.email) }.getOrElse {
                         return@launch errorGoogle(R.string.login_error_google)
                     }
-                    // No se guarda como "último usuario": ese campo es para entrar con contraseña.
-                    sessionManager.guardarUsuario(usuario)
-                    _uiState.update { it.copy(cargandoGoogle = false, exitoso = true) }
+                    if (existe) {
+                        // No se guarda como "último usuario": ese campo es para entrar con contraseña.
+                        sessionManager.guardarUsuario(cuenta.email)
+                        _uiState.update { it.copy(cargandoGoogle = false, exitoso = true) }
+                    } else {
+                        // Primera vez con esta cuenta: falta completar el registro.
+                        _uiState.update { it.copy(cargandoGoogle = false, cuentaParaRegistro = cuenta) }
+                    }
                 }
                 ResultadoGoogle.Cancelado -> _uiState.update { it.copy(cargandoGoogle = false) }
                 ResultadoGoogle.SinCuentas -> errorGoogle(R.string.login_error_google_sin_cuentas)
@@ -124,6 +133,9 @@ class LoginViewModel(
             }
         }
     }
+
+    /** La pantalla ya abrió el registro: se limpia para no volver a abrirlo al volver al login. */
+    fun registroGoogleAbierto() = _uiState.update { it.copy(cuentaParaRegistro = null) }
 
     private fun errorGoogle(mensaje: Int) =
         _uiState.update { it.copy(cargandoGoogle = false, errorGeneral = textoUi(mensaje)) }

@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.navigation
 
+import android.net.Uri
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import kotlinx.coroutines.flow.flowOf
 import com.berterogarcia.appnea.AppDestinations
+import com.berterogarcia.appnea.data.auth.CuentaGoogle
 import com.berterogarcia.appnea.MyApplication
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.condiciones.CondicionesScreen
@@ -60,6 +62,10 @@ import com.berterogarcia.appnea.ui.registro.RegistroViewModel
 
 //Estas son pantallas que no aparecen en la barra de la app.
 const val RUTA_REGISTRO = "registro"
+/** Registro de una cuenta de Google que entra por primera vez (empieza en Datos personales, ya cargados). */
+const val RUTA_REGISTRO_GOOGLE = "registro/google?email={email}&nombre={nombre}&apellido={apellido}"
+fun rutaRegistroGoogle(cuenta: CuentaGoogle) =
+    "registro/google?email=${Uri.encode(cuenta.email)}&nombre=${Uri.encode(cuenta.nombre)}&apellido=${Uri.encode(cuenta.apellido)}"
 const val RUTA_LOGIN = "login"
 const val RUTA_NUEVA_INMERSION = "nueva_inmersion"
 const val RUTA_DETALLE_INMERSION = "detalle_inmersion/{id}"
@@ -148,12 +154,41 @@ fun AppNavHost(
                         popUpTo(RUTA_LOGIN) { inclusive = true } // Esto hace que una vez iniciado sesion no pueda volver al login
                     }
                 },
-                onRegistroClick = { navController.navigate(RUTA_REGISTRO) }
+                onRegistroClick = { navController.navigate(RUTA_REGISTRO) },
+                onRegistroGoogle = { cuenta -> navController.navigate(rutaRegistroGoogle(cuenta)) }
             )
         }
         composable(RUTA_REGISTRO) {
             val viewModel: RegistroViewModel = viewModel(
-                factory = RegistroViewModel.Factory(app.registroRepository, app.sessionManager)
+                factory = RegistroViewModel.Factory(app.registroRepository, app.cuentaGoogleRepository, app.sessionManager)
+            )
+            RegistroScreen(
+                viewModel = viewModel,
+                onCancelar = { navController.popBackStack() },
+                // La sesión ya quedó iniciada: va a Inicio y limpia la pila (no se vuelve a login/registro).
+                onRegistroExitoso = {
+                    navController.navigate(AppDestinations.INICIO.name) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        //================================INICIO================================================
+        // Registrar inmersión primero, últimas inmersiones y resumen del clima.
+        composable(
+            route = RUTA_REGISTRO_GOOGLE,
+            arguments = listOf("email", "nombre", "apellido").map {
+                navArgument(it) { type = NavType.StringType; defaultValue = "" }
+            }
+        ) { entrada ->
+            val cuenta = CuentaGoogle(
+                email = entrada.arguments?.getString("email").orEmpty(),
+                nombre = entrada.arguments?.getString("nombre").orEmpty(),
+                apellido = entrada.arguments?.getString("apellido").orEmpty()
+            )
+            val viewModel: RegistroViewModel = viewModel(
+                factory = RegistroViewModel.Factory(app.registroRepository, app.cuentaGoogleRepository, app.sessionManager, cuenta)
             )
             RegistroScreen(
                 viewModel = viewModel,

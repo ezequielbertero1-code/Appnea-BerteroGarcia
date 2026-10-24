@@ -1,8 +1,8 @@
 package com.berterogarcia.appnea.data.repository
 
 import androidx.room.withTransaction
-import com.berterogarcia.appnea.data.auth.CuentaGoogle
 import com.berterogarcia.appnea.data.local.AppDatabase
+import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
 import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
 import com.berterogarcia.appnea.data.local.UsuarioEntity
 
@@ -14,26 +14,20 @@ import com.berterogarcia.appnea.data.local.UsuarioEntity
  */
 class CuentaGoogleRepository(private val db: AppDatabase) {
 
+    /** true si esta cuenta de Google ya completó el registro (si no, hay que mandarla a registrarse). */
+    suspend fun existe(email: String): Boolean = db.usuarioDao().existeUsuario(email)
+
     /**
-     * Devuelve el usuario con el que hay que iniciar sesión. Si es la primera vez, crea usuario y
-     * perfil en una transacción; si ya existía, no toca nada (el perfil puede estar editado).
+     * Crea usuario + perfil + contacto de emergencia en UNA transacción (o se guardan los tres o ninguno).
+     * Si la cuenta ya existía (ej. otro registro ganó la carrera) no toca nada: es la misma cuenta.
      */
-    suspend fun entrar(cuenta: CuentaGoogle): String {
-        val usuario = cuenta.email
+    suspend fun registrar(email: String, perfil: PerfilUsuarioEntity, contacto: ContactoEmergenciaEntity) {
         db.withTransaction {
-            if (!db.usuarioDao().existeUsuario(usuario)) {
-                db.usuarioDao().insertar(UsuarioEntity(usuario, PASSWORD_CUENTA_GOOGLE))
-                db.perfilUsuarioDao().guardar(
-                    PerfilUsuarioEntity(
-                        nombreUsuario = usuario,
-                        nombre = cuenta.nombre,
-                        apellido = cuenta.apellido,
-                        email = cuenta.email
-                    )
-                )
-            }
+            if (db.usuarioDao().existeUsuario(email)) return@withTransaction
+            db.usuarioDao().insertar(UsuarioEntity(email, PASSWORD_CUENTA_GOOGLE))
+            db.perfilUsuarioDao().guardar(perfil.copy(nombreUsuario = email))
+            db.contactoEmergenciaDao().guardar(contacto.copy(nombreUsuario = email, esPrincipal = true))
         }
-        return usuario
     }
 
     private companion object {

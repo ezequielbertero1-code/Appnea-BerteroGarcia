@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.data.auth.CuentaGoogle
 import com.berterogarcia.appnea.data.auth.GoogleAuth
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.CampoPassword
@@ -64,7 +65,12 @@ import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
  * degradado, botón cian de ancho completo y "Creá una" abajo.
  */
 @Composable
-fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistroClick: () -> Unit) {
+fun LoginScreen(
+    viewModel: LoginViewModel,
+    onLoginExitoso: () -> Unit,
+    onRegistroClick: () -> Unit,
+    onRegistroGoogle: (CuentaGoogle) -> Unit
+) {
     val s by viewModel.uiState.collectAsStateWithLifecycle()
 
     val focoPassword = remember { FocusRequester() }
@@ -81,6 +87,12 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistr
 
     LaunchedEffect(s.exitoso) {
         if (s.exitoso) onLoginExitoso()
+    }
+    LaunchedEffect(s.cuentaParaRegistro) {
+        s.cuentaParaRegistro?.let {
+            viewModel.registroGoogleAbierto()
+            onRegistroGoogle(it)
+        }
     }
     // Si el usuario ya vino completo, el foco va directo a la contraseña.
     LaunchedEffect(Unit) {

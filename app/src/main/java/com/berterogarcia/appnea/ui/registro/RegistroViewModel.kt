@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.data.auth.CuentaGoogle
 import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
 import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
 import com.berterogarcia.appnea.data.local.SessionManager
+import com.berterogarcia.appnea.data.repository.CuentaGoogleRepository
 import com.berterogarcia.appnea.data.repository.NuevoRegistro
 import com.berterogarcia.appnea.data.repository.RegistroRepository
 import com.berterogarcia.appnea.data.repository.ResultadoRegistro
@@ -42,7 +44,11 @@ enum class CampoRegistro(val paso: PasoRegistro) {
 }
 
 data class RegistroUiState(
+    /** Pasos de este registro: con Google no hay CUENTA (no hay usuario ni contraseña que elegir). */
+    val pasos: List<PasoRegistro> = PasoRegistro.entries,
     val paso: PasoRegistro = PasoRegistro.CUENTA,
+    /** Email de la cuenta de Google con la que se está registrando, o null en el registro normal. */
+    val emailGoogle: String? = null,
     val usuario: String = "",
     val password: String = "",
     val confirmacion: String = "",
@@ -64,18 +70,36 @@ data class RegistroUiState(
 ) {
     val fuerza: FuerzaPassword get() = ReglasRegistro.fuerza(password)
     val ocupado: Boolean get() = verificandoUsuario || creando
-    val esPrimerPaso: Boolean get() = paso == PasoRegistro.entries.first()
-    val esUltimoPaso: Boolean get() = paso == PasoRegistro.entries.last()
+    val indicePaso: Int get() = pasos.indexOf(paso)
+    val esPrimerPaso: Boolean get() = paso == pasos.first()
+    val esUltimoPaso: Boolean get() = paso == pasos.last()
+    val esGoogle: Boolean get() = emailGoogle != null
     val pasosConError: Set<PasoRegistro> get() = errores.keys.map { it.paso }.toSet()
 }
 
-/** Registro por pasos. Al terminar crea usuario + perfil + contacto e inicia sesión. */
+/**
+ * Registro por pasos. Al terminar crea usuario + perfil + contacto e inicia sesión.
+ * Con [cuentaGoogle] (primer ingreso con Google) se saltea el paso de cuenta y se parte de los datos de Google.
+ */
 class RegistroViewModel(
     private val repository: RegistroRepository,
-    private val sessionManager: SessionManager
+    private val cuentaGoogleRepository: CuentaGoogleRepository,
+    private val sessionManager: SessionManager,
+    private val cuentaGoogle: CuentaGoogle? = null
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(RegistroUiState())
+    private val _uiState = MutableStateFlow(
+        if (cuentaGoogle == null) RegistroUiState()
+        else RegistroUiState(
+            pasos = PasoRegistro.entries - PasoRegistro.CUENTA,
+            paso = PasoRegistro.PERSONALES,
+            emailGoogle = cuentaGoogle.email,
+            usuario = cuentaGoogle.email,
+            nombre = cuentaGoogle.nombre,
+            apellido = cuentaGoogle.apellido,
+            email = cuentaGoogle.email
+        )
+    )
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
 
     // ------------------------------- Cambios de campos -------------------------------
@@ -118,18 +142,18 @@ class RegistroViewModel(
     fun anterior(): Boolean {
         val s = _uiState.value
         if (s.esPrimerPaso || s.ocupado) return false
-        _uiState.update { it.copy(paso = PasoRegistro.entries[s.paso.ordinal - 1], errorGeneral = null) }
+        _uiState.update { it.copy(paso = s.pasos[s.indicePaso - 1], errorGeneral = null) }
         return true
     }
 
     /** Ir a un paso anterior (indicador o "Editar" del resumen). No se puede saltar hacia adelante. */
     fun irA(paso: PasoRegistro) {
         val s = _uiState.value
-        if (!s.ocupado && paso.ordinal < s.paso.ordinal) _uiState.update { it.copy(paso = paso) }
+        if (!s.ocupado && paso in s.pasos && s.pasos.indexOf(paso) < s.indicePaso) _uiState.update { it.copy(paso = paso) }
     }
 
     private fun avanzar() {
-        _uiState.update { it.copy(paso = PasoRegistro.entries[it.paso.ordinal + 1]) }
+        _uiState.update { it.copy(paso = it.pasos[it.indicePaso + 1]) }
     }
 
     private fun verificarUsuarioYAvanzar(usuario: String) {
@@ -156,20 +180,27 @@ class RegistroViewModel(
         // Se valida toodoo de nuevo y, si algo falla, se vuelve al primer paso con error.
         val errores = validar(s)
         if (errores.isNotEmpty()) {
-            val primerPaso = errores.keys.minOf { it.paso.ordinal }
-            _uiState.update { it.copy(errores = errores, paso = PasoRegistro.entries[primerPaso]) }
+            val primerPaso = errores.keys.minOf { s.pasos.indexOf(it.paso) }
+            _uiState.update { it.copy(errores = errores, paso = s.pasos[primerPaso]) }
             return
         }
 
         _uiState.update { it.copy(creando = true, errorGeneral = null) }
         viewModelScope.launch {
-            val resultado = runCatching { repository.registrar(armarRegistro(s)) }
+            val resultado = runCatching {
+                if (cuentaGoogle == null) repository.registrar(armarRegistro(s))
+                else {
+                    val datos = armarRegistro(s)
+                    cuentaGoogleRepository.registrar(cuentaGoogle.email, datos.perfil, datos.contacto)
+                    ResultadoRegistro.Creado
+                }
+            }
             _uiState.update { actual ->
                 resultado.fold(
                     onSuccess = { r ->
                         when (r) {
                             ResultadoRegistro.Creado -> {
-                                sessionManager.guardarUsuario(s.usuario) // entra directo, sin pasar por el login
+                                sessionManager.guardarUsuario(s.usuario) // (con Google, usuario = email) entra directo, sin pasar por el login
                                 actual.copy(creando = false, registroOk = true)
                             }
                             ResultadoRegistro.UsuarioExistente -> actual.copy(
@@ -211,9 +242,11 @@ class RegistroViewModel(
     // ---------------------------------- Validación ----------------------------------
 
     private fun validar(s: RegistroUiState): Map<CampoRegistro, TextoUi> = buildMap {
-        ReglasRegistro.usuario(s.usuario)?.let { put(CampoRegistro.USUARIO, it) }
-        ReglasRegistro.password(s.password)?.let { put(CampoRegistro.PASSWORD, it) }
-        ReglasRegistro.confirmacion(s.password, s.confirmacion)?.let { put(CampoRegistro.CONFIRMACION, it) }
+        if (!s.esGoogle) {
+            ReglasRegistro.usuario(s.usuario)?.let { put(CampoRegistro.USUARIO, it) }
+            ReglasRegistro.password(s.password)?.let { put(CampoRegistro.PASSWORD, it) }
+            ReglasRegistro.confirmacion(s.password, s.confirmacion)?.let { put(CampoRegistro.CONFIRMACION, it) }
+        }
 
         (Validaciones.obligatorio(s.nombre, textoUi(R.string.campo_tu_nombre)) ?: Validaciones.largoMaximo(s.nombre, 60))
             ?.let { put(CampoRegistro.NOMBRE, it) }
@@ -240,8 +273,13 @@ class RegistroViewModel(
     }
 
     companion object {
-        fun Factory(repository: RegistroRepository, sessionManager: SessionManager) = viewModelFactory {
-            initializer { RegistroViewModel(repository, sessionManager) }
+        fun Factory(
+            repository: RegistroRepository,
+            cuentaGoogleRepository: CuentaGoogleRepository,
+            sessionManager: SessionManager,
+            cuentaGoogle: CuentaGoogle? = null
+        ) = viewModelFactory {
+            initializer { RegistroViewModel(repository, cuentaGoogleRepository, sessionManager, cuentaGoogle) }
         }
     }
 }

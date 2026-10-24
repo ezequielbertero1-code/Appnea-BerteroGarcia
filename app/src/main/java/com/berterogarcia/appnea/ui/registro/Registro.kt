@@ -81,7 +81,7 @@ fun RegistroScreen(
     onRegistroExitoso: () -> Unit
 ) {
     val s by viewModel.uiState.collectAsStateWithLifecycle()
-    val pasos = PasoRegistro.entries
+    val pasos = s.pasos
     val onAnterior: () -> Unit = { if (!viewModel.anterior()) onCancelar() }
 
     LaunchedEffect(s.registroOk) {
@@ -104,13 +104,13 @@ fun RegistroScreen(
         Column(Modifier.padding(horizontal = 16.dp)) {
             ProgresoPasosNavegable(
                 total = pasos.size,
-                actual = s.paso.ordinal,
-                conError = s.pasosConError.map { it.ordinal }.toSet(),
+                actual = s.indicePaso,
+                conError = s.pasosConError.map { pasos.indexOf(it) }.toSet(),
                 onIrA = { viewModel.irA(pasos[it]) },
                 descripcion = { stringResource(R.string.nueva_ir_a_paso, it + 1, pasos[it].nombre()) }
             )
             Text(
-                stringResource(R.string.nueva_paso_de, s.paso.ordinal + 1, pasos.size, s.paso.nombre()),
+                stringResource(R.string.nueva_paso_de, s.indicePaso + 1, pasos.size, s.paso.nombre()),
                 style = MaterialTheme.typography.bodySmall,
                 color = TextoSuperficieVariante,
                 modifier = Modifier.padding(start = 4.dp, top = 8.dp)
@@ -120,7 +120,7 @@ fun RegistroScreen(
         AnimatedContent(
             targetState = s.paso,
             transitionSpec = {
-                val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
+                val dir = if (s.pasos.indexOf(targetState) > s.pasos.indexOf(initialState)) 1 else -1
                 (slideInHorizontally { it * dir } + fadeIn()) togetherWith
                         (slideOutHorizontally { -it * dir } + fadeOut())
             },
@@ -209,6 +209,7 @@ private fun PasoCuenta(s: RegistroUiState, vm: RegistroViewModel) {
 
 @Composable
 private fun PasoPersonales(s: RegistroUiState, vm: RegistroViewModel) {
+    if (s.esGoogle) Texto(stringResource(R.string.registro_google_ayuda, s.emailGoogle.orEmpty()))
     val palabras = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next)
     // Nombre y apellido lado a lado, como en el mockup de Datos personales
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -286,8 +287,10 @@ private fun PasoEmergencia(s: RegistroUiState, vm: RegistroViewModel) {
 /** Resumen editable: cada sección es una fila con su ícono y "Editar"; después el aviso y el checkbox. */
 @Composable
 private fun PasoConfirmar(s: RegistroUiState, vm: RegistroViewModel) {
-    val filas = listOf(
-        Triple(R.drawable.ic_ms_person, stringResource(R.string.registro_resumen_usuario), s.usuario) to PasoRegistro.CUENTA,
+    val filas = listOfNotNull(
+        // Con Google no hay paso de cuenta que editar: la fila de usuario no se muestra.
+        if (s.esGoogle) null
+        else Triple(R.drawable.ic_ms_person, stringResource(R.string.registro_resumen_usuario), s.usuario) to PasoRegistro.CUENTA,
         Triple(
             R.drawable.ic_ms_badge,
             stringResource(R.string.cuenta_datos_personales),

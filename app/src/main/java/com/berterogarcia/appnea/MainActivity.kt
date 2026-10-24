@@ -114,7 +114,7 @@ fun MyApplicationApp(destinoInicial: String = RUTA_LOGIN) { // [CAMBIO] recibe e
     // Se recalcula cada vez que cambia la pantalla (backStackEntry).
     val pestaniaSeleccionada = remember(backStackEntry) { navController.pestaniaAbierta() }
 
-    val mostrarMenu = currentRoute != RUTA_LOGIN && currentRoute != RUTA_REGISTRO
+    val mostrarMenu = currentRoute != RUTA_LOGIN && currentRoute?.startsWith(RUTA_REGISTRO) != true
     val ocultarBarra = remember { mutableStateOf(false) }
     // Sin barra: formularios (RUTAS_SIN_BARRA) o una pantalla que la pidió ocultar
     val esFormulario = currentRoute in RUTAS_SIN_BARRA || ocultarBarra.value

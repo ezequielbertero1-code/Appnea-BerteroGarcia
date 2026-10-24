@@ -468,6 +468,7 @@
     <string name="registro_emergencia_ayuda">Es la persona a la que hay que avisar si te pasa algo en el agua. Después podés agregar más contactos desde Cuenta.</string>
     <string name="registro_contacto_nombre">Nombre y apellido *</string>
     <string name="registro_contacto_relacion">Relación (ej: hermana, pareja, amigo)</string>
+    <string name="registro_google_ayuda">Es tu primera vez con %1$s. Revisá tus datos y completá los que faltan para crear tu cuenta.</string>
     <string name="registro_resumen_usuario">Usuario</string>
     <string name="registro_editar">Editar</string>
     <string name="registro_aviso_titulo">Aviso de seguridad</string>
