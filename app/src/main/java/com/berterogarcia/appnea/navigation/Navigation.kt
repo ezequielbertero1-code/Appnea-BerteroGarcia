@@ -3,10 +3,12 @@ package com.berterogarcia.appnea.navigation
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
@@ -14,6 +16,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import kotlinx.coroutines.flow.flowOf
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.MyApplication
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
@@ -173,8 +176,15 @@ fun AppNavHost(
             val inicioViewModel: InicioViewModel = viewModel(
                 factory = InicioViewModel.Factory(app.inmersionRepository)
             )
+            val usuario = app.sessionManager.obtenerUsuario()
+            // En las cuentas de Google el usuario es el email: se saluda con el nombre del perfil
+            // (mientras carga queda solo "Hola", para no mostrar el email un instante).
+            val perfil by remember(usuario) {
+                usuario?.let { app.perfilRepository.observarPerfil(it) } ?: flowOf(null)
+            }.collectAsStateWithLifecycle(initialValue = null)
+            val saludo = if (usuario?.contains('@') == true) perfil?.nombre?.takeIf { it.isNotBlank() } else usuario
             InicioScreen(
-                nombreUsuario = app.sessionManager.obtenerUsuario(),
+                nombreUsuario = saludo,
                 inicioViewModel = inicioViewModel,
                 climaViewModel = climaViewModel,
                 // launchSingleTop: un doble toque no abre el formulario dos veces
