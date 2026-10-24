@@ -447,13 +447,13 @@
     <!-- =========================== ACCESO (login, registro, contraseña) =========================== -->
     <string name="campo_mostrar_password">Mostrar contraseña</string>
     <string name="campo_ocultar_password">Ocultar contraseña</string>
-    <string name="login_hola_de_nuevo">Hola de nuevo, %1$s</string>
-    <string name="login_no_sos">¿No sos %1$s?</string>
-    <string name="login_usar_otra_cuenta">Usar otra cuenta</string>
     <string name="login_ingresando">Ingresando…</string>
     <string name="login_espera">Esperá %1$d s</string>
     <string name="login_sin_cuenta">¿No tenés cuenta?</string>
     <string name="login_crear_cuenta">Creá una</string>
+    <string name="login_o">o</string>
+    <string name="login_google">Continuar con Google</string>
+    <string name="login_google_cargando">Conectando con Google…</string>
     <string name="login_logo">Logo de AppneaMe</string>
     <string name="login_lema">Tu bitácora de apnea y buceo</string>
     <string name="login_bloqueado">Demasiados intentos fallidos. Podés volver a intentar en %1$s.</string>
@@ -639,6 +639,9 @@
     </plurals>
     <string name="login_error_password">Ingresá tu contraseña.</string>
     <string name="login_error_verificar">No se pudo verificar el usuario. Intentá de nuevo.</string>
+    <string name="login_error_google">No se pudo iniciar sesión con Google. Intentá de nuevo.</string>
+    <string name="login_error_google_sin_cuentas">No hay ninguna cuenta de Google en este dispositivo. Agregá una en Ajustes e intentá de nuevo.</string>
+    <string name="login_error_google_config">El inicio de sesión con Google no está configurado en esta versión de la app.</string>
     <string name="login_error_credenciales">Usuario o contraseña incorrectos.</string>
     <string name="registro_error_usuario_existe">Ese usuario ya existe, elegí otro.</string>
     <string name="registro_error_crear">No se pudo crear la cuenta. Intentá de nuevo.</string>

@@ -14,12 +14,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
@@ -43,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.data.auth.GoogleAuth
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.CampoPassword
 import com.berterogarcia.appnea.ui.components.CampoTexto
@@ -65,6 +70,7 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistr
     val focoPassword = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val teclado = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
 
     val irAPassword: () -> Unit = { focoPassword.requestFocus() }
     val intentarLogin: () -> Unit = {
@@ -95,27 +101,11 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistr
 
         Column(Modifier.fillMaxWidth()) {
             Text(
-                text = if (s.usuarioRecordado) stringResource(R.string.login_hola_de_nuevo, s.usuario)
-                else stringResource(R.string.login_button),
+                text = stringResource(R.string.login_button),
                 style = MaterialTheme.typography.titleMedium,
                 color = TextoSuperficie,
-                modifier = Modifier.padding(start = 4.dp)
+                modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
             )
-            if (s.usuarioRecordado) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        stringResource(R.string.login_no_sos, s.usuario),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextoSuperficieVariante,
-                        modifier = Modifier.padding(start = 4.dp)
-                    )
-                    TextButton(onClick = viewModel::usarOtraCuenta, enabled = s.habilitado) {
-                        Text(stringResource(R.string.login_usar_otra_cuenta), color = Acento)
-                    }
-                }
-            } else {
-                Spacer(Modifier.height(12.dp))
-            }
 
             // Usuario: Enter (teclado físico) o "Siguiente" → pasa a contraseña.
             CampoTexto(
@@ -163,6 +153,30 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistr
                     .fillMaxWidth()
                     .padding(top = 12.dp)
             )
+
+            SeparadorO()
+
+            OutlinedButton(
+                onClick = {
+                    teclado?.hide()
+                    focusManager.clearFocus()
+                    viewModel.loginConGoogle { GoogleAuth.pedirCuenta(context) }
+                },
+                enabled = s.googleHabilitado,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_google),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = if (s.cargandoGoogle) stringResource(R.string.login_google_cargando)
+                    else stringResource(R.string.login_google),
+                    color = if (s.googleHabilitado) TextoSuperficie else TextoSuperficieVariante
+                )
+            }
         }
 
         Row(
@@ -174,6 +188,26 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit, onRegistr
                 Text(stringResource(R.string.login_crear_cuenta), color = Acento)
             }
         }
+    }
+}
+
+/** Línea con "o" en el medio, entre el botón de contraseña y el de Google. */
+@Composable
+private fun SeparadorO() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp)
+    ) {
+        HorizontalDivider(Modifier.weight(1f), color = TextoSuperficieVariante.copy(alpha = 0.4f))
+        Text(
+            stringResource(R.string.login_o),
+            color = TextoSuperficieVariante,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
+        HorizontalDivider(Modifier.weight(1f), color = TextoSuperficieVariante.copy(alpha = 0.4f))
     }
 }
 

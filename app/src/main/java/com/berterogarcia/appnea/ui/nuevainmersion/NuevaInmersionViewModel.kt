@@ -7,9 +7,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
+import com.berterogarcia.appnea.data.local.BajadaApnea
 import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.EquipoEntity
-import com.berterogarcia.appnea.data.local.BajadaApnea
 import com.berterogarcia.appnea.data.local.Geocodificador
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.RegistroApnea

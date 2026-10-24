@@ -10,7 +10,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -66,8 +65,8 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.Aptitud
-import com.berterogarcia.appnea.data.local.RegistroApnea
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.local.RegistroApnea
 import com.berterogarcia.appnea.data.local.Ubicacion
 import com.berterogarcia.appnea.data.local.formatearDuracion
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado

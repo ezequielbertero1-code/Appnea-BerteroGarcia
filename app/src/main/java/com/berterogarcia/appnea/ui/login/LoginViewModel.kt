@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.data.auth.ResultadoGoogle
 import com.berterogarcia.appnea.data.local.EstadoIntentos
 import com.berterogarcia.appnea.data.local.PoliticaIntentos
 import com.berterogarcia.appnea.data.local.PreferenciasLogin
 import com.berterogarcia.appnea.data.local.SessionManager
+import com.berterogarcia.appnea.data.repository.CuentaGoogleRepository
 import com.berterogarcia.appnea.data.repository.UsuarioRepository
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.pluralUi
@@ -33,17 +35,22 @@ data class LoginUiState(
     /** Aviso naranja, ej: "Te quedan 2 intentos". */
     val aviso: TextoUi? = null,
     val cargando: Boolean = false,
+    /** Esperando a Google (selector de cuentas) o guardando la cuenta. */
+    val cargandoGoogle: Boolean = false,
     val exitoso: Boolean = false,
     /** Segundos que faltan para poder intentar de nuevo (0 = no bloqueado). */
     val bloqueadoSegundos: Int = 0
 ) {
     val bloqueado: Boolean get() = bloqueadoSegundos > 0
     /** Campos y botón deshabilitados mientras verifica, después de entrar o durante un bloqueo. */
-    val habilitado: Boolean get() = !cargando && !exitoso && !bloqueado
+    val habilitado: Boolean get() = !cargando && !cargandoGoogle && !exitoso && !bloqueado
+    /** El bloqueo por intentos es solo de contraseña: con Google se puede entrar igual. */
+    val googleHabilitado: Boolean get() = !cargando && !cargandoGoogle && !exitoso
 }
 
 class LoginViewModel(
     private val repository: UsuarioRepository,
+    private val cuentaGoogleRepository: CuentaGoogleRepository,
     private val sessionManager: SessionManager,
     private val preferencias: PreferenciasLogin,
     private val reloj: () -> Long = System::currentTimeMillis
@@ -70,12 +77,6 @@ class LoginViewModel(
         _uiState.update { it.copy(password = v, errorPassword = null, errorGeneral = null) }
     }
 
-    /** "¿No sos X?": borra el usuario recordado para entrar con otra cuenta. */
-    fun usarOtraCuenta() {
-        runCatching { preferencias.ultimoUsuario = null }
-        _uiState.update { it.copy(usuario = "", password = "", usuarioRecordado = false, errorGeneral = null, aviso = null) }
-    }
-
     fun login() {
         val s = _uiState.value
         if (!s.habilitado) return
@@ -98,6 +99,34 @@ class LoginViewModel(
             if (valido) onLoginCorrecto(usuario) else onLoginIncorrecto()
         }
     }
+
+    /**
+     * [pedirCuenta] abre el selector de cuentas de Google (necesita la Activity, por eso lo pone la
+     * pantalla y el ViewModel no guarda ningún Context).
+     */
+    fun loginConGoogle(pedirCuenta: suspend () -> ResultadoGoogle) {
+        if (!_uiState.value.googleHabilitado) return
+        _uiState.update { it.copy(cargandoGoogle = true, errorGeneral = null, aviso = null) }
+        viewModelScope.launch {
+            when (val resultado = pedirCuenta()) {
+                is ResultadoGoogle.Ok -> {
+                    val usuario = runCatching { cuentaGoogleRepository.entrar(resultado.cuenta) }.getOrElse {
+                        return@launch errorGoogle(R.string.login_error_google)
+                    }
+                    // No se guarda como "último usuario": ese campo es para entrar con contraseña.
+                    sessionManager.guardarUsuario(usuario)
+                    _uiState.update { it.copy(cargandoGoogle = false, exitoso = true) }
+                }
+                ResultadoGoogle.Cancelado -> _uiState.update { it.copy(cargandoGoogle = false) }
+                ResultadoGoogle.SinCuentas -> errorGoogle(R.string.login_error_google_sin_cuentas)
+                ResultadoGoogle.SinConfigurar -> errorGoogle(R.string.login_error_google_config)
+                ResultadoGoogle.Error -> errorGoogle(R.string.login_error_google)
+            }
+        }
+    }
+
+    private fun errorGoogle(mensaje: Int) =
+        _uiState.update { it.copy(cargandoGoogle = false, errorGeneral = textoUi(mensaje)) }
 
     private fun onLoginCorrecto(usuario: String) {
         runCatching {
@@ -146,10 +175,11 @@ class LoginViewModel(
     companion object {
         fun Factory(
             repository: UsuarioRepository,
+            cuentaGoogleRepository: CuentaGoogleRepository,
             sessionManager: SessionManager,
             preferencias: PreferenciasLogin
         ) = viewModelFactory {
-            initializer { LoginViewModel(repository, sessionManager, preferencias) }
+            initializer { LoginViewModel(repository, cuentaGoogleRepository, sessionManager, preferencias) }
         }
     }
 }

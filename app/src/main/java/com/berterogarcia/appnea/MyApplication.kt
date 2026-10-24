@@ -6,6 +6,7 @@ import com.berterogarcia.appnea.data.local.PreferenciasLogin
 import com.berterogarcia.appnea.data.local.SeedDatos
 import com.berterogarcia.appnea.data.local.SessionManager
 import com.berterogarcia.appnea.data.local.SonidoManager
+import com.berterogarcia.appnea.data.repository.CuentaGoogleRepository
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.PerfilRepository
 import com.berterogarcia.appnea.data.repository.RegistroRepository
@@ -24,6 +25,7 @@ class MyApplication : Application() {
     val sessionManager by lazy { SessionManager(this) }
     val sonidoManager by lazy { SonidoManager(this) }
     val usuarioRepository by lazy { UsuarioRepository(database.usuarioDao()) }
+    val cuentaGoogleRepository by lazy { CuentaGoogleRepository(database) }
     // Estos repositorios reciben la sesión: trabajan siempre sobre el usuario logueado.
     val preferenciasLogin by lazy { PreferenciasLogin(this) }
     val inmersionRepository by lazy { InmersionRepository(database.inmersionDao(), sessionManager) }
