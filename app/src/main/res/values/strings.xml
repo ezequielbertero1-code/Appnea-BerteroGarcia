@@ -524,7 +524,7 @@
     <string name="perfil_equipo_categoria_ayuda">Elegí a qué categoría pertenece.</string>
     <string name="perfil_equipo_marca">Marca</string>
     <string name="perfil_equipo_modelo">Modelo</string>
-    <string name="perfil_equipo_talle">Talle / medida / espesor (ej: L, 42-43, 5 mm)</string>
+    <string name="perfil_equipo_talle">Talle / medida / espesor (ej: L, 42–43, 5 mm)</string>
     <string name="perfil_equipo_compra">Fecha de compra</string>
     <string name="perfil_equipo_service">Próximo service / revisión</string>
     <string name="perfil_equipo_en_uso">En uso</string>
@@ -706,7 +706,7 @@
     <string name="aprender_apnea_reflejo_titulo">El reflejo de inmersión de los mamíferos</string>
     <string name="aprender_apnea_reflejo_cuerpo">Al sumergirnos, el cuerpo activa una serie de respuestas fisiológicas que ayudan a ahorrar oxígeno: bradicardia (baja la frecuencia cardíaca), esplenocontracción (el bazo libera glóbulos rojos extra), vasoconstricción periférica (la sangre se retira de brazos y piernas) y el \"blood shift\" (la sangre se concentra en el pecho para proteger los pulmones de la presión). Este reflejo es más fuerte cuanto más frío el agua en contacto con la cara, y se entrena y mejora con la práctica.</string>
     <string name="aprender_apnea_respiracion_titulo">Respiración: antes y después de la apnea</string>
-    <string name="aprender_apnea_respiracion_cuerpo">La respiración previa debe ser lenta, relajada y consciente (por ejemplo: inhalar 4 segundos, exhalar 7-8 segundos), con 2 a 4 respiraciones completas antes de la última inhalación total. Al salir a superficie, la respiración de recuperación es clave: inhalar completo, sostener 2-3 segundos y exhalar en forma pasiva. Una buena recuperación ayuda a prevenir la samba (pérdida de control motor) y el síncope (desmayo por hipoxia).</string>
+    <string name="aprender_apnea_respiracion_cuerpo">La respiración previa debe ser lenta, relajada y consciente (por ejemplo: inhalar 4 segundos, exhalar 7–8 segundos), con 2 a 4 respiraciones completas antes de la última inhalación total. Al salir a superficie, la respiración de recuperación es clave: inhalar completo, sostener 2-3 segundos y exhalar en forma pasiva. Una buena recuperación ayuda a prevenir la samba (pérdida de control motor) y el síncope (desmayo por hipoxia).</string>
     <string name="aprender_apnea_respiracion_aviso_titulo_1">Nunca hiperventilar</string>
     <string name="aprender_apnea_respiracion_aviso_cuerpo_1">Respirar rápido y en exceso antes de sumergirse (hiperventilar) NO aumenta el oxígeno disponible: sólo baja el CO₂, que es la señal que nuestro cuerpo usa para avisarnos que hay que respirar. El resultado es que la necesidad de respirar aparece tarde, cuando el nivel de oxígeno ya puede ser peligrosamente bajo, aumentando el riesgo de desmayo bajo el agua. Señales de alerta: mareos, hormigueo en los labios, entumecimiento de las extremidades, problemas auditivos o pérdida del equilibrio.</string>
     <string name="aprender_apnea_seccion_2">Equipamiento básico</string>
@@ -777,7 +777,7 @@
     <string name="aprender_buceo_checklist_punto_1">Bucear siempre en pareja (buddy system), nunca en solitario.</string>
     <string name="aprender_buceo_checklist_punto_2">Respetar las tablas de buceo y no exceder los tiempos de fondo.</string>
     <string name="aprender_buceo_checklist_punto_3">Ascender a no más de 10 metros por minuto.</string>
-    <string name="aprender_buceo_checklist_punto_4">Hacer la parada de seguridad de 3 minutos a 3-5 metros.</string>
+    <string name="aprender_buceo_checklist_punto_4">Hacer la parada de seguridad de 3 minutos a 3–5 metros.</string>
     <string name="aprender_buceo_checklist_punto_5">Ecualizar los oídos de forma frecuente durante todo el descenso.</string>
     <string name="aprender_buceo_checklist_punto_6">No bucear con apnea el mismo día después de bucear con botellas.</string>
     <string name="aprender_buceo_checklist_punto_7">No tomar un avión ni subir a mucha altura tras bucear.</string>

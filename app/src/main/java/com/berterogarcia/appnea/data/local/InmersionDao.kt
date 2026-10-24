@@ -3,8 +3,8 @@ package com.berterogarcia.appnea.data.local
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 // [CAMBIO v7] Todas las consultas filtran por usuario: nadie lee ni borra datos de otro.
 @Dao

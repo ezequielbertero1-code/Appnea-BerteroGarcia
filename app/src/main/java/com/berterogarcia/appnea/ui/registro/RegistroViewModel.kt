@@ -14,12 +14,12 @@ import com.berterogarcia.appnea.data.repository.ResultadoRegistro
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.Validaciones
-import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 /** Pasos del registro. El nombre que se muestra sale de strings.xml (ver Registro.kt). */
 enum class PasoRegistro { CUENTA, PERSONALES, EMERGENCIA, CONFIRMAR }

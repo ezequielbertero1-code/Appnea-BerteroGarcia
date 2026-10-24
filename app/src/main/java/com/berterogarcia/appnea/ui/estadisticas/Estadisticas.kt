@@ -53,10 +53,10 @@ import com.berterogarcia.appnea.ui.theme.ContornoFuerte
 import com.berterogarcia.appnea.ui.theme.Divisor
 import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
+import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.time.Duration
-import kotlinx.coroutines.launch
 
 private val LOCALE_ES: Locale = Locale.forLanguageTag("es-AR")
 private val FORMATO_DIA_MES: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM", LOCALE_ES)

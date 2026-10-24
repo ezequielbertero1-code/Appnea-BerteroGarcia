@@ -2,12 +2,8 @@ package com.berterogarcia.appnea.data.perfil
 
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado.ASCENSO_BUCEO
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado.DESCENSO_BUCEO
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado.MAX_PUNTOS
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado.PROF_PARADA_M
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado.VELOCIDAD_APNEA
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado.generar
 import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.cos

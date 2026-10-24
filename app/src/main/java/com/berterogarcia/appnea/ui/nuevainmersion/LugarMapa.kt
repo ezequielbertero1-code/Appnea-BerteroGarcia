@@ -64,13 +64,13 @@ import com.berterogarcia.appnea.ui.theme.FondoIntermedio
 import com.berterogarcia.appnea.ui.theme.SuperficieTonal
 import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /** Tarjeta de "Datos generales": mini mapa + coordenadas + botones. */
 @Composable

@@ -14,12 +14,12 @@ import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_CARGAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_GUARDAR
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_SIN_SESION
 import com.berterogarcia.appnea.ui.perfil.comun.Validaciones
-import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 enum class CampoEquipo { CATEGORIA, MARCA_MODELO, TALLE, FECHA_COMPRA, MANTENIMIENTO, NOTAS }
 

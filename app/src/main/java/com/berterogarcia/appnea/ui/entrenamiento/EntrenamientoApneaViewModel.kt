@@ -17,8 +17,6 @@ import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.data.repository.TablaPersonalizadaRepository
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
-import java.time.LocalDate
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +24,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class EtapaEntrenamiento { SELECCION, EN_CURSO, GUARDANDO }
 

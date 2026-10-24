@@ -105,10 +105,10 @@ import com.berterogarcia.appnea.ui.theme.ColorError
 import com.berterogarcia.appnea.ui.theme.Divisor
 import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
+import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.time.Duration as JDuration
-import kotlinx.coroutines.launch
 
 private val FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 private val HH_MM = DateTimeFormatter.ofPattern("HH:mm")

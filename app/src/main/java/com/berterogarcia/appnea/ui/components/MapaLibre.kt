@@ -37,7 +37,6 @@ import com.berterogarcia.appnea.data.local.UbicacionHelper
 import com.berterogarcia.appnea.ui.theme.ColorMalo
 import com.berterogarcia.appnea.ui.theme.FondoIntermedio
 import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
-import java.util.Locale
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -45,6 +44,7 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
+import java.util.Locale
 
 /** Estilo gratuito de OpenFreeMap: sin API key ni registro. La atribución (ⓘ) la agrega MapLibre. */
 private const val ESTILO_MAPA = "https://tiles.openfreemap.org/styles/liberty"

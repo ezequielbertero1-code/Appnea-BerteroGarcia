@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * Sesión del usuario: se guarda en SharedPreferences (persiste al cerrar la app) y además
  * se expone como StateFlow para que los repositorios reaccionen al login/logout.
  *
- * [CAMBIO] Ahora implementa [ProveedorUsuario]. La API anterior (guardarUsuario,
+ * CAMBIO Ahora implementa [ProveedorUsuario]. La API anterior (guardarUsuario,
  * obtenerUsuario, cerrarSesion) sigue igual, así que el resto del código no cambia.
  */
 class SessionManager(context: Context) : ProveedorUsuario {

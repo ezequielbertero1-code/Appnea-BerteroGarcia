@@ -75,10 +75,10 @@ import com.berterogarcia.appnea.ui.theme.SuperficieTonalAlta
 import com.berterogarcia.appnea.ui.theme.TextoSobreContenedorSecundario
 import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
+import kotlinx.coroutines.launch
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import kotlinx.coroutines.launch
 
 private val PESTANIAS = listOf(
     R.string.condiciones_tab_resumen,

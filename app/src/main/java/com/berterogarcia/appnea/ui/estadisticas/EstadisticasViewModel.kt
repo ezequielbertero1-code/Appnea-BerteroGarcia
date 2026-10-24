@@ -12,11 +12,6 @@ import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.ui.entrenamiento.FACTORES_DISPONIBLES
-import java.time.LocalDate
-import java.time.YearMonth
-import kotlin.math.abs
-import kotlin.math.roundToInt
-import kotlin.time.Duration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,6 +20,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDate
+import java.time.YearMonth
+import kotlin.math.abs
+import kotlin.math.roundToInt
+import kotlin.time.Duration
 
 /** Período de las estadísticas. [meses] null = todo. */
 enum class PeriodoEstadisticas(@param:StringRes val etiqueta: Int, val meses: Long?) {

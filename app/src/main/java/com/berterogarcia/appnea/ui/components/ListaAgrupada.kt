@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
@@ -50,8 +50,8 @@ import com.berterogarcia.appnea.ui.theme.ContenedorSecundario
 import com.berterogarcia.appnea.ui.theme.ContornoFuerte
 import com.berterogarcia.appnea.ui.theme.SuperficieTonal
 import com.berterogarcia.appnea.ui.theme.SuperficieTonalMaxima
-import com.berterogarcia.appnea.ui.theme.TextoSobreContenedorApnea
 import com.berterogarcia.appnea.ui.theme.TextoSobreAcentoFuerte
+import com.berterogarcia.appnea.ui.theme.TextoSobreContenedorApnea
 import com.berterogarcia.appnea.ui.theme.TextoSobreContenedorSecundario
 import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
