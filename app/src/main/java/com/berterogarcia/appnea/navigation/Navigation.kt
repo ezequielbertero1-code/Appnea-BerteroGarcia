@@ -372,11 +372,7 @@ fun AppNavHost(
             )
             CuentaScreen(
                 viewModel = viewModel,
-                onCerrarSesion = {
-                    navController.navigate(RUTA_LOGIN) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                    }
-                },
+                onCerrarSesion = { navController.irAlLoginSinEstadoGuardado() },
                 //  Accesos a cada sección del perfil
                 onEditarDatos = { navController.navigate(RUTA_DATOS_PERSONALES) },
                 onVerEquipamiento = { navController.navigate(RUTA_EQUIPAMIENTO) },
@@ -502,6 +498,22 @@ fun NavHostController.irAPestania(destino: AppDestinations) {
         popUpTo(inicio) { saveState = true }
         launchSingleTop = true
         restoreState = destino != AppDestinations.INICIO
+    }
+}
+
+/**
+ * Cierre de sesión: vuelve al login descartando TODO lo de la cuenta anterior.
+ *
+ * irAPestania guarda las pestañas que dejás (saveState = true), y ese estado guardado incluye
+ * sus ViewModels. popUpTo(graph.id) solo saca la pila actual, no lo guardado: al entrar con otra
+ * cuenta se restauraban los ViewModels viejos (el cronómetro seguía corriendo y la bitácora
+ * mostraba un instante las inmersiones del usuario anterior). clearBackStack borra ese estado
+ * y limpia sus ViewModels (onCleared cancela sus corrutinas).
+ */
+fun NavHostController.irAlLoginSinEstadoGuardado() {
+    AppDestinations.entries.forEach { clearBackStack(it.name) }
+    navigate(RUTA_LOGIN) {
+        popUpTo(graph.id) { inclusive = true }
     }
 }
 

@@ -1,6 +1,7 @@
 package com.berterogarcia.appnea.ui.clima
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -112,7 +113,9 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
             onSuccess = { condiciones ->
                 _uiState.update { it.copy(cargando = false, condiciones = condiciones, error = aviso) }
             },
-            onFailure = {
+            onFailure = { error ->
+                // Sin esto el motivo real (red, JSON, cálculo de mareas…) se pierde: la UI solo dice "revisá tu conexión"
+                Log.e(TAG, "No se pudo cargar el clima de $ubicacion", error)
                 _uiState.update {
                     it.copy(
                         cargando = false,
@@ -127,6 +130,8 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
     }
 
     companion object {
+        private const val TAG = "Clima"
+
         fun Factory(appContext: Context) = viewModelFactory {
             initializer { ClimaViewModel(appContext) }
         }

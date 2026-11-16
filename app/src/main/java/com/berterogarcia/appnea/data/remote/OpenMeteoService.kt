@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.remote
 
+import com.berterogarcia.appnea.BuildConfig
 import com.berterogarcia.appnea.data.condiciones.DiaClima
 import com.berterogarcia.appnea.data.condiciones.HoraClima
 import com.berterogarcia.appnea.data.condiciones.HoraMar
@@ -32,6 +33,7 @@ data class PronosticoClima(
 object OpenMeteoService {
 
     private const val TIMEOUT_MS = 10_000
+    private const val USER_AGENT = "AppneaMe/${BuildConfig.VERSION_NAME} (Android)"
 
     private const val VARIABLES_HORA_CLIMA =
         "temperature_2m,apparent_temperature,relative_humidity_2m,dew_point_2m," +
@@ -159,11 +161,16 @@ object OpenMeteoService {
         val conexion = URL(urlStr).openConnection() as HttpURLConnection
         try {
             conexion.requestMethod = "GET"
+            // Sin esto Android manda "Dalvik/2.1.0 (...)", el mismo que miles de apps: Open-Meteo bloquea
+            // ese User-Agent en algunos pedidos (403 de nginx si se pide pressure_msl). Con uno propio responde bien.
+            conexion.setRequestProperty("User-Agent", USER_AGENT)
             conexion.connectTimeout = TIMEOUT_MS
             conexion.readTimeout = TIMEOUT_MS
             val codigo = conexion.responseCode
             if (codigo !in 200..299) {
-                throw RuntimeException("Open-Meteo respondió con código $codigo")
+                // Open-Meteo explica el motivo en el cuerpo ({"error":true,"reason":"..."}): va al mensaje para el log
+                val detalle = runCatching { conexion.errorStream?.bufferedReader()?.use { it.readText() } }.getOrNull()
+                throw RuntimeException("Open-Meteo respondió con código $codigo: ${detalle?.take(500)} | URL: $urlStr")
             }
             val texto = conexion.inputStream.bufferedReader().use { it.readText() }
             return JSONObject(texto)
