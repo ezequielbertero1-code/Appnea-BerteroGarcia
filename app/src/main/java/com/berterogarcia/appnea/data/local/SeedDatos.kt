@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.util.intentar
 import android.content.Context
 import androidx.core.content.edit
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
@@ -34,7 +35,7 @@ object SeedDatos {
 
         // Usuario Demo con muchos datos (independiente de la marca de Franco: se siembra
         // solo si el usuario Demo no existe, así también aparece en instalaciones viejas).
-        runCatching { SeedDemo.sembrarSiHaceFalta(db) }
+        intentar("SeedDatos") { SeedDemo.sembrarSiHaceFalta(db) }
 
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         if (prefs.getBoolean(CLAVE_SEMBRADO, false)) return
@@ -49,7 +50,7 @@ object SeedDatos {
         sesionesApnea().forEach { db.sesionApneaDao().insertar(it.copy(nombreUsuario = USUARIO_PRUEBA)) }
 
         // Perfil de ejemplo (datos personales, certificados, equipo, contacto). Es idempotente.
-        runCatching { SeedPerfil.sembrarPerfilFranco(db) }
+        intentar("SeedDatos") { SeedPerfil.sembrarPerfilFranco(db) }
         prefs.edit { putBoolean(CLAVE_SEMBRADO, true) }
     }
 

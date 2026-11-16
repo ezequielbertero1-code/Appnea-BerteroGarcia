@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.repository
 
+import com.berterogarcia.appnea.util.intentar
 import com.berterogarcia.appnea.data.local.SessionManager
 import com.berterogarcia.appnea.data.local.UsuarioDao
 
@@ -23,7 +24,7 @@ class SesionRepository(
      */
     suspend fun usuarioConSesionValida(): String? {
         val guardado = sessionManager.obtenerUsuario()?.takeIf { it.isNotBlank() } ?: return null
-        val existe = runCatching { usuarioDao.existeUsuario(guardado) }.getOrElse { return null }
+        val existe = intentar("SesionRepository") { usuarioDao.existeUsuario(guardado) }.getOrElse { return null }
         if (!existe) sessionManager.cerrarSesion()
         return guardado.takeIf { existe }
     }

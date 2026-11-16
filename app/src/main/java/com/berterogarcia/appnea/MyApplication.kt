@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea
 
+import com.berterogarcia.appnea.util.intentar
 import android.app.Application
 import com.berterogarcia.appnea.data.local.AppDatabase
 import com.berterogarcia.appnea.data.local.PreferenciasLogin
@@ -55,11 +56,11 @@ class MyApplication : Application() {
         appScope.launch {
             // v8: se sacó pesca submarina → se borran las fotos de capturas que hayan quedado.
             // Si la carpeta no existe no hace nada; si falla, no afecta al resto de la app.
-            runCatching { java.io.File(filesDir, "capturas_pesca").deleteRecursively() }
+            intentar("MyApplication") { java.io.File(filesDir, "capturas_pesca").deleteRecursively() }
         }
         // Carga datos de ejemplo para el usuario de prueba "Franco" (solo la primera vez).
         appScope.launch {
-            runCatching { SeedDatos.sembrarSiHaceFalta(this@MyApplication, database) }
+            intentar("MyApplication") { SeedDatos.sembrarSiHaceFalta(this@MyApplication, database) }
         }
     }
 }

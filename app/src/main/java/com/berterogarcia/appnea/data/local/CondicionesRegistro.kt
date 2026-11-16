@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.util.intentar
 import org.json.JSONObject
 
 /**
@@ -57,7 +58,7 @@ data class CondicionesRegistro(
     }.toString()
 
     companion object {
-        fun desdeJson(texto: String): CondicionesRegistro? = runCatching {
+        fun desdeJson(texto: String): CondicionesRegistro? = intentar("CondicionesRegistro") {
             val j = JSONObject(texto)
             fun d(n: String) = if (j.has(n) && !j.isNull(n)) j.getDouble(n) else null
             fun i(n: String) = if (j.has(n) && !j.isNull(n)) j.getInt(n) else null

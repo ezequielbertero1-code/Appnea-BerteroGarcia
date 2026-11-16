@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.condiciones
 
+import com.berterogarcia.appnea.util.intentar
 import com.berterogarcia.appnea.data.local.CondicionesRegistro
 import com.berterogarcia.appnea.data.local.Ubicacion
 import com.berterogarcia.appnea.data.remote.OpenMeteoService
@@ -22,7 +23,7 @@ object CondicionesRepository {
         val pronostico = OpenMeteoService.obtenerPronostico(ubicacion.latitud, ubicacion.longitud)
             .getOrElse { return Result.failure(it) }
         val mar = OpenMeteoService.obtenerMar(ubicacion.latitud, ubicacion.longitud).getOrNull()
-        return runCatching { armar(ubicacion, pronostico, mar.orEmpty(), mar != null) }
+        return intentar("CondicionesRepository") { armar(ubicacion, pronostico, mar.orEmpty(), mar != null) }
     }
 
     private fun armar(

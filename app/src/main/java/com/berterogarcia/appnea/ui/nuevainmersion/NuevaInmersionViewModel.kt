@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
+import com.berterogarcia.appnea.util.intentar
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -61,7 +62,7 @@ private val FORMATO_HORA: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm
 private val REGEX_TIEMPO_FONDO = Regex("^\\d{2}[0-5]\\d\$") // 4 dígitos, segundos 00-59
 
 /** El campo se llena desde el final ("500" = 05:00), así que se valida el texto completado a 4 dígitos. */
-private fun tiempoValido(v: String): Boolean = v.isNotEmpty() && REGEX_TIEMPO_FONDO.matches(v.padStart(4, '0'))
+internal fun tiempoValido(v: String): Boolean = v.isNotEmpty() && REGEX_TIEMPO_FONDO.matches(v.padStart(4, '0'))
 
 /** Categorías que solo tienen sentido en buceo con tanque: en Apnea no se ofrecen. */
 private val SOLO_BUCEO = setOf(CategoriaEquipo.REGULADOR, CategoriaEquipo.CHALECO, CategoriaEquipo.TUBO)
@@ -229,7 +230,7 @@ class NuevaInmersionViewModel(
     init {
         if (idEditar != null) cargarParaEditar(idEditar)
         viewModelScope.launch {
-            inmersionesPrevias = runCatching { repository.todasLasInmersiones.first() }
+            inmersionesPrevias = intentar("NuevaInmersionViewModel") { repository.todasLasInmersiones.first() }
                 .getOrDefault(emptyList())
             preseleccionarEquipo()
         }
@@ -273,7 +274,7 @@ class NuevaInmersionViewModel(
     /** Lee la inmersión y completa el formulario con sus datos. */
     private fun cargarParaEditar(id: Long) {
         viewModelScope.launch {
-            val i = runCatching { repository.obtenerPorId(id).first() }.getOrNull()
+            val i = intentar("NuevaInmersionViewModel") { repository.obtenerPorId(id).first() }.getOrNull()
             if (i == null) {
                 _uiState.update {
                     it.copy(cargandoEdicion = false, errorCarga = textoUi(R.string.nueva_error_no_encontrada))
@@ -319,7 +320,7 @@ class NuevaInmersionViewModel(
 
     fun siguiente() {
         val s = _uiState.value
-        val erroresEtapa = validar(s).filterKeys { it in s.etapa.campos }
+        val erroresEtapa = validarInmersion(s).filterKeys { it in s.etapa.campos }
         if (erroresEtapa.isNotEmpty()) {
             _uiState.update { it.copy(errores = it.errores - s.etapa.campos + erroresEtapa) }
             return
@@ -362,7 +363,7 @@ class NuevaInmersionViewModel(
         if (_uiState.value.buscandoUbicacion) return
         _uiState.update { it.copy(buscandoUbicacion = true, avisoUbicacion = null) }
         viewModelScope.launch {
-            val u = runCatching { UbicacionHelper.obtenerUbicacionActual(appContext, 15.seconds) }.getOrNull()
+            val u = intentar("NuevaInmersionViewModel") { UbicacionHelper.obtenerUbicacionActual(appContext, 15.seconds) }.getOrNull()
             _uiState.update {
                 if (u != null) it.copy(latitud = u.latitud, longitud = u.longitud, buscandoUbicacion = false)
                 else it.copy(
@@ -510,7 +511,7 @@ class NuevaInmersionViewModel(
 
     fun guardar() {
         val s = _uiState.value
-        val errores = validar(s)
+        val errores = validarInmersion(s)
         if (errores.isNotEmpty()) {
             val primera = Etapa.entries.first { e -> errores.keys.any { it in e.campos } }
             _uiState.update { it.copy(errores = errores, etapa = primera) }
@@ -535,7 +536,7 @@ class NuevaInmersionViewModel(
                 // Sin internet guarda solo la luna.
                 val ubicacion = if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
                 else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
-                runCatching {
+                intentar("NuevaInmersionViewModel") {
                     CondicionesRepository.registroPara(ubicacion.latitud, ubicacion.longitud, fecha.atTime(horaEntrada))
                 }.getOrNull() ?: anterior?.condiciones
             }
@@ -570,7 +571,7 @@ class NuevaInmersionViewModel(
                     longitud = s.longitud,
                     apnea = registroApnea
                 )
-            val ok = runCatching {
+            val ok = intentar("NuevaInmersionViewModel") {
                 if (anterior != null) repository.actualizar(entidad.copy(id = anterior.id))
                 else repository.guardar(entidad)
             }.getOrDefault(false)
@@ -579,63 +580,6 @@ class NuevaInmersionViewModel(
                 else it.copy(guardando = false, errorGuardado = textoUi(R.string.nueva_error_guardar))
             }
         }
-    }
-
-    private fun validar(s: NuevaInmersionUiState): Map<Campo, TextoUi> {
-        val errores = mutableMapOf<Campo, TextoUi>()
-        if (s.fecha.isBlank()) errores[Campo.FECHA] = textoUi(R.string.nueva_error_fecha)
-        if (s.lugar.isBlank()) errores[Campo.LUGAR] = textoUi(R.string.nueva_error_lugar)
-        val esApnea = s.tipo == TipoInmersion.APNEA
-        // Apnea con detalle: la profundidad máxima sale de las bajadas
-        if (!(esApnea && s.cargarDetalleBajadas) && s.profundidadMetros.toFloatOrNull() == null)
-            errores[Campo.PROFUNDIDAD] = textoUi(R.string.nueva_error_profundidad)
-        if (esApnea) {
-            if ((s.cantidadBajadas.toIntOrNull() ?: 0) < 1)
-                errores[Campo.CANTIDAD_BAJADAS] = textoUi(R.string.nueva_error_cantidad_bajadas)
-            if (s.cargarDetalleBajadas && (s.bajadasActivas.isEmpty() || s.bajadasActivas.any { !it.esValida() }))
-                errores[Campo.BAJADAS] = textoUi(R.string.nueva_error_bajadas)
-        }
-
-        // La parada de seguridad solo existe en buceo con tanque
-        if (s.tipo == TipoInmersion.BUCEO) {
-            val parada = s.paradaSeguridadMin.toFloatOrNull()
-            if (parada == null || parada < 3f) errores[Campo.PARADA] = textoUi(R.string.nueva_error_parada)
-        }
-
-        // En apnea el tiempo sale de las bajadas (si se cargaron), no se pide aparte
-        if (!esApnea && !tiempoValido(s.tiempoFondo)) errores[Campo.TIEMPO_FONDO] = textoUi(R.string.nueva_error_tiempo)
-
-        val horaEntrada = s.horaEntrada.takeIf { it.isNotBlank() }
-            ?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
-        val horaSalida = s.horaSalida.takeIf { it.isNotBlank() }
-            ?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
-
-        if (horaEntrada == null) errores[Campo.HORA_ENTRADA] = textoUi(R.string.nueva_error_hora_entrada)
-        if (horaSalida == null) errores[Campo.HORA_SALIDA] = textoUi(R.string.nueva_error_hora_salida)
-        if (horaEntrada != null && horaSalida != null && horaEntrada.isAfter(horaSalida)) {
-            errores[Campo.HORA_SALIDA] = textoUi(R.string.nueva_error_salida_anterior)
-        }
-
-        // Lastre y protección son extras opcionales: solo se validan si se eligió "Sí"
-        if (s.usoLastre) {
-            val lastre = s.lastreKg.toFloatOrNull()
-            if (lastre == null || lastre < 0f) errores[Campo.LASTRE] = textoUi(R.string.nueva_error_lastre)
-        }
-        if (s.usoProteccion) {
-            val proteccion = s.proteccionMm.toFloatOrNull()
-            if (proteccion == null || proteccion < 0f) errores[Campo.PROTECCION] = textoUi(R.string.nueva_error_proteccion)
-        }
-
-        val temperaturaAire = s.temperaturaAireC.toFloatOrNull()
-        if (temperaturaAire == null || temperaturaAire < LimitesInmersion.TEMP_AIRE_MIN) errores[Campo.TEMP_AIRE] = textoUi(R.string.nueva_error_temp_minima, LimitesInmersion.TEMP_AIRE_MIN)
-        else if (temperaturaAire > LimitesInmersion.TEMP_AIRE_MAX) errores[Campo.TEMP_AIRE] = textoUi(R.string.nueva_error_temp_maxima, LimitesInmersion.TEMP_AIRE_MAX)
-
-        val temperaturaAgua = s.temperaturaAguaC.toFloatOrNull()
-        if (temperaturaAgua == null || temperaturaAgua < LimitesInmersion.TEMP_AGUA_MIN) errores[Campo.TEMP_AGUA] = textoUi(R.string.nueva_error_temp_minima, LimitesInmersion.TEMP_AGUA_MIN)
-        else if (temperaturaAgua > LimitesInmersion.TEMP_AGUA_MAX) errores[Campo.TEMP_AGUA] = textoUi(R.string.nueva_error_temp_maxima, LimitesInmersion.TEMP_AGUA_MAX)
-
-        // Visibilidad (escala y metros) es opcional; el campo de metros solo acepta dígitos
-        return errores
     }
 
     companion object {

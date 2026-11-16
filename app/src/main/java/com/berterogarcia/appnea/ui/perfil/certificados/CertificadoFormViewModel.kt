@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.perfil.certificados
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -68,7 +69,7 @@ class CertificadoFormViewModel(
     private fun cargar(usuario: String, id: Long) {
         _uiState.update { it.copy(cargando = true) }
         viewModelScope.launch {
-            val c = runCatching { repository.obtenerCertificado(id, usuario) }.getOrElse {
+            val c = intentar("CertificadoFormViewModel") { repository.obtenerCertificado(id, usuario) }.getOrElse {
                 _uiState.update { it.copy(cargando = false, bloqueado = true, errorGeneral = MENSAJE_ERROR_CARGAR) }
                 return@launch
             }
@@ -137,7 +138,7 @@ class CertificadoFormViewModel(
                 fechaVencimiento = s.fechaVencimiento,
                 notas = s.notas.trim()
             )
-            runCatching { repository.guardarCertificado(certificado) }
+            intentar("CertificadoFormViewModel") { repository.guardarCertificado(certificado) }
                 .onSuccess { _uiState.update { it.copy(guardando = false, guardadoOk = true) } }
                 .onFailure { _uiState.update { it.copy(guardando = false, errorGeneral = MENSAJE_ERROR_GUARDAR) } }
         }

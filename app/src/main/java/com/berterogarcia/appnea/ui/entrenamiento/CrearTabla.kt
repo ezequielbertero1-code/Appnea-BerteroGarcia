@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.entrenamiento
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -132,7 +133,7 @@ class CrearTablaViewModel(private val repository: TablaPersonalizadaRepository) 
         _uiState.update { it.copy(guardando = true, error = null) }
         viewModelScope.launch {
             // guardar() devuelve false si no hay sesión; si la base falla, runCatching da false
-            val ok = runCatching {
+            val ok = intentar("CrearTabla") {
                 repository.guardar(TablaPersonalizadaEntity(nombre = s.nombre.trim(), fases = s.fases))
             }.getOrDefault(false)
             _uiState.update {

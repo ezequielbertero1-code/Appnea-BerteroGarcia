@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.perfil.certificados
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -55,7 +56,7 @@ class CertificadosViewModel(
     fun eliminar(id: Long) {
         val u = usuario ?: return
         viewModelScope.launch {
-            runCatching { repository.eliminarCertificado(id, u) }
+            intentar("CertificadosViewModel") { repository.eliminarCertificado(id, u) }
                 .onFailure { _mensaje.value = MENSAJE_ERROR_ELIMINAR }
         }
     }

@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.perfil.equipamiento
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -42,7 +43,7 @@ class EquipamientoViewModel(
     fun eliminar(id: Long) {
         val u = usuario ?: return
         viewModelScope.launch {
-            runCatching { repository.eliminarEquipo(id, u) }
+            intentar("EquipamientoViewModel") { repository.eliminarEquipo(id, u) }
                 .onFailure { _mensaje.value = MENSAJE_ERROR_ELIMINAR }
         }
     }

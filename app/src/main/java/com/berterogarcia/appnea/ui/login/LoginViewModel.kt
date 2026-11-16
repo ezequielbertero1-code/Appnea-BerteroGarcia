@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.login
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -65,7 +66,7 @@ class LoginViewModel(
     private var cuentaRegresiva: Job? = null
 
     init {
-        val ultimo = runCatching { preferencias.ultimoUsuario }.getOrNull()
+        val ultimo = intentar("LoginViewModel") { preferencias.ultimoUsuario }.getOrNull()
         _uiState.value = LoginUiState(usuario = ultimo.orEmpty(), usuarioRecordado = ultimo != null)
         actualizarBloqueo()
     }
@@ -95,7 +96,7 @@ class LoginViewModel(
 
         _uiState.update { it.copy(cargando = true, errorGeneral = null, aviso = null) }
         viewModelScope.launch {
-            val valido = runCatching { repository.validar(usuario, s.password) }.getOrElse {
+            val valido = intentar("LoginViewModel") { repository.validar(usuario, s.password) }.getOrElse {
                 _uiState.update { it.copy(cargando = false, errorGeneral = textoUi(R.string.login_error_verificar)) }
                 return@launch
             }
@@ -114,7 +115,7 @@ class LoginViewModel(
             when (val resultado = pedirCuenta()) {
                 is ResultadoGoogle.Ok -> {
                     val cuenta = resultado.cuenta
-                    val existe = runCatching { cuentaGoogleRepository.existe(cuenta.email) }.getOrElse {
+                    val existe = intentar("LoginViewModel") { cuentaGoogleRepository.existe(cuenta.email) }.getOrElse {
                         return@launch errorGoogle(R.string.login_error_google)
                     }
                     if (existe) {
@@ -141,7 +142,7 @@ class LoginViewModel(
         _uiState.update { it.copy(cargandoGoogle = false, errorGeneral = textoUi(mensaje)) }
 
     private fun onLoginCorrecto(usuario: String) {
-        runCatching {
+        intentar("LoginViewModel") {
             preferencias.guardarIntentos(EstadoIntentos())
             preferencias.ultimoUsuario = usuario
         }
@@ -152,7 +153,7 @@ class LoginViewModel(
 
     private fun onLoginIncorrecto() {
         val estado = PoliticaIntentos.registrarFallo(leerIntentos(), reloj())
-        runCatching { preferencias.guardarIntentos(estado) }
+        intentar("LoginViewModel") { preferencias.guardarIntentos(estado) }
 
         val restantes = PoliticaIntentos.intentosRestantes(estado)
         _uiState.update {
@@ -182,7 +183,7 @@ class LoginViewModel(
         }
     }
 
-    private fun leerIntentos(): EstadoIntentos = runCatching { preferencias.leerIntentos() }.getOrDefault(EstadoIntentos())
+    private fun leerIntentos(): EstadoIntentos = intentar("LoginViewModel") { preferencias.leerIntentos() }.getOrDefault(EstadoIntentos())
 
     companion object {
         fun Factory(

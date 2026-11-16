@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.entrenamiento
 
+import com.berterogarcia.appnea.util.intentar
 import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -116,7 +117,7 @@ class EntrenamientoApneaViewModel(
         if (_uiState.value.tablaSeleccionada == tabla.aTablaApnea()) {
             _uiState.update { it.copy(tablaSeleccionada = null) }
         }
-        viewModelScope.launch { runCatching { tablaRepository.eliminar(tabla) } }
+        viewModelScope.launch { intentar("EntrenamientoApneaViewModel") { tablaRepository.eliminar(tabla) } }
     }
 
     fun onIniciar() {
@@ -252,7 +253,7 @@ class EntrenamientoApneaViewModel(
 
         viewModelScope.launch {
             // guardar() devuelve false si no hay sesión iniciada; si la base falla, runCatching da false
-            val ok = runCatching {
+            val ok = intentar("EntrenamientoApneaViewModel") {
                 sesionRepository.guardar(
                     SesionApneaEntity(
                         fecha = LocalDate.now(),

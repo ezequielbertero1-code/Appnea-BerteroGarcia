@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.perfil.datos
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -59,7 +60,7 @@ class DatosPersonalesViewModel(
             return
         }
         viewModelScope.launch {
-            runCatching { repository.obtenerPerfil(usuario) }
+            intentar("DatosPersonalesViewModel") { repository.obtenerPerfil(usuario) }
                 .onSuccess { perfil ->
                     _uiState.update {
                         if (perfil == null) {
@@ -120,7 +121,7 @@ class DatosPersonalesViewModel(
                 ciudad = s.ciudad.trim(),
                 companeroHabitual = s.companeroHabitual.trim()
             )
-            runCatching { repository.guardarPerfil(perfil) }
+            intentar("DatosPersonalesViewModel") { repository.guardarPerfil(perfil) }
                 .onSuccess { _uiState.update { it.copy(guardando = false, guardadoOk = true) } }
                 .onFailure { _uiState.update { it.copy(guardando = false, errorGeneral = MENSAJE_ERROR_GUARDAR) } }
         }

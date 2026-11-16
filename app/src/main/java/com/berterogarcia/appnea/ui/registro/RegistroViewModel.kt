@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.registro
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -160,7 +161,7 @@ class RegistroViewModel(
         _uiState.update { it.copy(verificandoUsuario = true) }
         viewModelScope.launch {
             // Si falla la consulta dejamos avanzar: al crear la cuenta se vuelve a verificar.
-            val disponible = runCatching { repository.usuarioDisponible(usuario) }.getOrDefault(true)
+            val disponible = intentar("RegistroViewModel") { repository.usuarioDisponible(usuario) }.getOrDefault(true)
             _uiState.update {
                 if (disponible) it.copy(verificandoUsuario = false, paso = PasoRegistro.PERSONALES)
                 else it.copy(
@@ -187,7 +188,7 @@ class RegistroViewModel(
 
         _uiState.update { it.copy(creando = true, errorGeneral = null) }
         viewModelScope.launch {
-            val resultado = runCatching {
+            val resultado = intentar("RegistroViewModel") {
                 if (cuentaGoogle == null) repository.registrar(armarRegistro(s))
                 else {
                     val datos = armarRegistro(s)

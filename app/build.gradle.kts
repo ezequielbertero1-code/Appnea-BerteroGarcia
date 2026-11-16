@@ -41,6 +41,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    testOptions {
+        // android.util.Log y similares devuelven valores por defecto en los tests de JVM (no fallan)
+        unitTests.isReturnDefaultValues = true
+    }
+    sourceSets {
+        // Los esquemas exportados de Room: los usa MigrationTestHelper en los tests instrumentados
+        getByName("androidTest").assets.directories.add("$projectDir/schemas")
+    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -66,6 +74,9 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.org.json) // org.json real: el de android.jar en los tests de JVM es un stub
+    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

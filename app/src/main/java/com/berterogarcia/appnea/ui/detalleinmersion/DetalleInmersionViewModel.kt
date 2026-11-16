@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.detalleinmersion
 
+import com.berterogarcia.appnea.util.intentar
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -51,7 +52,7 @@ class DetalleInmersionViewModel(
         val i = inmersion.value ?: return false
         val contenido = UddfExporter.generar(i)
         return withContext(Dispatchers.IO) {
-            runCatching {
+            intentar("DetalleInmersionViewModel") {
                 appContext.contentResolver.openOutputStream(uri)
                     ?.use { it.write(contenido.toByteArray(Charsets.UTF_8)) }
                     ?: error("No se pudo abrir el archivo")

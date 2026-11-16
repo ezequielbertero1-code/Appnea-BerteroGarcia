@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.util.intentar
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -54,7 +55,7 @@ data class RegistroApnea(
     }.toString()
 
     companion object {
-        fun desdeJson(texto: String): RegistroApnea? = runCatching {
+        fun desdeJson(texto: String): RegistroApnea? = intentar("RegistroApnea") {
             val j = JSONObject(texto)
             val lista = j.optJSONArray("bajadas") ?: JSONArray()
             RegistroApnea(

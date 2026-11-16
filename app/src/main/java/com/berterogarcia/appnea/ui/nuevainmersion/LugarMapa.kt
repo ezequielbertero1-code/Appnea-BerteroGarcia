@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -200,7 +201,7 @@ fun SelectorLugarMapa(
         } else scope.launch {
             buscando = true
             aviso = null
-            val u = runCatching {
+            val u = intentar("LugarMapa") {
                 UbicacionHelper.obtenerUbicacionActual(appContext, 15.seconds)
             }.getOrNull()
             buscando = false

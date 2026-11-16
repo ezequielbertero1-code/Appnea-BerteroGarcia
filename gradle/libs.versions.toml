@@ -14,6 +14,8 @@ desugarJdkLibs = "2.1.5"
 maplibre = "13.6.1"
 credentials = "1.6.0"
 googleid = "1.1.1"
+coroutinesTest = "1.10.2"
+orgJson = "20240303"
 
 [libraries]
 desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
@@ -42,6 +44,9 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 google-googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 maplibre-android = { group = "org.maplibre.gl", name = "android-sdk-opengl", version.ref = "maplibre" }
 
 [plugins]

@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.perfil.equipamiento
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -69,7 +70,7 @@ class EquipoFormViewModel(
     private fun cargar(usuario: String, id: Long) {
         _uiState.update { it.copy(cargando = true) }
         viewModelScope.launch {
-            val equipo = runCatching { repository.obtenerEquipo(id, usuario) }.getOrElse {
+            val equipo = intentar("EquipoFormViewModel") { repository.obtenerEquipo(id, usuario) }.getOrElse {
                 _uiState.update { it.copy(cargando = false, bloqueado = true, errorGeneral = MENSAJE_ERROR_CARGAR) }
                 return@launch
             }
@@ -131,7 +132,7 @@ class EquipoFormViewModel(
                 enUso = s.enUso,
                 notas = s.notas.trim()
             )
-            runCatching { repository.guardarEquipo(equipo) }
+            intentar("EquipoFormViewModel") { repository.guardarEquipo(equipo) }
                 .onSuccess { _uiState.update { it.copy(guardando = false, guardadoOk = true) } }
                 .onFailure { _uiState.update { it.copy(guardando = false, errorGeneral = MENSAJE_ERROR_GUARDAR) } }
         }

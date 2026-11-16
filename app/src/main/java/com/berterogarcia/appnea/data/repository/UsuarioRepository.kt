@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.repository
 
+import com.berterogarcia.appnea.util.intentar
 import com.berterogarcia.appnea.data.local.SeguridadPassword
 import com.berterogarcia.appnea.data.local.UsuarioDao
 import kotlinx.coroutines.CoroutineDispatcher
@@ -30,7 +31,7 @@ class UsuarioRepository(
 
         val correcta = withContext(cpu) { SeguridadPassword.verificar(password, usuario.password) }
         if (correcta && SeguridadPassword.necesitaActualizar(usuario.password)) {
-            runCatching {
+            intentar("UsuarioRepository") {
                 val nuevo = withContext(cpu) { SeguridadPassword.hashear(password) }
                 dao.actualizarPassword(nombreUsuario, nuevo)
             }

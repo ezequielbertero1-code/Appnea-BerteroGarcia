@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.remote
 
+import com.berterogarcia.appnea.util.intentar
 import com.berterogarcia.appnea.BuildConfig
 import com.berterogarcia.appnea.data.condiciones.DiaClima
 import com.berterogarcia.appnea.data.condiciones.HoraClima
@@ -60,7 +61,7 @@ object OpenMeteoService {
 
     suspend fun obtenerPronostico(latitud: Double, longitud: Double, fecha: LocalDate? = null): Result<PronosticoClima> =
         withContext(Dispatchers.IO) {
-            runCatching {
+            intentar("OpenMeteoService") {
                 val url = String.format(
                     Locale.US,
                     "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f" +
@@ -116,7 +117,7 @@ object OpenMeteoService {
 
     suspend fun obtenerMar(latitud: Double, longitud: Double, fecha: LocalDate? = null): Result<List<HoraMar>> =
         withContext(Dispatchers.IO) {
-            runCatching {
+            intentar("OpenMeteoService") {
                 val url = String.format(
                     Locale.US,
                     "https://marine-api.open-meteo.com/v1/marine?latitude=%.4f&longitude=%.4f" +
@@ -169,7 +170,7 @@ object OpenMeteoService {
             val codigo = conexion.responseCode
             if (codigo !in 200..299) {
                 // Open-Meteo explica el motivo en el cuerpo ({"error":true,"reason":"..."}): va al mensaje para el log
-                val detalle = runCatching { conexion.errorStream?.bufferedReader()?.use { it.readText() } }.getOrNull()
+                val detalle = intentar("OpenMeteoService") { conexion.errorStream?.bufferedReader()?.use { it.readText() } }.getOrNull()
                 throw RuntimeException("Open-Meteo respondió con código $codigo: ${detalle?.take(500)} | URL: $urlStr")
             }
             val texto = conexion.inputStream.bufferedReader().use { it.readText() }

@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.sesion
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -36,7 +37,7 @@ class SesionViewModel(private val sesionRepository: SesionRepository) : ViewMode
 
     init {
         viewModelScope.launch {
-            val usuario = runCatching { sesionRepository.usuarioConSesionValida() }.getOrNull()
+            val usuario = intentar("SesionViewModel") { sesionRepository.usuarioConSesionValida() }.getOrNull()
             _estado.value = EstadoArranque.Listo(
                 destinoInicial = if (usuario != null) AppDestinations.INICIO.name else RUTA_LOGIN
             )

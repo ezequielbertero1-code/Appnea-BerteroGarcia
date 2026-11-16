@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.perfil.contactos
 
+import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -64,7 +65,7 @@ class ContactoFormViewModel(
     /** Siempre se lee la base: en alta para saber si es el primer contacto, en edición para traer los datos. */
     private fun cargar(usuario: String) {
         viewModelScope.launch {
-            runCatching {
+            intentar("ContactoFormViewModel") {
                 val cantidad = repository.cantidadContactos(usuario)
                 val existente = idContacto?.let { repository.obtenerContacto(it, usuario) }
                 cantidad to existente
@@ -132,7 +133,7 @@ class ContactoFormViewModel(
                 esPrincipal = s.esPrincipal,
                 notas = s.notas.trim()
             )
-            runCatching { repository.guardarContacto(contacto) }
+            intentar("ContactoFormViewModel") { repository.guardarContacto(contacto) }
                 .onSuccess { _uiState.update { it.copy(guardando = false, guardadoOk = true) } }
                 .onFailure { _uiState.update { it.copy(guardando = false, errorGeneral = MENSAJE_ERROR_GUARDAR) } }
         }

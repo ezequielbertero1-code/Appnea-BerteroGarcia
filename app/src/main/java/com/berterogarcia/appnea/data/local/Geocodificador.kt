@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.util.intentar
 import android.content.Context
 import android.location.Address
 import android.location.Geocoder
@@ -28,7 +29,7 @@ object Geocodificador {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 // Android 13+: versión asincrónica con listener
                 suspendCancellableCoroutine { cont ->
-                    runCatching {
+                    intentar("Geocodificador") {
                         geocoder.getFromLocation(latitud, longitud, 1, object : Geocoder.GeocodeListener {
                             override fun onGeocode(addresses: MutableList<Address>) {
                                 if (cont.isActive) cont.resume(addresses.firstOrNull())
@@ -42,7 +43,7 @@ object Geocodificador {
             } else {
                 // Android 7–12: versión bloqueante, por eso va en IO
                 withContext(Dispatchers.IO) {
-                    runCatching { geocoder.getFromLocation(latitud, longitud, 1)?.firstOrNull() }.getOrNull()
+                    intentar("Geocodificador") { geocoder.getFromLocation(latitud, longitud, 1)?.firstOrNull() }.getOrNull()
                 }
             }
         }

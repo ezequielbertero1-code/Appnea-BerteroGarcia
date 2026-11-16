@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.util.intentar
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -72,7 +73,7 @@ object UbicacionHelper {
         val lm =
             context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return null
 
-        val activados = runCatching { lm.getProviders(true) }.getOrDefault(emptyList())
+        val activados = intentar("UbicacionHelper") { lm.getProviders(true) }.getOrDefault(emptyList())
         // "passive" no genera ubicaciones propias, solo escucha las de otras apps
         val candidatos = activados.filter { it != LocationManager.PASSIVE_PROVIDER }
         Log.d(TAG, "activados=$activados → pide a $candidatos")
@@ -100,7 +101,7 @@ object UbicacionHelper {
         suspendCancellableCoroutine { cont ->
             val cancelar = CancellationSignal()
             cont.invokeOnCancellation { cancelar.cancel() }
-            runCatching {
+            intentar("UbicacionHelper") {
                 LocationManagerCompat.getCurrentLocation(
                     lm, proveedor, cancelar, ContextCompat.getMainExecutor(context)
                 ) { location ->
@@ -120,7 +121,7 @@ object UbicacionHelper {
         val lm =
             context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return null
 
-        val proveedores = runCatching { lm.allProviders }.getOrDefault(
+        val proveedores = intentar("UbicacionHelper") { lm.allProviders }.getOrDefault(
             listOf(
                 LocationManager.GPS_PROVIDER,
                 LocationManager.NETWORK_PROVIDER,
@@ -128,7 +129,7 @@ object UbicacionHelper {
             )
         )
         val mejor = proveedores
-            .mapNotNull { runCatching { lm.getLastKnownLocation(it) }.getOrNull() }
+            .mapNotNull { intentar("UbicacionHelper") { lm.getLastKnownLocation(it) }.getOrNull() }
             .maxByOrNull { it.time }   // la más reciente
 
         Log.d(TAG, "ultima=$mejor")
