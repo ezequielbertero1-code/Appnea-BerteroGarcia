@@ -17,7 +17,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import kotlinx.coroutines.flow.flowOf
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.data.auth.CuentaGoogle
 import com.berterogarcia.appnea.MyApplication
@@ -211,12 +210,11 @@ fun AppNavHost(
             val inicioViewModel: InicioViewModel = viewModel(
                 factory = InicioViewModel.Factory(app.inmersionRepository)
             )
-            val usuario = app.sessionManager.obtenerUsuario()
+            val usuario by app.sessionManager.usuarioActual.collectAsStateWithLifecycle()
             // En las cuentas de Google el usuario es el email: se saluda con el nombre del perfil
             // (mientras carga queda solo "Hola", para no mostrar el email un instante).
-            val perfil by remember(usuario) {
-                usuario?.let { app.perfilRepository.observarPerfil(it) } ?: flowOf(null)
-            }.collectAsStateWithLifecycle(initialValue = null)
+            val perfil by remember { app.perfilRepository.perfilActual }
+                .collectAsStateWithLifecycle(initialValue = null)
             val saludo = if (usuario?.contains('@') == true) perfil?.nombre?.takeIf { it.isNotBlank() } else usuario
             InicioScreen(
                 nombreUsuario = saludo,
@@ -287,7 +285,6 @@ fun AppNavHost(
                     repository = app.inmersionRepository,
                     registrar = app.registrarInmersion,
                     perfilRepository = app.perfilRepository,
-                    nombreUsuario = app.sessionManager.obtenerUsuario(),
                     appContext = app.applicationContext
                 )
             )
@@ -309,7 +306,6 @@ fun AppNavHost(
                     repository = app.inmersionRepository,
                     registrar = app.registrarInmersion,
                     perfilRepository = app.perfilRepository,
-                    nombreUsuario = app.sessionManager.obtenerUsuario(),
                     appContext = app.applicationContext,
                     idEditar = id
                 )
@@ -390,7 +386,7 @@ fun AppNavHost(
 
         composable(RUTA_DATOS_PERSONALES) { entrada ->
             val viewModel: DatosPersonalesViewModel = viewModel(
-                factory = DatosPersonalesViewModel.Factory(app.perfilRepository, app.sessionManager.obtenerUsuario())
+                factory = DatosPersonalesViewModel.Factory(app.perfilRepository)
             )
             DatosPersonalesScreen(
                 viewModel = viewModel,
@@ -401,7 +397,7 @@ fun AppNavHost(
         // ---------- Equipamiento ----------
         composable(RUTA_EQUIPAMIENTO) { entrada ->
             val viewModel: EquipamientoViewModel = viewModel(
-                factory = EquipamientoViewModel.Factory(app.perfilRepository, app.sessionManager.obtenerUsuario())
+                factory = EquipamientoViewModel.Factory(app.perfilRepository)
             )
             EquipamientoScreen(
                 viewModel = viewModel,
@@ -413,7 +409,7 @@ fun AppNavHost(
         composable(RUTA_FORM_EQUIPO, arguments = argumentoIdOpcional()) { entrada ->
             val viewModel: EquipoFormViewModel = viewModel(
                 factory = EquipoFormViewModel.Factory(
-                    app.perfilRepository, app.sessionManager.obtenerUsuario(), entrada.idOpcional()
+                    app.perfilRepository, entrada.idOpcional()
                 )
             )
             EquipoFormScreen(viewModel = viewModel, onVolver = { navController.volverDesde(entrada) })
@@ -422,7 +418,7 @@ fun AppNavHost(
         // ---------- Certificados ----------
         composable(RUTA_CERTIFICADOS) { entrada ->
             val viewModel: CertificadosViewModel = viewModel(
-                factory = CertificadosViewModel.Factory(app.perfilRepository, app.sessionManager.obtenerUsuario())
+                factory = CertificadosViewModel.Factory(app.perfilRepository)
             )
             CertificadosScreen(
                 viewModel = viewModel,
@@ -434,7 +430,7 @@ fun AppNavHost(
         composable(RUTA_FORM_CERTIFICADO, arguments = argumentoIdOpcional()) { entrada ->
             val viewModel: CertificadoFormViewModel = viewModel(
                 factory = CertificadoFormViewModel.Factory(
-                    app.perfilRepository, app.sessionManager.obtenerUsuario(), entrada.idOpcional()
+                    app.perfilRepository, entrada.idOpcional()
                 )
             )
             CertificadoFormScreen(viewModel = viewModel, onVolver = { navController.volverDesde(entrada) })
@@ -443,7 +439,7 @@ fun AppNavHost(
         // ---------- Contactos de emergencia ----------
         composable(RUTA_CONTACTOS) { entrada ->
             val viewModel: ContactosViewModel = viewModel(
-                factory = ContactosViewModel.Factory(app.perfilRepository, app.sessionManager.obtenerUsuario())
+                factory = ContactosViewModel.Factory(app.perfilRepository)
             )
             ContactosScreen(
                 viewModel = viewModel,
@@ -455,7 +451,7 @@ fun AppNavHost(
         composable(RUTA_FORM_CONTACTO, arguments = argumentoIdOpcional()) { entrada ->
             val viewModel: ContactoFormViewModel = viewModel(
                 factory = ContactoFormViewModel.Factory(
-                    app.perfilRepository, app.sessionManager.obtenerUsuario(), entrada.idOpcional()
+                    app.perfilRepository, entrada.idOpcional()
                 )
             )
             ContactoFormScreen(viewModel = viewModel, onVolver = { navController.volverDesde(entrada) })

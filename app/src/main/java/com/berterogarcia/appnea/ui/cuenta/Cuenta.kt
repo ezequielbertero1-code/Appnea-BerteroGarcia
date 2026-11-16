@@ -62,7 +62,7 @@ fun CuentaScreen(
 ) {
     val resumen by viewModel.resumen.collectAsStateWithLifecycle()
     val stats by viewModel.estadisticas.collectAsStateWithLifecycle()
-    val usuario = viewModel.usuario.orEmpty()
+    val usuario = viewModel.usuario.collectAsStateWithLifecycle().value.orEmpty()
     val perfil = resumen.perfil
     val cargando = stringResource(R.string.cuenta_cargando)
 

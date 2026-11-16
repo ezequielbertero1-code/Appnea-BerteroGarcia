@@ -47,9 +47,10 @@ data class ContactoFormUiState(
 
 class ContactoFormViewModel(
     private val repository: PerfilRepository,
-    private val usuario: String?,
     private val idContacto: Long?
 ) : ViewModel() {
+    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
+    private val usuario: String? = repository.usuarioActual
 
     private val _uiState = MutableStateFlow(ContactoFormUiState(esEdicion = idContacto != null))
     val uiState: StateFlow<ContactoFormUiState> = _uiState.asStateFlow()
@@ -149,8 +150,8 @@ class ContactoFormViewModel(
     }
 
     companion object {
-        fun Factory(repository: PerfilRepository, usuario: String?, idContacto: Long?) = viewModelFactory {
-            initializer { ContactoFormViewModel(repository, usuario, idContacto) }
+        fun Factory(repository: PerfilRepository, idContacto: Long?) = viewModelFactory {
+            initializer { ContactoFormViewModel(repository, idContacto) }
         }
     }
 }

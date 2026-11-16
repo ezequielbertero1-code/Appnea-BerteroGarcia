@@ -209,7 +209,6 @@ class NuevaInmersionViewModel(
     private val repository: InmersionRepository,
     private val registrar: RegistrarInmersion,
     perfilRepository: PerfilRepository,
-    nombreUsuario: String?,
     private val appContext: Context,
     /** null = alta de una inmersión nueva; con id = edición de esa inmersión. */
     private val idEditar: Long? = null,
@@ -255,19 +254,16 @@ class NuevaInmersionViewModel(
                 .getOrDefault(emptyList())
             preseleccionarEquipo()
         }
-        if (nombreUsuario == null) {
-            _uiState.update { it.copy(equipoCargado = true) } // sin sesión: lista vacía, no ruedita eterna
-        } else {
-            viewModelScope.launch {
-                perfilRepository.observarEquipamiento(nombreUsuario)
-                    .catch { emit(emptyList()) } // si falla la base: lista vacía en vez de crashear
-                    .collect { lista ->
-                        _uiState.update {
-                            it.copy(equipoPerfil = lista.filter { e -> e.enUso }, equipoCargado = true)
-                        }
-                        preseleccionarEquipo()
+        // Equipo del usuario logueado (sin sesión: lista vacía, no ruedita eterna)
+        viewModelScope.launch {
+            perfilRepository.equipamientoActual
+                .catch { emit(emptyList()) } // si falla la base: lista vacía en vez de crashear
+                .collect { lista ->
+                    _uiState.update {
+                        it.copy(equipoPerfil = lista.filter { e -> e.enUso }, equipoCargado = true)
                     }
-            }
+                    preseleccionarEquipo()
+                }
         }
     }
 
@@ -602,13 +598,12 @@ class NuevaInmersionViewModel(
             repository: InmersionRepository,
             registrar: RegistrarInmersion,
             perfilRepository: PerfilRepository,
-            nombreUsuario: String?,
             appContext: Context,
             idEditar: Long? = null
         ) = viewModelFactory {
             initializer {
                 NuevaInmersionViewModel(
-                    repository, registrar, perfilRepository, nombreUsuario, appContext, idEditar, createSavedStateHandle()
+                    repository, registrar, perfilRepository, appContext, idEditar, createSavedStateHandle()
                 )
             }
         }

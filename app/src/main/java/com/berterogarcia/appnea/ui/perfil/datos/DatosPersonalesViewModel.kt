@@ -43,9 +43,10 @@ data class DatosPersonalesUiState(
 }
 
 class DatosPersonalesViewModel(
-    private val repository: PerfilRepository,
-    private val usuario: String?
+    private val repository: PerfilRepository
 ) : ViewModel() {
+    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
+    private val usuario: String? = repository.usuarioActual
 
     private val _uiState = MutableStateFlow(DatosPersonalesUiState())
     val uiState: StateFlow<DatosPersonalesUiState> = _uiState.asStateFlow()
@@ -139,8 +140,8 @@ class DatosPersonalesViewModel(
     }
 
     companion object {
-        fun Factory(repository: PerfilRepository, usuario: String?) = viewModelFactory {
-            initializer { DatosPersonalesViewModel(repository, usuario) }
+        fun Factory(repository: PerfilRepository) = viewModelFactory {
+            initializer { DatosPersonalesViewModel(repository) }
         }
     }
 }

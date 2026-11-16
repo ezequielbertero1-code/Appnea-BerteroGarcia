@@ -18,9 +18,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class EquipamientoViewModel(
-    private val repository: PerfilRepository,
-    private val usuario: String?
+    private val repository: PerfilRepository
 ) : ViewModel() {
+    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
+    private val usuario: String? = repository.usuarioActual
 
     /** Orden: primero lo que está en uso, después por categoría (orden del enum) y marca. */
     val estado: StateFlow<EstadoLista<EquipoEntity>> =
@@ -53,8 +54,8 @@ class EquipamientoViewModel(
     }
 
     companion object {
-        fun Factory(repository: PerfilRepository, usuario: String?) = viewModelFactory {
-            initializer { EquipamientoViewModel(repository, usuario) }
+        fun Factory(repository: PerfilRepository) = viewModelFactory {
+            initializer { EquipamientoViewModel(repository) }
         }
     }
 }

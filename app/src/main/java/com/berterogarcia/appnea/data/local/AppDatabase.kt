@@ -48,17 +48,11 @@ abstract class AppDatabase : RoomDatabase() {
          */
         private val VERSIONES_SIN_MIGRACION = intArrayOf(1, 2, 3, 4, 5)
 
-        // Usuario de prueba: se crea solo la primera vez que se genera la base
-        // (instalación nueva o cuando se borra por venir de una versión vieja).
-        // Login: Franco / Mamalesa21
-        // Además reinicia la marca de SeedDatos para que se vuelvan a cargar los datos de ejemplo.
+        // Base nueva (instalación nueva o recreada): reinicia la marca de SeedDatos para que se
+        // vuelvan a cargar los datos de ejemplo. En release SeedDatos no hace nada.
         private fun seedCallback(appContext: Context) = object : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
-                db.execSQL(
-                    "INSERT INTO usuarios (nombreUsuario, password) VALUES (?, ?)",
-                    arrayOf(SeedDatos.USUARIO_PRUEBA, SeguridadPassword.hashear(SeedDatos.PASSWORD_PRUEBA))
-                )
                 SeedDatos.reiniciarMarca(appContext)
             }
         }

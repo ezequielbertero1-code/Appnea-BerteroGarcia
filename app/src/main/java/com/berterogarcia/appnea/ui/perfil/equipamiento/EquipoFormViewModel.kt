@@ -52,9 +52,10 @@ data class EquipoFormUiState(
  */
 class EquipoFormViewModel(
     private val repository: PerfilRepository,
-    private val usuario: String?,
     private val idEquipo: Long?
 ) : ViewModel() {
+    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
+    private val usuario: String? = repository.usuarioActual
 
     private val _uiState = MutableStateFlow(EquipoFormUiState(esEdicion = idEquipo != null))
     val uiState: StateFlow<EquipoFormUiState> = _uiState.asStateFlow()
@@ -155,8 +156,8 @@ class EquipoFormViewModel(
     }
 
     companion object {
-        fun Factory(repository: PerfilRepository, usuario: String?, idEquipo: Long?) = viewModelFactory {
-            initializer { EquipoFormViewModel(repository, usuario, idEquipo) }
+        fun Factory(repository: PerfilRepository, idEquipo: Long?) = viewModelFactory {
+            initializer { EquipoFormViewModel(repository, idEquipo) }
         }
     }
 }

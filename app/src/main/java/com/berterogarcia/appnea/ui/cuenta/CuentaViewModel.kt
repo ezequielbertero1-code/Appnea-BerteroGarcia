@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import java.util.Locale
 import kotlin.time.Duration
@@ -70,28 +69,25 @@ class CuentaViewModel(
     inmersionRepository: InmersionRepository,
     sesionApneaRepository: SesionApneaRepository
 ) : ViewModel() {
-    val usuario: String? = sessionManager.obtenerUsuario()
+    /** Se actualiza solo si cambia la sesión (no es una foto del momento en que se abrió). */
+    val usuario: StateFlow<String?> = sessionManager.usuarioActual
 
     // Perfil real, se actualiza solo cuando se edita en las otras pantallas (Flow de Room).
     private val resumenFlow: Flow<ResumenPerfil> =
-        if (usuario == null) {
-            flowOf(ResumenPerfil(cargando = false))
-        } else {
-            combine(
-                perfilRepository.observarPerfil(usuario),
-                perfilRepository.observarEquipamiento(usuario),
-                perfilRepository.observarCertificados(usuario),
-                perfilRepository.observarContactos(usuario)
-            ) { perfil, equipos, certificados, contactos ->
-                ResumenPerfil(
-                    cargando = false,
-                    perfil = perfil,
-                    equipos = equipos,
-                    certificados = ordenarCertificados(certificados),
-                    contactos = contactos
-                )
-            }.catch { emit(ResumenPerfil(cargando = false, error = true)) }
-        }
+        combine(
+            perfilRepository.perfilActual,
+            perfilRepository.equipamientoActual,
+            perfilRepository.certificadosActuales,
+            perfilRepository.contactosActuales
+        ) { perfil, equipos, certificados, contactos ->
+            ResumenPerfil(
+                cargando = false,
+                perfil = perfil,
+                equipos = equipos,
+                certificados = ordenarCertificados(certificados),
+                contactos = contactos
+            )
+        }.catch { emit(ResumenPerfil(cargando = false, error = true)) }
 
     val resumen: StateFlow<ResumenPerfil> = resumenFlow.stateIn(
         scope = viewModelScope,

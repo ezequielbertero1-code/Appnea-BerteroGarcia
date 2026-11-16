@@ -51,9 +51,10 @@ data class CertificadoFormUiState(
 
 class CertificadoFormViewModel(
     private val repository: PerfilRepository,
-    private val usuario: String?,
     private val idCertificado: Long?
 ) : ViewModel() {
+    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
+    private val usuario: String? = repository.usuarioActual
 
     private val _uiState = MutableStateFlow(CertificadoFormUiState(esEdicion = idCertificado != null))
     val uiState: StateFlow<CertificadoFormUiState> = _uiState.asStateFlow()
@@ -163,8 +164,8 @@ class CertificadoFormViewModel(
     }
 
     companion object {
-        fun Factory(repository: PerfilRepository, usuario: String?, idCertificado: Long?) = viewModelFactory {
-            initializer { CertificadoFormViewModel(repository, usuario, idCertificado) }
+        fun Factory(repository: PerfilRepository, idCertificado: Long?) = viewModelFactory {
+            initializer { CertificadoFormViewModel(repository, idCertificado) }
         }
     }
 }

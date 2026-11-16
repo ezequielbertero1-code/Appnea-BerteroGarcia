@@ -3,6 +3,7 @@ package com.berterogarcia.appnea.data.local
 import com.berterogarcia.appnea.util.intentar
 import android.content.Context
 import androidx.core.content.edit
+import androidx.room.withTransaction
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import java.time.LocalDate
 import java.time.LocalTime
@@ -10,7 +11,10 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Datos de ejemplo para el usuario de prueba "Franco" (login: Franco / Mamalesa21).
+ * Datos de ejemplo para el usuario de prueba "Franco" (login: Franco / Prueba1234).
+ *
+ * SOLO EN DEBUG (src/debug): el APK release usa el SeedDatos vacío de src/release, así no
+ * viajan usuarios de prueba ni sus contraseñas a los usuarios reales.
  *
  * Carga algunas inmersiones y sesiones de entrenamiento para que
  * las pantallas (sobre todo las estadísticas de Cuenta) no arranquen vacías.
@@ -21,7 +25,7 @@ object SeedDatos {
     private const val PREFS = "seed"
     private const val CLAVE_SEMBRADO = "datos_franco_v1"
     const val USUARIO_PRUEBA = "Franco"
-    const val PASSWORD_PRUEBA = "Mamalesa21"
+    const val PASSWORD_PRUEBA = "Prueba1234"
 
     /** Se llama desde el callback onCreate de la base para que se vuelva a sembrar. */
     fun reiniciarMarca(context: Context) {
@@ -40,17 +44,18 @@ object SeedDatos {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         if (prefs.getBoolean(CLAVE_SEMBRADO, false)) return
 
-        if (!existeFranco) {
-            db.usuarioDao().insertar(UsuarioEntity(USUARIO_PRUEBA, SeguridadPassword.hashear(PASSWORD_PRUEBA)))
+        // Todo o nada: si algo falla a mitad de camino no quedan datos de ejemplo a medias
+        // (y como la marca no se guarda, se reintenta en el próximo arranque).
+        val hash = SeguridadPassword.hashear(PASSWORD_PRUEBA)
+        db.withTransaction {
+            if (!existeFranco) db.usuarioDao().insertar(UsuarioEntity(USUARIO_PRUEBA, hash))
+            inmersiones().zip(CLIMA_INMERSIONES) { inmersion, clima ->
+                inmersion.copy(condiciones = clima.aRegistro(inmersion.fecha.atTime(inmersion.horaEntrada)))
+            }.forEach { db.inmersionDao().insertar(it.copy(nombreUsuario = USUARIO_PRUEBA)) }
+            sesionesApnea().forEach { db.sesionApneaDao().insertar(it.copy(nombreUsuario = USUARIO_PRUEBA)) }
+            // Perfil de ejemplo (datos personales, certificados, equipo, contacto). Es idempotente.
+            SeedPerfil.sembrarPerfilFranco(db)
         }
-
-        inmersiones().zip(CLIMA_INMERSIONES) { inmersion, clima ->
-            inmersion.copy(condiciones = clima.aRegistro(inmersion.fecha.atTime(inmersion.horaEntrada)))
-        }.forEach { db.inmersionDao().insertar(it.copy(nombreUsuario = USUARIO_PRUEBA)) }
-        sesionesApnea().forEach { db.sesionApneaDao().insertar(it.copy(nombreUsuario = USUARIO_PRUEBA)) }
-
-        // Perfil de ejemplo (datos personales, certificados, equipo, contacto). Es idempotente.
-        intentar("SeedDatos") { SeedPerfil.sembrarPerfilFranco(db) }
         prefs.edit { putBoolean(CLAVE_SEMBRADO, true) }
     }
 

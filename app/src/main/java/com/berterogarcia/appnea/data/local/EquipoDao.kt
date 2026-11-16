@@ -3,6 +3,7 @@ package com.berterogarcia.appnea.data.local
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
@@ -27,6 +28,13 @@ interface EquipoDao {
     /** Devuelve la cantidad de filas actualizadas (0 = no existía). */
     @Update
     suspend fun actualizar(equipo: EquipoEntity): Int
+
+    /** Actualiza solo si el equipo existe y es del mismo usuario (verificación + UPDATE atómicos). */
+    @Transaction
+    suspend fun actualizarSiEsDe(equipo: EquipoEntity): Boolean {
+        if (obtener(equipo.id, equipo.nombreUsuario) == null) return false
+        return actualizar(equipo) > 0
+    }
 
     @Query("DELETE FROM equipamiento WHERE id = :id AND nombreUsuario = :nombreUsuario")
     suspend fun eliminar(id: Long, nombreUsuario: String): Int

@@ -21,9 +21,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ContactosViewModel(
-    private val repository: PerfilRepository,
-    private val usuario: String?
+    private val repository: PerfilRepository
 ) : ViewModel() {
+    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
+    private val usuario: String? = repository.usuarioActual
 
     /** El DAO ya los devuelve con el principal primero. */
     val estado: StateFlow<EstadoLista<ContactoEmergenciaEntity>> =
@@ -62,8 +63,8 @@ class ContactosViewModel(
     }
 
     companion object {
-        fun Factory(repository: PerfilRepository, usuario: String?) = viewModelFactory {
-            initializer { ContactosViewModel(repository, usuario) }
+        fun Factory(repository: PerfilRepository) = viewModelFactory {
+            initializer { ContactosViewModel(repository) }
         }
     }
 }

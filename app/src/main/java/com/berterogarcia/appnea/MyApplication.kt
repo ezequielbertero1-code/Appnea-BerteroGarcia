@@ -51,7 +51,8 @@ class MyApplication : Application() {
             perfilDao = database.perfilUsuarioDao(),
             equipoDao = database.equipoDao(),
             certificadoDao = database.certificadoDao(),
-            contactoDao = database.contactoEmergenciaDao()
+            contactoDao = database.contactoEmergenciaDao(),
+            sesion = sessionManager
         )
     }
 
@@ -81,7 +82,7 @@ class MyApplication : Application() {
         appScope.launch {
             sessionManager.usuarioActual.drop(1).collect { motorEntrenamiento.reiniciar() }
         }
-        // Carga datos de ejemplo para el usuario de prueba "Franco" (solo la primera vez).
+        // Datos de ejemplo (Franco y Demo) solo en debug; en release SeedDatos no hace nada.
         appScope.launch {
             intentar("MyApplication") { SeedDatos.sembrarSiHaceFalta(this@MyApplication, database) }
         }

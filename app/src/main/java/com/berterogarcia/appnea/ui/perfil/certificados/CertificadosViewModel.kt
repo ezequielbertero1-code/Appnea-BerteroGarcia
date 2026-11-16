@@ -39,9 +39,10 @@ internal fun ordenarCertificados(lista: List<CertificadoEntity>): List<Certifica
 }
 
 class CertificadosViewModel(
-    private val repository: PerfilRepository,
-    private val usuario: String?
+    private val repository: PerfilRepository
 ) : ViewModel() {
+    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
+    private val usuario: String? = repository.usuarioActual
 
     val estado: StateFlow<EstadoLista<CertificadoEntity>> =
         if (usuario == null) {
@@ -66,8 +67,8 @@ class CertificadosViewModel(
     }
 
     companion object {
-        fun Factory(repository: PerfilRepository, usuario: String?) = viewModelFactory {
-            initializer { CertificadosViewModel(repository, usuario) }
+        fun Factory(repository: PerfilRepository) = viewModelFactory {
+            initializer { CertificadosViewModel(repository) }
         }
     }
 }
