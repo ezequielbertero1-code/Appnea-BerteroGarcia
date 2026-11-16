@@ -3,8 +3,6 @@ package com.berterogarcia.appnea.ui.perfil.equipamiento
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.EquipoEntity
@@ -153,11 +151,5 @@ class EquipoFormViewModel(
             s.proximoMantenimiento, s.fechaCompra, textoUi(R.string.perfil_error_equipo_service)
         )?.let { put(CampoEquipo.MANTENIMIENTO, it) }
         Validaciones.largoMaximo(s.notas, 300)?.let { put(CampoEquipo.NOTAS, it) }
-    }
-
-    companion object {
-        fun Factory(repository: PerfilRepository, idEquipo: Long?) = viewModelFactory {
-            initializer { EquipoFormViewModel(repository, idEquipo) }
-        }
     }
 }

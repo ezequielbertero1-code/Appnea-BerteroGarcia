@@ -3,15 +3,13 @@ package com.berterogarcia.appnea.ui.login
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.auth.CuentaGoogle
 import com.berterogarcia.appnea.data.auth.ResultadoGoogle
-import com.berterogarcia.appnea.data.local.EstadoIntentos
-import com.berterogarcia.appnea.data.local.PoliticaIntentos
-import com.berterogarcia.appnea.data.local.PreferenciasLogin
-import com.berterogarcia.appnea.data.local.SessionManager
+import com.berterogarcia.appnea.data.seguridad.EstadoIntentos
+import com.berterogarcia.appnea.data.seguridad.PoliticaIntentos
+import com.berterogarcia.appnea.data.sesion.PreferenciasLogin
+import com.berterogarcia.appnea.data.sesion.SessionManager
 import com.berterogarcia.appnea.data.repository.CuentaGoogleRepository
 import com.berterogarcia.appnea.data.repository.UsuarioRepository
 import com.berterogarcia.appnea.ui.components.TextoUi
@@ -184,15 +182,4 @@ class LoginViewModel(
     }
 
     private fun leerIntentos(): EstadoIntentos = intentar("LoginViewModel") { preferencias.leerIntentos() }.getOrDefault(EstadoIntentos())
-
-    companion object {
-        fun Factory(
-            repository: UsuarioRepository,
-            cuentaGoogleRepository: CuentaGoogleRepository,
-            sessionManager: SessionManager,
-            preferencias: PreferenciasLogin
-        ) = viewModelFactory {
-            initializer { LoginViewModel(repository, cuentaGoogleRepository, sessionManager, preferencias) }
-        }
-    }
 }

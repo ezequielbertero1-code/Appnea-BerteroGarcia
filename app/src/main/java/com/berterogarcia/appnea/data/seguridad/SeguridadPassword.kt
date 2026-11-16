@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.data.seguridad
 
 import java.security.MessageDigest
 import java.security.SecureRandom

@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.data.sesion
 
 import android.content.Context
 import androidx.core.content.edit

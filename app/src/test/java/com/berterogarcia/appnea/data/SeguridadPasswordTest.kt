@@ -1,6 +1,6 @@
 package com.berterogarcia.appnea.data
 
-import com.berterogarcia.appnea.data.local.SeguridadPassword
+import com.berterogarcia.appnea.data.seguridad.SeguridadPassword
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue

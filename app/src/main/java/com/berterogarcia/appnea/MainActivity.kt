@@ -6,6 +6,8 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -61,7 +63,7 @@ class MainActivity : ComponentActivity() {
 
     // [NUEVO] Decide si se arranca en Inicio (sesión válida) o en Login.
     private val sesionViewModel: SesionViewModel by viewModels {
-        SesionViewModel.Factory((application as MyApplication).sesionRepository)
+        viewModelFactory { initializer { SesionViewModel(contenedor().sesionRepository) } }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

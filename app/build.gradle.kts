@@ -21,8 +21,9 @@ android {
         applicationId = "com.berterogarcia.appnea"
         minSdk = 24
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        // Subir versionCode en cada APK que se distribuya (Android no instala uno menor encima)
+        versionCode = 2
+        versionName = "1.1.0"
 
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$clientWebGoogle\"")
 
@@ -31,9 +32,12 @@ android {
 
     buildTypes {
         release {
+            // R8: reduce y ofusca el código y saca los recursos que no se usan (APK más chico)
             optimization {
-                enable = false
+                enable = true
             }
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
@@ -48,6 +52,14 @@ android {
     sourceSets {
         // Los esquemas exportados de Room: los usa MigrationTestHelper en los tests instrumentados
         getByName("androidTest").assets.directories.add("$projectDir/schemas")
+    }
+    lint {
+        // Los problemas que ya existían quedan en lint-baseline.xml: falla solo por problemas NUEVOS
+        baseline = file("lint-baseline.xml")
+        abortOnError = true
+        checkDependencies = false
+        // Traducciones: la app es solo en español por ahora
+        disable += "MissingTranslation"
     }
     buildFeatures {
         compose = true

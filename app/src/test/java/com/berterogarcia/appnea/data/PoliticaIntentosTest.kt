@@ -1,7 +1,7 @@
 package com.berterogarcia.appnea.data
 
-import com.berterogarcia.appnea.data.local.EstadoIntentos
-import com.berterogarcia.appnea.data.local.PoliticaIntentos
+import com.berterogarcia.appnea.data.seguridad.EstadoIntentos
+import com.berterogarcia.appnea.data.seguridad.PoliticaIntentos
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

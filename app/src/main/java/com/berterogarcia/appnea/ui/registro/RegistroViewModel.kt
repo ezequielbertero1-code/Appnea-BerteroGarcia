@@ -3,15 +3,12 @@ package com.berterogarcia.appnea.ui.registro
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.auth.CuentaGoogle
 import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
 import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
-import com.berterogarcia.appnea.data.local.SessionManager
+import com.berterogarcia.appnea.data.sesion.SessionManager
 import com.berterogarcia.appnea.data.repository.CuentaGoogleRepository
 import com.berterogarcia.appnea.data.repository.NuevoRegistro
 import com.berterogarcia.appnea.data.repository.RegistroRepository
@@ -289,18 +286,8 @@ class RegistroViewModel(
     }
 
     companion object {
-        private const val CLAVE_BORRADOR = "borrador_registro"
 
-        fun Factory(
-            repository: RegistroRepository,
-            cuentaGoogleRepository: CuentaGoogleRepository,
-            sessionManager: SessionManager,
-            cuentaGoogle: CuentaGoogle? = null
-        ) = viewModelFactory {
-            initializer {
-                RegistroViewModel(repository, cuentaGoogleRepository, sessionManager, cuentaGoogle, createSavedStateHandle())
-            }
-        }
+        private const val CLAVE_BORRADOR = "borrador_registro"
     }
 }
 /**

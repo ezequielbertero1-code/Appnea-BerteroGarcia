@@ -1,7 +1,7 @@
 package com.berterogarcia.appnea.data.repository
 
 import com.berterogarcia.appnea.util.intentar
-import com.berterogarcia.appnea.data.local.SeguridadPassword
+import com.berterogarcia.appnea.data.seguridad.SeguridadPassword
 import com.berterogarcia.appnea.data.local.UsuarioDao
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

@@ -37,7 +37,7 @@ import androidx.core.net.toUri
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.RegistroApnea
-import com.berterogarcia.appnea.data.local.Ubicacion
+import com.berterogarcia.appnea.data.ubicacion.Ubicacion
 import com.berterogarcia.appnea.data.local.formatearDuracion
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado
 import com.berterogarcia.appnea.ui.components.EncabezadoGrupo

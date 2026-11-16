@@ -3,8 +3,6 @@ package com.berterogarcia.appnea.ui.entrenamiento
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.Fase
 import com.berterogarcia.appnea.data.local.SesionApneaEntity
@@ -187,16 +185,6 @@ class EntrenamientoApneaViewModel(
         motor.reiniciar()
         local.update {
             it.copy(factoresSeleccionados = emptySet(), sensaciones = "", guardando = false, guardadoOk = false, errorGuardado = null)
-        }
-    }
-
-    companion object {
-        fun Factory(
-            tablaRepository: TablaPersonalizadaRepository,
-            sesionRepository: SesionApneaRepository,
-            motor: MotorEntrenamiento
-        ) = viewModelFactory {
-            initializer { EntrenamientoApneaViewModel(tablaRepository, sesionRepository, motor) }
         }
     }
 }

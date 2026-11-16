@@ -4,7 +4,7 @@ import androidx.room.withTransaction
 import com.berterogarcia.appnea.data.local.AppDatabase
 import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
 import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
-import com.berterogarcia.appnea.data.local.SeguridadPassword
+import com.berterogarcia.appnea.data.seguridad.SeguridadPassword
 import com.berterogarcia.appnea.data.local.UsuarioEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

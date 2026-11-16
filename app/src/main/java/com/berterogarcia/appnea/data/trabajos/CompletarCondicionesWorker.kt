@@ -10,9 +10,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.berterogarcia.appnea.MyApplication
+import com.berterogarcia.appnea.contenedor
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
-import com.berterogarcia.appnea.data.local.Ubicacion
+import com.berterogarcia.appnea.data.ubicacion.Ubicacion
 import com.berterogarcia.appnea.dominio.ProgramadorCondiciones
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
@@ -35,7 +35,7 @@ class CompletarCondicionesWorker(context: Context, params: WorkerParameters) : C
             // Sin datos (red caída a mitad de camino, error del servidor...): se reintenta unas veces
             return if (runAttemptCount < MAX_INTENTOS) Result.retry() else Result.success()
         }
-        val dao = (applicationContext as MyApplication).database.inmersionDao()
+        val dao = applicationContext.contenedor().database.inmersionDao()
         dao.actualizarCondiciones(id, registro)
         return Result.success()
     }

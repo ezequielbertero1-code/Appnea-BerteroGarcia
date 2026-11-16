@@ -8,8 +8,8 @@ import com.berterogarcia.appnea.data.local.EquipoDao
 import com.berterogarcia.appnea.data.local.EquipoEntity
 import com.berterogarcia.appnea.data.local.PerfilUsuarioDao
 import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
-import com.berterogarcia.appnea.data.local.ProveedorUsuario
-import com.berterogarcia.appnea.data.local.porUsuario
+import com.berterogarcia.appnea.data.sesion.ProveedorUsuario
+import com.berterogarcia.appnea.data.sesion.porUsuario
 import kotlinx.coroutines.flow.Flow
 
 /**

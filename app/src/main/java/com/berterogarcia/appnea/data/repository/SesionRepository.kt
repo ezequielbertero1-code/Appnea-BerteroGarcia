@@ -1,7 +1,7 @@
 package com.berterogarcia.appnea.data.repository
 
 import com.berterogarcia.appnea.util.intentar
-import com.berterogarcia.appnea.data.local.SessionManager
+import com.berterogarcia.appnea.data.sesion.SessionManager
 import com.berterogarcia.appnea.data.local.UsuarioDao
 
 /**

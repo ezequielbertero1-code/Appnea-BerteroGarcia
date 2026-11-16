@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
+import com.berterogarcia.appnea.data.ubicacion.UBICACION_COMODORO_RIVADAVIA
 import com.berterogarcia.appnea.ui.components.ChipFiltro
 import com.berterogarcia.appnea.ui.components.resolver
 import com.berterogarcia.appnea.ui.theme.Acento

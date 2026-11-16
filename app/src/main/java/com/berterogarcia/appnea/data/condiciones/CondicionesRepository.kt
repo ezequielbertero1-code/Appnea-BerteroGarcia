@@ -3,7 +3,7 @@ package com.berterogarcia.appnea.data.condiciones
 import com.berterogarcia.appnea.dominio.FuenteCondiciones
 import com.berterogarcia.appnea.util.intentar
 import com.berterogarcia.appnea.data.local.CondicionesRegistro
-import com.berterogarcia.appnea.data.local.Ubicacion
+import com.berterogarcia.appnea.data.ubicacion.Ubicacion
 import com.berterogarcia.appnea.data.remote.OpenMeteoService
 import com.berterogarcia.appnea.data.remote.PronosticoClima
 import java.time.LocalDate

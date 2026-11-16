@@ -17,7 +17,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.berterogarcia.appnea.MainActivity
-import com.berterogarcia.appnea.MyApplication
+import com.berterogarcia.appnea.contenedor
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.TipoFase
 import kotlinx.coroutines.CoroutineScope
@@ -44,7 +44,7 @@ class ServicioEntrenamiento : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var wakeLock: PowerManager.WakeLock? = null
 
-    private val motor get() = (application as MyApplication).motorEntrenamiento
+    private val motor get() = contenedor().motorEntrenamiento
 
     override fun onBind(intent: Intent?): IBinder? = null
 

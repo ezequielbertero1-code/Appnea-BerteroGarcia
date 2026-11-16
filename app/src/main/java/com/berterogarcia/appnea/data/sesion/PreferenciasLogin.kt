@@ -1,5 +1,6 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.data.sesion
 
+import com.berterogarcia.appnea.data.seguridad.EstadoIntentos
 import android.content.Context
 import androidx.core.content.edit
 

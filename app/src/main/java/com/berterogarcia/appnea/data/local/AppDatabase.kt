@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.data.sesion.SessionManager
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room

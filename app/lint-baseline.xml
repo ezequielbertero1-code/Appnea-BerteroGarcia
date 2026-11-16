@@ -1,0 +1,598 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.3.1" type="baseline" client="gradle" dependencies="false" name="AGP (9.3.1)" variant="all" version="9.3.1">
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        message="A newer version of Gradle than 9.5.0 is available: 9.9.1"
+        errorLine1="distributionUrl=https\://services.gradle.org/distributions/gradle-9.5.0-bin.zip"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/wrapper/gradle-wrapper.properties"
+            line="5"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        message="A newer version of com.android.application than 9.3.1 is available: 9.5.1. (There is also a newer version of 9.3.𝑥 available, if upgrading to 9.5.1 is difficult: 9.3.3)"
+        errorLine1="agp = &quot;9.3.1&quot;"
+        errorLine2="      ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="2"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.core:core-ktx than 1.10.1 is available: 1.19.1"
+        errorLine1="coreKtx = &quot;1.10.1&quot;"
+        errorLine2="          ~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="3"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.ext:junit than 1.1.5 is available: 1.3.0"
+        errorLine1="junitVersion = &quot;1.1.5&quot;"
+        errorLine2="               ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="5"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.espresso:espresso-core than 3.5.1 is available: 3.7.0"
+        errorLine1="espressoCore = &quot;3.5.1&quot;"
+        errorLine2="               ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="6"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.6.1 is available: 2.11.0"
+        errorLine1="lifecycleRuntimeKtx = &quot;2.6.1&quot;"
+        errorLine2="                      ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="7"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.6.1 is available: 2.11.0"
+        errorLine1="lifecycleRuntimeKtx = &quot;2.6.1&quot;"
+        errorLine2="                      ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="7"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.6.1 is available: 2.11.0"
+        errorLine1="lifecycleRuntimeKtx = &quot;2.6.1&quot;"
+        errorLine2="                      ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="7"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.activity:activity-compose than 1.8.0 is available: 1.13.0"
+        errorLine1="activityCompose = &quot;1.8.0&quot;"
+        errorLine2="                  ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="8"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.compose:compose-bom than 2025.12.00 is available: 2026.09.00"
+        errorLine1="composeBom = &quot;2025.12.00&quot;"
+        errorLine2="             ~~~~~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="10"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.navigation:navigation-compose than 2.8.9 is available: 2.10.2"
+        errorLine1="navigationCompose = &quot;2.8.9&quot;"
+        errorLine2="                    ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="11"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.room:room-compiler than 2.8.4 is available: 2.8.5"
+        errorLine1="room = &quot;2.8.4&quot;"
+        errorLine2="       ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="12"
+            column="8"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.room:room-ktx than 2.8.4 is available: 2.8.5"
+        errorLine1="room = &quot;2.8.4&quot;"
+        errorLine2="       ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="12"
+            column="8"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.room:room-runtime than 2.8.4 is available: 2.8.5"
+        errorLine1="room = &quot;2.8.4&quot;"
+        errorLine2="       ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="12"
+            column="8"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.room:room-testing than 2.8.4 is available: 2.8.5"
+        errorLine1="room = &quot;2.8.4&quot;"
+        errorLine2="       ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="12"
+            column="8"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.android.libraries.identity.googleid:googleid than 1.1.1 is available: 1.2.1"
+        errorLine1="googleid = &quot;1.1.1&quot;"
+        errorLine2="           ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="16"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.work:work-runtime-ktx than 2.10.1 is available: 2.12.0"
+        errorLine1="work = &quot;2.10.1&quot;"
+        errorLine2="       ~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="19"
+            column="8"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-serialization-core than 1.8.1 is available: 1.13.0"
+        errorLine1="        implementation(&quot;org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1&quot;)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="96"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlin.plugin.compose than 2.2.10 is available: 2.4.21"
+        errorLine1="kotlin = &quot;2.2.10&quot;"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="9"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.maplibre.gl:android-sdk-opengl than 13.6.1 is available: 13.7.1"
+        errorLine1="maplibre = &quot;13.6.1&quot;"
+        errorLine2="           ~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="14"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-test than 1.10.2 is available: 1.11.0"
+        errorLine1="coroutinesTest = &quot;1.10.2&quot;"
+        errorLine2="                 ~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="17"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.json:json than 20240303 is available: 20260814"
+        errorLine1="orgJson = &quot;20240303&quot;"
+        errorLine2="          ~~~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="18"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="&quot;momento&quot; is a common misspelling; did you mean &quot;memento&quot;?"
+        errorLine1="    &lt;string name=&quot;nueva_condiciones_automaticas&quot;>Al guardar se registran solas las condiciones del momento de entrada: clima, olas, marea y luna.&lt;/string>"
+        errorLine2="                                                                                                   ~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="259"
+            column="100"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="&quot;momento&quot; is a common misspelling; did you mean &quot;memento&quot;?"
+        errorLine1="    &lt;string name=&quot;aprender_apnea_compensacion_aviso_cuerpo_1&quot;>Nunca practiques apnea estando resfriado/a, con gripe o congestión: aumenta mucho el riesgo de barotrauma de oído. Si en algún momento no podés compensar, hay que detener el descenso en el momento; forzarlo puede lesionar el oído o los senos.&lt;/string>"
+        errorLine2="                                                                                                                                                                                             ~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="741"
+            column="190"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="&quot;momento&quot; is a common misspelling; did you mean &quot;memento&quot;?"
+        errorLine1="    &lt;string name=&quot;aprender_apnea_compensacion_aviso_cuerpo_1&quot;>Nunca practiques apnea estando resfriado/a, con gripe o congestión: aumenta mucho el riesgo de barotrauma de oído. Si en algún momento no podés compensar, hay que detener el descenso en el momento; forzarlo puede lesionar el oído o los senos.&lt;/string>"
+        errorLine2="                                                                                                                                                                                                                                                           ~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="741"
+            column="252"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="&quot;momento&quot; is a common misspelling; did you mean &quot;memento&quot;?"
+        errorLine1="    &lt;string name=&quot;aprender_buceo_dcs_imagen_pie_2&quot;>El chaleco debe desinflarse gradualmente durante el ascenso, ya que el aire dentro se expande y aumenta la flotabilidad: hay que controlar la velocidad en todo momento y nunca dejar de respirar con normalidad.&lt;/string>"
+        errorLine2="                                                                                                                                                                                                                   ~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="787"
+            column="212"/>
+    </issue>
+
+    <issue
+        id="LogNotTimber"
+        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
+        errorLine1="                Log.e(TAG, &quot;No se pudo cargar el clima de $ubicacion&quot;, error)"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/berterogarcia/appnea/ui/clima/ClimaViewModel.kt"
+            line="118"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="LogNotTimber"
+        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
+        errorLine1="        Log.w(tag, &quot;Operación fallida: ${e.message}&quot;, e)"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/berterogarcia/appnea/util/Errores.kt"
+            line="24"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="LogNotTimber"
+        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
+        errorLine1="        Log.d(TAG, &quot;activados=$activados → pide a $candidatos&quot;)"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/berterogarcia/appnea/data/ubicacion/UbicacionHelper.kt"
+            line="79"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="LogNotTimber"
+        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
+        errorLine1="        Log.d(TAG, &quot;actual=$actual&quot;)"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/berterogarcia/appnea/data/ubicacion/UbicacionHelper.kt"
+            line="88"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="LogNotTimber"
+        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
+        errorLine1="                    Log.d(TAG, &quot;$proveedor respondió: $location&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/berterogarcia/appnea/data/ubicacion/UbicacionHelper.kt"
+            line="108"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="LogNotTimber"
+        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
+        errorLine1="                Log.d(TAG, &quot;$proveedor falló: ${it.message}&quot;)"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/berterogarcia/appnea/data/ubicacion/UbicacionHelper.kt"
+            line="112"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="LogNotTimber"
+        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
+        errorLine1="        Log.d(TAG, &quot;ultima=$mejor&quot;)"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/berterogarcia/appnea/data/ubicacion/UbicacionHelper.kt"
+            line="135"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;entrenamientos&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;cuenta_estadisticas_resumen&quot;>Fondo %1$s · %2$d entrenamientos · mejor apnea %3$s&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="116"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;fases&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;tabla_resumen_fases&quot;>%1$d fases&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="179"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;apneas&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;tabla_resumen_variable&quot;>%1$d apneas · %2$s a %3$s&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="182"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;fases&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;crear_tabla_resumen&quot;>%1$d fases · %2$d apneas&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="192"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;segundos&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;crear_tabla_restar_nueva&quot;>Restar %1$d segundos a la fase nueva&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="197"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;segundos&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;crear_tabla_sumar_nueva&quot;>Sumar %1$d segundos a la fase nueva&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="198"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;segundos&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;crear_tabla_restar_fase&quot;>Restar %1$d segundos a la fase %2$d&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="200"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;segundos&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;crear_tabla_sumar_fase&quot;>Sumar %1$d segundos a la fase %2$d&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="201"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;meses&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;estadisticas_ultimos_meses&quot;>últimos %1$d meses&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="362"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;completas&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;estadisticas_completas&quot;>%1$d completas&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="369"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;sesiones&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;estadisticas_factores_sin_datos&quot;>Todavía no hay suficientes datos. Marcá los factores al terminar cada tabla: un factor aparece cuando lo marcaste en %1$d sesiones o más.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="375"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;ses&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;estadisticas_factor_valor&quot;>%1$d %% · %2$d ses.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="377"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;días&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;vencimiento_en_dias&quot;>Vence en %1$d días&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="615"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;caracteres&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;val_maximo_caracteres&quot;>Máximo %1$d caracteres.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="631"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;caracteres&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;val_password_minimo&quot;>Tiene que tener al menos %1$d caracteres.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="641"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_ms_insights` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_ms_insights.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.nueva_tiempo_apnea` appears to be unused"
+        errorLine1="    &lt;string name=&quot;nueva_tiempo_apnea&quot;>Tiempo de apnea (mm:ss)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="239"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.nueva_bajada_titulo` appears to be unused"
+        errorLine1="    &lt;string name=&quot;nueva_bajada_titulo&quot;>Bajada %1$d&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="814"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.nueva_bajada_quitar` appears to be unused"
+        errorLine1="    &lt;string name=&quot;nueva_bajada_quitar&quot;>Quitar bajada %1$d&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="817"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="TypographyDashes"
+        message="Replace &quot;-&quot; with an &quot;en dash&quot; character (–, &amp;#8211;) ?"
+        errorLine1="    &lt;string name=&quot;aprender_apnea_respiracion_cuerpo&quot;>La respiración previa debe ser lenta, relajada y consciente (por ejemplo: inhalar 4 segundos, exhalar 7–8 segundos), con 2 a 4 respiraciones completas antes de la última inhalación total. Al salir a superficie, la respiración de recuperación es clave: inhalar completo, sostener 2-3 segundos y exhalar en forma pasiva. Una buena recuperación ayuda a prevenir la samba (pérdida de control motor) y el síncope (desmayo por hipoxia).&lt;/string>"
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="722"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="UseTomlInstead"
+        message="Use version catalog instead"
+        errorLine1="        implementation(&quot;org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1&quot;)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="96"
+            column="24"/>
+    </issue>
+
+</issues>

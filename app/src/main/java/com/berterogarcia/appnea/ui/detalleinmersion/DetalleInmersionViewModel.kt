@@ -5,8 +5,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.export.UddfExporter
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.perfil.PerfilSimulado
@@ -71,12 +69,6 @@ class DetalleInmersionViewModel(
                     ?.use { it.write(contenido.toByteArray(Charsets.UTF_8)) }
                     ?: error("No se pudo abrir el archivo")
             }.isSuccess
-        }
-    }
-
-    companion object {
-        fun Factory(repository: InmersionRepository, id: Long, context: Context) = viewModelFactory {
-            initializer { DetalleInmersionViewModel(repository, id, context.applicationContext) }
         }
     }
 }

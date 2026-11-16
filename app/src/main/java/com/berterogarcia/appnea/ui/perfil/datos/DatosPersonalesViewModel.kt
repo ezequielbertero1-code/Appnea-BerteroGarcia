@@ -3,8 +3,6 @@ package com.berterogarcia.appnea.ui.perfil.datos
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
@@ -137,11 +135,5 @@ class DatosPersonalesViewModel(
         Validaciones.noFutura(s.fechaNacimiento)?.let { put(CampoDatos.FECHA_NACIMIENTO, it) }
         Validaciones.largoMaximo(s.ciudad, 80)?.let { put(CampoDatos.CIUDAD, it) }
         Validaciones.largoMaximo(s.companeroHabitual, 60)?.let { put(CampoDatos.COMPANERO, it) }
-    }
-
-    companion object {
-        fun Factory(repository: PerfilRepository) = viewModelFactory {
-            initializer { DatosPersonalesViewModel(repository) }
-        }
     }
 }

@@ -2,13 +2,11 @@ package com.berterogarcia.appnea.ui.cuenta
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.local.CertificadoEntity
 import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
 import com.berterogarcia.appnea.data.local.EquipoEntity
 import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
-import com.berterogarcia.appnea.data.local.SessionManager
+import com.berterogarcia.appnea.data.sesion.SessionManager
 import com.berterogarcia.appnea.data.local.formatearDuracion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.PerfilRepository
@@ -121,18 +119,5 @@ class CuentaViewModel(
 
     fun cerrarSesion() {
         sessionManager.cerrarSesion()
-    }
-
-    companion object {
-        fun Factory(
-            sessionManager: SessionManager,
-            perfilRepository: PerfilRepository,
-            inmersionRepository: InmersionRepository,
-            sesionApneaRepository: SesionApneaRepository
-        ) = viewModelFactory {
-            initializer {
-                CuentaViewModel(sessionManager, perfilRepository, inmersionRepository, sesionApneaRepository)
-            }
-        }
     }
 }

@@ -3,8 +3,6 @@ package com.berterogarcia.appnea.ui.historial
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.TipoInmersion
@@ -91,11 +89,8 @@ class HistorialViewModel(repository: InmersionRepository) : ViewModel() {
     }
 
     companion object {
-        private const val MAX_BUSQUEDA = 60
 
-        fun Factory(repository: InmersionRepository) = viewModelFactory {
-            initializer { HistorialViewModel(repository) }
-        }
+        private const val MAX_BUSQUEDA = 60
     }
 }
 

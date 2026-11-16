@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.data.sesion
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

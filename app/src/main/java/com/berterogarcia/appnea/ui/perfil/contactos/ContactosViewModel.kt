@@ -3,8 +3,6 @@ package com.berterogarcia.appnea.ui.perfil.contactos
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
@@ -60,11 +58,5 @@ class ContactosViewModel(
 
     fun mensajeMostrado() {
         _mensaje.value = null
-    }
-
-    companion object {
-        fun Factory(repository: PerfilRepository) = viewModelFactory {
-            initializer { ContactosViewModel(repository) }
-        }
     }
 }

@@ -2,6 +2,8 @@
 
 Revisión completa de AppneaMe por capas: datos (Room, DAOs, migraciones, seeds), seguridad (login, contraseñas, sesión), dominio (condiciones, mareas, perfil simulado), ViewModels, UI y navegación, y build/tests. Son unas 20.000 líneas en 145 archivos.
 
+> **Estado (16/11/2026):** las fases 0 a 4 están implementadas en la rama `refactor/mejoras-analisis`, un commit por fase. Quedan afuera a propósito: el login con Google (falta registrar el SHA-1 en Google Cloud), la firma del release (se hace desde Android Studio con el keystore propio) y las advertencias de lint ya existentes (registradas en `app/lint-baseline.xml`).
+
 Para cada punto se tuvo en cuenta cómo se usa la app: se registra la inmersión en la playa, a veces sin señal, y se entrena apnea con el teléfono apoyado y la pantalla bloqueada.
 
 ## Devolución resumida

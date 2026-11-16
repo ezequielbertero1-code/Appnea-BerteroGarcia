@@ -1,7 +1,7 @@
 package com.berterogarcia.appnea.entrenamiento
 
 import android.os.SystemClock
-import com.berterogarcia.appnea.data.local.SonidoManager
+import com.berterogarcia.appnea.data.sonido.SonidoManager
 import com.berterogarcia.appnea.data.local.TablaApnea
 import com.berterogarcia.appnea.data.local.TipoFase
 import kotlinx.coroutines.CoroutineScope

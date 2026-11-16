@@ -1,6 +1,6 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.data.seguridad
 
-import com.berterogarcia.appnea.data.local.PoliticaIntentos.ESPERA_MAX_MS
+import com.berterogarcia.appnea.data.seguridad.PoliticaIntentos.ESPERA_MAX_MS
 
 
 /** Intentos fallidos de login guardados en el dispositivo. */

@@ -3,10 +3,7 @@ package com.berterogarcia.appnea.ui.nuevainmersion
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.dominio.RegistrarInmersion
 import com.berterogarcia.appnea.dominio.ServicioUbicacion
@@ -17,8 +14,8 @@ import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.RegistroApnea
 import com.berterogarcia.appnea.data.local.ResumenApnea
 import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
-import com.berterogarcia.appnea.data.local.Ubicacion
+import com.berterogarcia.appnea.data.ubicacion.UBICACION_COMODORO_RIVADAVIA
+import com.berterogarcia.appnea.data.ubicacion.Ubicacion
 import com.berterogarcia.appnea.data.local.Visibilidad
 import com.berterogarcia.appnea.data.local.descripcion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
@@ -528,20 +525,7 @@ class NuevaInmersionViewModel(
     }
 
     companion object {
-        private const val CLAVE_BORRADOR = "borrador_inmersion"
 
-        fun Factory(
-            repository: InmersionRepository,
-            registrar: RegistrarInmersion,
-            perfilRepository: PerfilRepository,
-            ubicacionTelefono: ServicioUbicacion,
-            idEditar: Long? = null
-        ) = viewModelFactory {
-            initializer {
-                NuevaInmersionViewModel(
-                    repository, registrar, perfilRepository, ubicacionTelefono, idEditar, createSavedStateHandle()
-                )
-            }
-        }
+        private const val CLAVE_BORRADOR = "borrador_inmersion"
     }
 }

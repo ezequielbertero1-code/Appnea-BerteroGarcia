@@ -6,7 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.berterogarcia.appnea.data.local.AppDatabase
 import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.EquipoEntity
-import com.berterogarcia.appnea.data.local.ProveedorUsuario
+import com.berterogarcia.appnea.data.sesion.ProveedorUsuario
 import com.berterogarcia.appnea.data.local.UsuarioEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
 import kotlinx.coroutines.flow.MutableStateFlow

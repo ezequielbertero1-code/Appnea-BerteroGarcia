@@ -3,8 +3,6 @@ package com.berterogarcia.appnea.ui.sesion
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.data.repository.SesionRepository
 import com.berterogarcia.appnea.navigation.RUTA_LOGIN
@@ -41,12 +39,6 @@ class SesionViewModel(private val sesionRepository: SesionRepository) : ViewMode
             _estado.value = EstadoArranque.Listo(
                 destinoInicial = if (usuario != null) AppDestinations.INICIO.name else RUTA_LOGIN
             )
-        }
-    }
-
-    companion object {
-        fun Factory(sesionRepository: SesionRepository) = viewModelFactory {
-            initializer { SesionViewModel(sesionRepository) }
         }
     }
 }

@@ -34,8 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.Fase
 import com.berterogarcia.appnea.data.local.TablaPersonalizadaEntity
@@ -145,11 +143,6 @@ class CrearTablaViewModel(private val repository: TablaPersonalizadaRepository) 
 
     private fun ajustar(segundos: Int, delta: Int) = (segundos + delta).coerceIn(MIN_SEG, MAX_SEG)
 
-    companion object {
-        fun Factory(repository: TablaPersonalizadaRepository) = viewModelFactory {
-            initializer { CrearTablaViewModel(repository) }
-        }
-    }
 }
 
 // ================================ Pantalla ================================

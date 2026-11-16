@@ -2,7 +2,7 @@ package com.berterogarcia.appnea.dominio
 
 import com.berterogarcia.appnea.data.condiciones.Condiciones
 import com.berterogarcia.appnea.data.local.CondicionesRegistro
-import com.berterogarcia.appnea.data.local.Ubicacion
+import com.berterogarcia.appnea.data.ubicacion.Ubicacion
 import java.time.LocalDateTime
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds

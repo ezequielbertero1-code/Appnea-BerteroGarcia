@@ -1,6 +1,6 @@
 package com.berterogarcia.appnea.data.condiciones
 
-import com.berterogarcia.appnea.data.local.Ubicacion
+import com.berterogarcia.appnea.data.ubicacion.Ubicacion
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId

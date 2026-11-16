@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
@@ -20,7 +21,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.data.auth.CuentaGoogle
-import com.berterogarcia.appnea.MyApplication
+import com.berterogarcia.appnea.contenedor
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.condiciones.CondicionesScreen
 import com.berterogarcia.appnea.ui.cuenta.CuentaScreen
@@ -130,7 +131,7 @@ fun AppNavHost(
     startDestination: String, //  antes era RUTA_LOGIN fijo; ahora lo decide SesionViewModel
     modifier: Modifier = Modifier
 ) {
-    val app = LocalContext.current.applicationContext as MyApplication
+    val app = LocalContext.current.contenedor()
 
     NavHost(
         navController = navController,
@@ -144,9 +145,14 @@ fun AppNavHost(
 
         //================================LOGIN==========================================
         composable(RUTA_LOGIN) {
-            val viewModel: LoginViewModel = viewModel(
-                factory = LoginViewModel.Factory(app.usuarioRepository, app.cuentaGoogleRepository, app.sessionManager, app.preferenciasLogin)
-            )
+            val viewModel: LoginViewModel = viewModel {
+                LoginViewModel(
+                    app.usuarioRepository,
+                    app.cuentaGoogleRepository,
+                    app.sessionManager,
+                    app.preferenciasLogin
+                )
+            }
             LoginScreen(
                 viewModel = viewModel,
                 onLoginExitoso = {
@@ -159,9 +165,15 @@ fun AppNavHost(
             )
         }
         composable(RUTA_REGISTRO) {
-            val viewModel: RegistroViewModel = viewModel(
-                factory = RegistroViewModel.Factory(app.registroRepository, app.cuentaGoogleRepository, app.sessionManager)
-            )
+            val viewModel: RegistroViewModel = viewModel {
+                RegistroViewModel(
+                    app.registroRepository,
+                    app.cuentaGoogleRepository,
+                    app.sessionManager,
+                    cuentaGoogle = null,
+                    createSavedStateHandle()
+                )
+            }
             RegistroScreen(
                 viewModel = viewModel,
                 onCancelar = { navController.popBackStack() },
@@ -187,9 +199,15 @@ fun AppNavHost(
                 nombre = entrada.arguments?.getString("nombre").orEmpty(),
                 apellido = entrada.arguments?.getString("apellido").orEmpty()
             )
-            val viewModel: RegistroViewModel = viewModel(
-                factory = RegistroViewModel.Factory(app.registroRepository, app.cuentaGoogleRepository, app.sessionManager, cuenta)
-            )
+            val viewModel: RegistroViewModel = viewModel {
+                RegistroViewModel(
+                    app.registroRepository,
+                    app.cuentaGoogleRepository,
+                    app.sessionManager,
+                    cuenta,
+                    createSavedStateHandle()
+                )
+            }
             RegistroScreen(
                 viewModel = viewModel,
                 onCancelar = { navController.popBackStack() },
@@ -205,12 +223,8 @@ fun AppNavHost(
         //================================INICIO================================================
         // Registrar inmersión primero, últimas inmersiones y resumen del clima.
         composable(AppDestinations.INICIO.name) {
-            val climaViewModel: ClimaViewModel = viewModel(
-                factory = ClimaViewModel.Factory(CondicionesRepository, app.ubicacion)
-            )
-            val inicioViewModel: InicioViewModel = viewModel(
-                factory = InicioViewModel.Factory(app.inmersionRepository)
-            )
+            val climaViewModel: ClimaViewModel = viewModel { ClimaViewModel(CondicionesRepository, app.ubicacion) }
+            val inicioViewModel: InicioViewModel = viewModel { InicioViewModel(app.inmersionRepository) }
             val usuario by app.sessionManager.usuarioActual.collectAsStateWithLifecycle()
             // En las cuentas de Google el usuario es el email: se saluda con el nombre del perfil
             // (mientras carga queda solo "Hola", para no mostrar el email un instante).
@@ -234,21 +248,23 @@ fun AppNavHost(
             val duenio = remember(entrada) {
                 runCatching { navController.getBackStackEntry(AppDestinations.INICIO.name) }.getOrNull()
             } ?: entrada
-            val climaViewModel: ClimaViewModel = viewModel(
-                viewModelStoreOwner = duenio,
-                factory = ClimaViewModel.Factory(CondicionesRepository, app.ubicacion)
-            )
+            val climaViewModel: ClimaViewModel = viewModel(viewModelStoreOwner = duenio) {
+                ClimaViewModel(
+                    CondicionesRepository,
+                    app.ubicacion
+                )
+            }
             CondicionesScreen(viewModel = climaViewModel, onVolver = { navController.volverDesde(entrada) })
         }
         //==============================ENTRENAMIENTO (antes Cronometro)=========================
         composable(AppDestinations.ENTRENAMIENTO.name) {
-            val entrenamientoViewModel: EntrenamientoApneaViewModel = viewModel(
-                factory = EntrenamientoApneaViewModel.Factory(
+            val entrenamientoViewModel: EntrenamientoApneaViewModel = viewModel {
+                EntrenamientoApneaViewModel(
                     app.tablaPersonalizadaRepository,
                     app.sesionApneaRepository,
                     app.motorEntrenamiento
                 )
-            )
+            }
             CronometroScreen(
                 entrenamientoViewModel = entrenamientoViewModel,
                 onCrearTabla = { navController.navigate(RUTA_CREAR_TABLA) { launchSingleTop = true } },
@@ -259,9 +275,7 @@ fun AppNavHost(
             )
         }
         composable(RUTA_CREAR_TABLA) { entrada ->
-            val crearTablaViewModel: CrearTablaViewModel = viewModel(
-                factory = CrearTablaViewModel.Factory(app.tablaPersonalizadaRepository)
-            )
+            val crearTablaViewModel: CrearTablaViewModel = viewModel { CrearTablaViewModel(app.tablaPersonalizadaRepository) }
             CrearTablaScreen(
                 viewModel = crearTablaViewModel,
                 onCerrar = { navController.volverDesde(entrada) }
@@ -270,9 +284,7 @@ fun AppNavHost(
 
         //==============================INMERSION (buceo y apnea)=============================
         composable(AppDestinations.INMERSION.name) {
-            val historialViewModel: HistorialViewModel = viewModel(
-                factory = HistorialViewModel.Factory(app.inmersionRepository)
-            )
+            val historialViewModel: HistorialViewModel = viewModel { HistorialViewModel(app.inmersionRepository) }
             InmersionScreen(
                 historialViewModel = historialViewModel,
                 onAgregarInmersion = { navController.navigate(RUTA_NUEVA_INMERSION) { launchSingleTop = true } },
@@ -281,14 +293,16 @@ fun AppNavHost(
             )
         }
         composable(RUTA_NUEVA_INMERSION) {
-            val viewModel: NuevaInmersionViewModel = viewModel(
-                factory = NuevaInmersionViewModel.Factory(
-                    repository = app.inmersionRepository,
-                    registrar = app.registrarInmersion,
-                    perfilRepository = app.perfilRepository,
-                    ubicacionTelefono = app.ubicacion
+            val viewModel: NuevaInmersionViewModel = viewModel {
+                NuevaInmersionViewModel(
+                    app.inmersionRepository,
+                    app.registrarInmersion,
+                    app.perfilRepository,
+                    app.ubicacion,
+                    idEditar = null,
+                    createSavedStateHandle()
                 )
-            )
+            }
             NuevaInmersionScreen(
                 viewModel = viewModel,
                 onGuardado = { navController.popBackStack() },
@@ -302,15 +316,16 @@ fun AppNavHost(
             arguments = listOf(navArgument("id") { type = NavType.LongType })
         ) { entrada ->
             val id = entrada.arguments?.getLong("id") ?: 0L
-            val viewModel: NuevaInmersionViewModel = viewModel(
-                factory = NuevaInmersionViewModel.Factory(
-                    repository = app.inmersionRepository,
-                    registrar = app.registrarInmersion,
-                    perfilRepository = app.perfilRepository,
-                    ubicacionTelefono = app.ubicacion,
-                    idEditar = id
+            val viewModel: NuevaInmersionViewModel = viewModel {
+                NuevaInmersionViewModel(
+                    app.inmersionRepository,
+                    app.registrarInmersion,
+                    app.perfilRepository,
+                    app.ubicacion,
+                    id,
+                    createSavedStateHandle()
                 )
-            )
+            }
             NuevaInmersionScreen(
                 viewModel = viewModel,
                 onGuardado = { navController.volverDesde(entrada) }, // vuelve al detalle, que se actualiza solo
@@ -322,9 +337,13 @@ fun AppNavHost(
             arguments = listOf(navArgument("id") { type = NavType.LongType })
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getLong("id") ?: 0L
-            val viewModel: DetalleInmersionViewModel = viewModel(
-                factory = DetalleInmersionViewModel.Factory(app.inmersionRepository, id, app.applicationContext)
-            )
+            val viewModel: DetalleInmersionViewModel = viewModel {
+                DetalleInmersionViewModel(
+                    app.inmersionRepository,
+                    id,
+                    app.contexto
+                )
+            }
             DetalleInmersionScreen(
                 viewModel = viewModel,
                 onEliminada = { navController.popBackStack() },
@@ -341,9 +360,12 @@ fun AppNavHost(
                 defaultValue = 0
             })
         ) { entrada ->
-            val estadisticasViewModel: EstadisticasViewModel = viewModel(
-                factory = EstadisticasViewModel.Factory(app.inmersionRepository, app.sesionApneaRepository)
-            )
+            val estadisticasViewModel: EstadisticasViewModel = viewModel {
+                EstadisticasViewModel(
+                    app.inmersionRepository,
+                    app.sesionApneaRepository
+                )
+            }
             EstadisticasScreen(
                 viewModel = estadisticasViewModel,
                 pestaniaInicial = entrada.arguments?.getInt(ARG_PESTANIA) ?: 0,
@@ -361,14 +383,14 @@ fun AppNavHost(
 
         //===========================CUENTA-USUARIO============================================
         composable(AppDestinations.CUENTA.name) {
-            val viewModel: CuentaViewModel = viewModel(
-                factory = CuentaViewModel.Factory(
+            val viewModel: CuentaViewModel = viewModel {
+                CuentaViewModel(
                     app.sessionManager,
-                    app.perfilRepository, // 
+                    app.perfilRepository,
                     app.inmersionRepository,
-                    app.sesionApneaRepository,
+                    app.sesionApneaRepository
                 )
-            )
+            }
             CuentaScreen(
                 viewModel = viewModel,
                 onCerrarSesion = { navController.irAlLoginSinEstadoGuardado() },
@@ -386,9 +408,7 @@ fun AppNavHost(
         // las pantallas muestran "no hay sesión activa" y no dejan guardar (no crashean).
 
         composable(RUTA_DATOS_PERSONALES) { entrada ->
-            val viewModel: DatosPersonalesViewModel = viewModel(
-                factory = DatosPersonalesViewModel.Factory(app.perfilRepository)
-            )
+            val viewModel: DatosPersonalesViewModel = viewModel { DatosPersonalesViewModel(app.perfilRepository) }
             DatosPersonalesScreen(
                 viewModel = viewModel,
                 onVolver = { navController.volverDesde(entrada) }
@@ -397,9 +417,7 @@ fun AppNavHost(
 
         // ---------- Equipamiento ----------
         composable(RUTA_EQUIPAMIENTO) { entrada ->
-            val viewModel: EquipamientoViewModel = viewModel(
-                factory = EquipamientoViewModel.Factory(app.perfilRepository)
-            )
+            val viewModel: EquipamientoViewModel = viewModel { EquipamientoViewModel(app.perfilRepository) }
             EquipamientoScreen(
                 viewModel = viewModel,
                 onVolver = { navController.volverDesde(entrada) },
@@ -408,19 +426,18 @@ fun AppNavHost(
             )
         }
         composable(RUTA_FORM_EQUIPO, arguments = argumentoIdOpcional()) { entrada ->
-            val viewModel: EquipoFormViewModel = viewModel(
-                factory = EquipoFormViewModel.Factory(
-                    app.perfilRepository, entrada.idOpcional()
+            val viewModel: EquipoFormViewModel = viewModel {
+                EquipoFormViewModel(
+                    app.perfilRepository,
+                    entrada.idOpcional()
                 )
-            )
+            }
             EquipoFormScreen(viewModel = viewModel, onVolver = { navController.volverDesde(entrada) })
         }
 
         // ---------- Certificados ----------
         composable(RUTA_CERTIFICADOS) { entrada ->
-            val viewModel: CertificadosViewModel = viewModel(
-                factory = CertificadosViewModel.Factory(app.perfilRepository)
-            )
+            val viewModel: CertificadosViewModel = viewModel { CertificadosViewModel(app.perfilRepository) }
             CertificadosScreen(
                 viewModel = viewModel,
                 onVolver = { navController.volverDesde(entrada) },
@@ -429,19 +446,18 @@ fun AppNavHost(
             )
         }
         composable(RUTA_FORM_CERTIFICADO, arguments = argumentoIdOpcional()) { entrada ->
-            val viewModel: CertificadoFormViewModel = viewModel(
-                factory = CertificadoFormViewModel.Factory(
-                    app.perfilRepository, entrada.idOpcional()
+            val viewModel: CertificadoFormViewModel = viewModel {
+                CertificadoFormViewModel(
+                    app.perfilRepository,
+                    entrada.idOpcional()
                 )
-            )
+            }
             CertificadoFormScreen(viewModel = viewModel, onVolver = { navController.volverDesde(entrada) })
         }
 
         // ---------- Contactos de emergencia ----------
         composable(RUTA_CONTACTOS) { entrada ->
-            val viewModel: ContactosViewModel = viewModel(
-                factory = ContactosViewModel.Factory(app.perfilRepository)
-            )
+            val viewModel: ContactosViewModel = viewModel { ContactosViewModel(app.perfilRepository) }
             ContactosScreen(
                 viewModel = viewModel,
                 onVolver = { navController.volverDesde(entrada) },
@@ -450,11 +466,12 @@ fun AppNavHost(
             )
         }
         composable(RUTA_FORM_CONTACTO, arguments = argumentoIdOpcional()) { entrada ->
-            val viewModel: ContactoFormViewModel = viewModel(
-                factory = ContactoFormViewModel.Factory(
-                    app.perfilRepository, entrada.idOpcional()
+            val viewModel: ContactoFormViewModel = viewModel {
+                ContactoFormViewModel(
+                    app.perfilRepository,
+                    entrada.idOpcional()
                 )
-            )
+            }
             ContactoFormScreen(viewModel = viewModel, onVolver = { navController.volverDesde(entrada) })
         }
     }

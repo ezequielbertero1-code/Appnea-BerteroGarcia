@@ -3,8 +3,6 @@ package com.berterogarcia.appnea.ui.perfil.contactos
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
@@ -147,11 +145,5 @@ class ContactoFormViewModel(
         Validaciones.telefono(s.telefono, obligatorio = true)?.let { put(CampoContacto.TELEFONO, it) }
         Validaciones.telefono(s.telefonoAlternativo, obligatorio = false)?.let { put(CampoContacto.TELEFONO_ALT, it) }
         Validaciones.largoMaximo(s.notas, 300)?.let { put(CampoContacto.NOTAS, it) }
-    }
-
-    companion object {
-        fun Factory(repository: PerfilRepository, idContacto: Long?) = viewModelFactory {
-            initializer { ContactoFormViewModel(repository, idContacto) }
-        }
     }
 }

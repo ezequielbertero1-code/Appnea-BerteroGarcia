@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.data.seguridad.SeguridadPassword
 import com.berterogarcia.appnea.dominio.FactorEntrenamiento
 import androidx.room.withTransaction
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository

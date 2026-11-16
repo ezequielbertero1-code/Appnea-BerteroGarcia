@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.data.ubicacion
 
 import android.content.Context
 import com.berterogarcia.appnea.dominio.ServicioUbicacion

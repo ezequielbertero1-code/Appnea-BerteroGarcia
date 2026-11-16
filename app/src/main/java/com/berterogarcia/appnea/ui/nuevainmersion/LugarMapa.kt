@@ -46,9 +46,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.Geocodificador
-import com.berterogarcia.appnea.data.local.Ubicacion
-import com.berterogarcia.appnea.data.local.UbicacionHelper
+import com.berterogarcia.appnea.data.ubicacion.Geocodificador
+import com.berterogarcia.appnea.data.ubicacion.Ubicacion
+import com.berterogarcia.appnea.data.ubicacion.UbicacionHelper
 import com.berterogarcia.appnea.ui.components.BotonContorno
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.BotonSecundario

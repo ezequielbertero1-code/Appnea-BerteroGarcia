@@ -2,7 +2,7 @@ package com.berterogarcia.appnea.dominio
 
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.Ubicacion
+import com.berterogarcia.appnea.data.ubicacion.Ubicacion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import java.time.LocalDateTime
 

@@ -1,9 +1,9 @@
 package com.berterogarcia.appnea.data.repository
 
-import com.berterogarcia.appnea.data.local.ProveedorUsuario
+import com.berterogarcia.appnea.data.sesion.ProveedorUsuario
 import com.berterogarcia.appnea.data.local.SesionApneaDao
 import com.berterogarcia.appnea.data.local.SesionApneaEntity
-import com.berterogarcia.appnea.data.local.porUsuario
+import com.berterogarcia.appnea.data.sesion.porUsuario
 import kotlinx.coroutines.flow.Flow
 
 /** [CAMBIO v7] Igual que InmersionRepository: todo sobre el usuario logueado. */

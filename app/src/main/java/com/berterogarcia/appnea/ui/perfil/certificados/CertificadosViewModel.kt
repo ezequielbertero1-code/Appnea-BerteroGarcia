@@ -3,8 +3,6 @@ package com.berterogarcia.appnea.ui.perfil.certificados
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.local.CertificadoEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
 import com.berterogarcia.appnea.ui.components.TextoUi
@@ -64,11 +62,5 @@ class CertificadosViewModel(
 
     fun mensajeMostrado() {
         _mensaje.value = null
-    }
-
-    companion object {
-        fun Factory(repository: PerfilRepository) = viewModelFactory {
-            initializer { CertificadosViewModel(repository) }
-        }
     }
 }

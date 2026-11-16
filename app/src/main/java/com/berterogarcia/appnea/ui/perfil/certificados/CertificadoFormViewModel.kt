@@ -3,8 +3,6 @@ package com.berterogarcia.appnea.ui.perfil.certificados
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.CertificadoEntity
 import com.berterogarcia.appnea.data.local.TipoCertificado
@@ -161,11 +159,5 @@ class CertificadoFormViewModel(
             )?.let { put(CampoCertificado.VENCIMIENTO, it) }
         }
         Validaciones.largoMaximo(s.notas, 300)?.let { put(CampoCertificado.NOTAS, it) }
-    }
-
-    companion object {
-        fun Factory(repository: PerfilRepository, idCertificado: Long?) = viewModelFactory {
-            initializer { CertificadoFormViewModel(repository, idCertificado) }
-        }
     }
 }

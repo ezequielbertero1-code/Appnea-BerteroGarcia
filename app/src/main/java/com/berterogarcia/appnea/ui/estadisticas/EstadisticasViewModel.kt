@@ -3,8 +3,6 @@ package com.berterogarcia.appnea.ui.estadisticas
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.SesionApneaEntity
@@ -124,10 +122,6 @@ class EstadisticasViewModel(
         _tipo.value = tipo
     }
 
-    companion object {
-        fun Factory(inmersionRepository: InmersionRepository, sesionRepository: SesionApneaRepository) =
-            viewModelFactory { initializer { EstadisticasViewModel(inmersionRepository, sesionRepository) } }
-    }
 }
 
 // ============ Cálculos: funciones puras (se pueden probar con un test sin Android) ============

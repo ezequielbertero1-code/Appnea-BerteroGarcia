@@ -5,12 +5,10 @@ import com.berterogarcia.appnea.dominio.ServicioUbicacion
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.Condiciones
-import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
-import com.berterogarcia.appnea.data.local.Ubicacion
+import com.berterogarcia.appnea.data.ubicacion.UBICACION_COMODORO_RIVADAVIA
+import com.berterogarcia.appnea.data.ubicacion.Ubicacion
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import kotlinx.coroutines.Job
@@ -132,10 +130,7 @@ class ClimaViewModel(
     }
 
     companion object {
-        private const val TAG = "Clima"
 
-        fun Factory(condiciones: FuenteCondiciones, ubicacion: ServicioUbicacion) = viewModelFactory {
-            initializer { ClimaViewModel(condiciones, ubicacion) }
-        }
+        private const val TAG = "Clima"
     }
 }

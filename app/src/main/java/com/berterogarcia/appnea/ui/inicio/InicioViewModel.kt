@@ -2,8 +2,6 @@ package com.berterogarcia.appnea.ui.inicio
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,10 +40,7 @@ class InicioViewModel(repository: InmersionRepository) : ViewModel() {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     companion object {
-        private const val CANTIDAD_RECIENTES = 3
 
-        fun Factory(repository: InmersionRepository) = viewModelFactory {
-            initializer { InicioViewModel(repository) }
-        }
+        private const val CANTIDAD_RECIENTES = 3
     }
 }
