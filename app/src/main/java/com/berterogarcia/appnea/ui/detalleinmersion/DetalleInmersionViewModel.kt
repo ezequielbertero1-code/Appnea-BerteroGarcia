@@ -14,7 +14,9 @@ import com.berterogarcia.appnea.data.perfil.PuntoPerfil
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -39,12 +41,24 @@ class DetalleInmersionViewModel(
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun eliminar(onEliminada: () -> Unit) {
+    /**
+     * Resultado de eliminar: null = nada pendiente, true = se borró, false = falló.
+     * Es estado (no un callback guardado en el ViewModel): la pantalla reacciona aunque se haya
+     * recreado (rotación) y un error de la base ya no cierra la app.
+     */
+    private val _eliminada = MutableStateFlow<Boolean?>(null)
+    val eliminada: StateFlow<Boolean?> = _eliminada.asStateFlow()
+
+    fun eliminar() {
         val i = inmersion.value ?: return
         viewModelScope.launch {
-            repository.eliminar(i)
-            onEliminada()
+            _eliminada.value = intentar("DetalleInmersionViewModel") { repository.eliminar(i) }.getOrDefault(false)
         }
+    }
+
+    /** La pantalla ya mostró el error: se limpia para poder reintentar. */
+    fun errorEliminarMostrado() {
+        _eliminada.value = null
     }
 
     /** Escribe el UDDF en el archivo que eligió el usuario. Devuelve true si salió bien. */

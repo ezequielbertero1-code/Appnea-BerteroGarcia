@@ -247,7 +247,7 @@ fun AppNavHost(
                 factory = EntrenamientoApneaViewModel.Factory(
                     app.tablaPersonalizadaRepository,
                     app.sesionApneaRepository,
-                    app.sonidoManager
+                    app.motorEntrenamiento
                 )
             )
             CronometroScreen(
@@ -285,6 +285,7 @@ fun AppNavHost(
             val viewModel: NuevaInmersionViewModel = viewModel(
                 factory = NuevaInmersionViewModel.Factory(
                     repository = app.inmersionRepository,
+                    registrar = app.registrarInmersion,
                     perfilRepository = app.perfilRepository,
                     nombreUsuario = app.sessionManager.obtenerUsuario(),
                     appContext = app.applicationContext
@@ -306,6 +307,7 @@ fun AppNavHost(
             val viewModel: NuevaInmersionViewModel = viewModel(
                 factory = NuevaInmersionViewModel.Factory(
                     repository = app.inmersionRepository,
+                    registrar = app.registrarInmersion,
                     perfilRepository = app.perfilRepository,
                     nombreUsuario = app.sessionManager.obtenerUsuario(),
                     appContext = app.applicationContext,

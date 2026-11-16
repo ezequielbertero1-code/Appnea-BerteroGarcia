@@ -9,8 +9,13 @@ import kotlinx.coroutines.flow.Flow
 // [CAMBIO v7] Todas las consultas filtran por usuario: nadie lee ni borra datos de otro.
 @Dao
 interface InmersionDao {
+    /** Devuelve el id generado. */
     @Insert
-    suspend fun insertar(inmersion: InmersionEntity)
+    suspend fun insertar(inmersion: InmersionEntity): Long
+
+    /** Completa las condiciones (clima, mar) cuando llegan de internet, después de guardar. */
+    @Query("UPDATE inmersiones SET condiciones = :condiciones WHERE id = :id")
+    suspend fun actualizarCondiciones(id: Long, condiciones: CondicionesRegistro?): Int
 
     /** Actualiza por id. Devuelve cuántas filas cambió (0 si no existía). */
     @Update

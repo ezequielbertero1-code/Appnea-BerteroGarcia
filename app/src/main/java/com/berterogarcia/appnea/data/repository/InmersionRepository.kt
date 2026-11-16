@@ -25,11 +25,10 @@ class InmersionRepository(
     fun obtenerPorId(id: Long): Flow<InmersionEntity?> =
         sesion.porUsuario(null) { usuario -> dao.obtenerPorId(id, usuario) }
 
-    /** @return false si no hay sesión. */
-    suspend fun guardar(inmersion: InmersionEntity): Boolean {
-        val usuario = sesion.usuarioActual.value ?: return false
-        dao.insertar(inmersion.copy(nombreUsuario = usuario))
-        return true
+    /** @return el id de la inmersión nueva, o null si no hay sesión. */
+    suspend fun guardar(inmersion: InmersionEntity): Long? {
+        val usuario = sesion.usuarioActual.value ?: return null
+        return dao.insertar(inmersion.copy(nombreUsuario = usuario))
     }
 
     /**

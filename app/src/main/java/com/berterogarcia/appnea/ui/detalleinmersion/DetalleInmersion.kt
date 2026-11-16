@@ -141,6 +141,7 @@ fun DetalleInmersionScreen(
     val textoExportada = stringResource(R.string.detalle_exportada)
     val textoNoExportada = stringResource(R.string.detalle_no_exportada)
     val textoEliminada = stringResource(R.string.detalle_eliminada)
+    val textoNoEliminada = stringResource(R.string.detalle_no_eliminada)
 
     // Abre el selector de Android para elegir dónde guardar el archivo
     val exportarLauncher = rememberLauncherForActivityResult(
@@ -149,6 +150,22 @@ fun DetalleInmersionScreen(
         if (uri != null) scope.launch {
             val ok = viewModel.exportarUddf(uri)
             Toast.makeText(context, if (ok) textoExportada else textoNoExportada, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Resultado de eliminar (antes del return: después de borrar, la inmersión pasa a null)
+    val eliminada by viewModel.eliminada.collectAsStateWithLifecycle()
+    LaunchedEffect(eliminada) {
+        when (eliminada) {
+            true -> {
+                Toast.makeText(context, textoEliminada, Toast.LENGTH_SHORT).show()
+                onEliminada()
+            }
+            false -> {
+                Toast.makeText(context, textoNoEliminada, Toast.LENGTH_SHORT).show()
+                viewModel.errorEliminarMostrado()
+            }
+            null -> Unit
         }
     }
 
@@ -247,10 +264,7 @@ fun DetalleInmersionScreen(
             confirmButton = {
                 TextButton(onClick = {
                     mostrarDialogo = false
-                    viewModel.eliminar {
-                        Toast.makeText(context, textoEliminada, Toast.LENGTH_SHORT).show()
-                        onEliminada()
-                    }
+                    viewModel.eliminar()
                 }) { Text(stringResource(R.string.accion_eliminar), color = ColorError) }
             },
             dismissButton = {

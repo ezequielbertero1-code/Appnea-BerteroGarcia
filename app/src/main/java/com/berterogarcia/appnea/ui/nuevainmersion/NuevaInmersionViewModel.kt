@@ -2,12 +2,14 @@ package com.berterogarcia.appnea.ui.nuevainmersion
 
 import com.berterogarcia.appnea.util.intentar
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
+import com.berterogarcia.appnea.dominio.RegistrarInmersion
 import com.berterogarcia.appnea.data.local.BajadaApnea
 import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.EquipoEntity
@@ -28,6 +30,9 @@ import com.berterogarcia.appnea.ui.components.textoUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -202,11 +207,14 @@ data class NuevaInmersionUiState(
 
 class NuevaInmersionViewModel(
     private val repository: InmersionRepository,
+    private val registrar: RegistrarInmersion,
     perfilRepository: PerfilRepository,
     nombreUsuario: String?,
     private val appContext: Context,
     /** null = alta de una inmersión nueva; con id = edición de esa inmersión. */
-    private val idEditar: Long? = null
+    private val idEditar: Long? = null,
+    /** Guarda el borrador del formulario por si Android mata la app en segundo plano. */
+    private val estadoGuardado: SavedStateHandle = SavedStateHandle()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -228,7 +236,20 @@ class NuevaInmersionViewModel(
     private var original: InmersionEntity? = null
 
     init {
-        if (idEditar != null) cargarParaEditar(idEditar)
+        val borrador = estadoGuardado.get<String>(CLAVE_BORRADOR)
+        if (borrador != null) {
+            // Volviendo después de que Android mató la app: se recupera lo escrito
+            _uiState.update { it.conBorrador(borrador) }
+            equipoTocado = true
+        }
+        if (idEditar != null) cargarParaEditar(idEditar, soloOriginal = borrador != null)
+        viewModelScope.launch {
+            _uiState
+                .filter { !it.cargandoEdicion && !it.guardadoOk }
+                .map { it.aBorradorJson() }
+                .distinctUntilChanged()
+                .collect { estadoGuardado[CLAVE_BORRADOR] = it }
+        }
         viewModelScope.launch {
             inmersionesPrevias = intentar("NuevaInmersionViewModel") { repository.todasLasInmersiones.first() }
                 .getOrDefault(emptyList())
@@ -271,8 +292,12 @@ class NuevaInmersionViewModel(
         }
     }
 
-    /** Lee la inmersión y completa el formulario con sus datos. */
-    private fun cargarParaEditar(id: Long) {
+    /**
+     * Lee la inmersión y completa el formulario con sus datos.
+     * [soloOriginal]: hay un borrador recuperado, así que solo se lee la original (para guardar
+     * después) sin pisar lo que el usuario ya había cambiado.
+     */
+    private fun cargarParaEditar(id: Long, soloOriginal: Boolean = false) {
         viewModelScope.launch {
             val i = intentar("NuevaInmersionViewModel") { repository.obtenerPorId(id).first() }.getOrNull()
             if (i == null) {
@@ -283,6 +308,10 @@ class NuevaInmersionViewModel(
             }
             original = i
             equipoTocado = true
+            if (soloOriginal) {
+                _uiState.update { it.copy(cargandoEdicion = false) }
+                return@launch
+            }
             _uiState.update {
                 it.copy(
                     cargandoEdicion = false,
@@ -524,22 +553,9 @@ class NuevaInmersionViewModel(
             val fecha = LocalDate.parse(s.fecha, FORMATO_FECHA)
             val horaEntrada = LocalTime.parse(s.horaEntrada)
             val anterior = original
-
-            // Editando sin cambiar fecha, hora de entrada ni lugar marcado: se conservan las
-            // condiciones que ya estaban (no tiene sentido volver a pedirlas a internet).
-            val mismoMomentoYLugar = anterior != null &&
-                anterior.fecha == fecha && anterior.horaEntrada == horaEntrada &&
-                anterior.latitud == s.latitud && anterior.longitud == s.longitud
-
-            val condiciones = if (mismoMomentoYLugar) anterior.condiciones else {
-                // Condiciones del LUGAR marcado. Sin marcar: ubicación del teléfono → Comodoro.
-                // Sin internet guarda solo la luna.
-                val ubicacion = if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
-                else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
-                intentar("NuevaInmersionViewModel") {
-                    CondicionesRepository.registroPara(ubicacion.latitud, ubicacion.longitud, fecha.atTime(horaEntrada))
-                }.getOrNull() ?: anterior?.condiciones
-            }
+            // Condiciones del LUGAR marcado. Sin marcar: ubicación del teléfono → Comodoro.
+            val ubicacion = if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
+            else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
             val esApnea = s.tipo == TipoInmersion.APNEA
             val registroApnea = if (esApnea) s.registroApnea else null
             val entidad = InmersionEntity(
@@ -565,16 +581,13 @@ class NuevaInmersionViewModel(
                     visibilidadMetros = s.visibilidadMetros.toFloatOrNull(),
                     actividad = s.actividad,
                     comentarios = s.comentarios,
-                    condiciones = condiciones,
                     tipo = s.tipo,
                     latitud = s.latitud,   // solo lo marcado; null si no se marcó nada
                     longitud = s.longitud,
                     apnea = registroApnea
                 )
-            val ok = intentar("NuevaInmersionViewModel") {
-                if (anterior != null) repository.actualizar(entidad.copy(id = anterior.id))
-                else repository.guardar(entidad)
-            }.getOrDefault(false)
+            // Guarda al instante; clima y mar se completan en segundo plano (RegistrarInmersion)
+            val ok = intentar("NuevaInmersionViewModel") { registrar(entidad, anterior, ubicacion) }.getOrDefault(false)
             _uiState.update {
                 if (ok) it.copy(guardadoOk = true, guardando = false)
                 else it.copy(guardando = false, errorGuardado = textoUi(R.string.nueva_error_guardar))
@@ -583,14 +596,21 @@ class NuevaInmersionViewModel(
     }
 
     companion object {
+        private const val CLAVE_BORRADOR = "borrador_inmersion"
+
         fun Factory(
             repository: InmersionRepository,
+            registrar: RegistrarInmersion,
             perfilRepository: PerfilRepository,
             nombreUsuario: String?,
             appContext: Context,
             idEditar: Long? = null
         ) = viewModelFactory {
-            initializer { NuevaInmersionViewModel(repository, perfilRepository, nombreUsuario, appContext, idEditar) }
+            initializer {
+                NuevaInmersionViewModel(
+                    repository, registrar, perfilRepository, nombreUsuario, appContext, idEditar, createSavedStateHandle()
+                )
+            }
         }
     }
 }

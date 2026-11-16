@@ -1,7 +1,9 @@
 package com.berterogarcia.appnea.ui.registro
 
 import com.berterogarcia.appnea.util.intentar
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -20,6 +22,9 @@ import com.berterogarcia.appnea.ui.perfil.comun.Validaciones
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -86,7 +91,9 @@ class RegistroViewModel(
     private val repository: RegistroRepository,
     private val cuentaGoogleRepository: CuentaGoogleRepository,
     private val sessionManager: SessionManager,
-    private val cuentaGoogle: CuentaGoogle? = null
+    private val cuentaGoogle: CuentaGoogle? = null,
+    /** Borrador del formulario por si Android mata la app en segundo plano (sin contraseñas). */
+    private val estadoGuardado: SavedStateHandle = SavedStateHandle()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -102,6 +109,14 @@ class RegistroViewModel(
         )
     )
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
+
+    init {
+        estadoGuardado.get<String>(CLAVE_BORRADOR)?.let { json -> _uiState.update { it.conBorrador(json) } }
+        viewModelScope.launch {
+            _uiState.filter { !it.registroOk }.map { it.aBorradorJson() }.distinctUntilChanged()
+                .collect { estadoGuardado[CLAVE_BORRADOR] = it }
+        }
+    }
 
     // ------------------------------- Cambios de campos -------------------------------
 
@@ -274,13 +289,55 @@ class RegistroViewModel(
     }
 
     companion object {
+        private const val CLAVE_BORRADOR = "borrador_registro"
+
         fun Factory(
             repository: RegistroRepository,
             cuentaGoogleRepository: CuentaGoogleRepository,
             sessionManager: SessionManager,
             cuentaGoogle: CuentaGoogle? = null
         ) = viewModelFactory {
-            initializer { RegistroViewModel(repository, cuentaGoogleRepository, sessionManager, cuentaGoogle) }
+            initializer {
+                RegistroViewModel(repository, cuentaGoogleRepository, sessionManager, cuentaGoogle, createSavedStateHandle())
+            }
         }
     }
 }
+/**
+ * Campos del registro como JSON para el SavedStateHandle. La contraseña y su confirmación NO se
+ * guardan: el SavedStateHandle puede terminar escrito en disco. Al volver, se piden de nuevo.
+ */
+internal fun RegistroUiState.aBorradorJson(): String = org.json.JSONObject().apply {
+    put("paso", paso.name)
+    put("usuario", usuario)
+    put("nombre", nombre)
+    put("apellido", apellido)
+    put("email", email)
+    put("telefono", telefono)
+    fechaNacimiento?.let { put("fechaNacimiento", it.toString()) }
+    put("ciudad", ciudad)
+    put("contactoNombre", contactoNombre)
+    put("contactoRelacion", contactoRelacion)
+    put("contactoTelefono", contactoTelefono)
+    put("aceptaAviso", aceptaAviso)
+}.toString()
+
+internal fun RegistroUiState.conBorrador(json: String): RegistroUiState = runCatching {
+    val j = org.json.JSONObject(json)
+    val pasoGuardado = runCatching { PasoRegistro.valueOf(j.getString("paso")) }.getOrNull()
+    copy(
+        // Sin contraseña recuperada, el registro normal vuelve al paso de la cuenta
+        paso = if (emailGoogle == null) PasoRegistro.CUENTA else pasoGuardado?.takeIf { it in pasos } ?: paso,
+        usuario = if (emailGoogle == null) j.optString("usuario") else usuario,
+        nombre = j.optString("nombre"),
+        apellido = j.optString("apellido"),
+        email = j.optString("email"),
+        telefono = j.optString("telefono"),
+        fechaNacimiento = j.optString("fechaNacimiento").takeIf { it.isNotEmpty() }?.let(LocalDate::parse),
+        ciudad = j.optString("ciudad"),
+        contactoNombre = j.optString("contactoNombre"),
+        contactoRelacion = j.optString("contactoRelacion"),
+        contactoTelefono = j.optString("contactoTelefono"),
+        aceptaAviso = j.optBoolean("aceptaAviso")
+    )
+}.getOrDefault(this)

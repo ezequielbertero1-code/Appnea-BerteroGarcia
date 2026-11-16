@@ -2,7 +2,13 @@ package com.berterogarcia.appnea.ui.entrenamiento
 
 import android.os.SystemClock
 import android.widget.Toast
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -149,9 +155,10 @@ fun SeleccionTablaScreen(
                 total = 1,
                 inicio = { Icon(painterResource(R.drawable.ic_ms_group), contentDescription = null) }
             )
+            val iniciarConPermiso = rememberIniciarConPermisoNotificaciones(viewModel::onIniciar)
             BotonPrincipal(
                 texto = stringResource(R.string.entrenar_iniciar),
-                onClick = viewModel::onIniciar,
+                onClick = iniciarConPermiso,
                 enabled = estado.tablaSeleccionada != null,
                 icono = rememberVectorPainter(Icons.Rounded.PlayArrow),
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
@@ -470,5 +477,20 @@ private fun DatoResultado(etiqueta: String, valor: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(valor, style = MaterialTheme.typography.titleMedium, color = TextoSuperficie)
         Text(etiqueta, style = MaterialTheme.typography.bodySmall, color = TextoSuperficieVariante)
+    }
+}
+
+/**
+ * En Android 13+ la notificación del entrenamiento (fase actual y cuenta regresiva) necesita permiso.
+ * Se pide al tocar "Iniciar" y la tabla arranca igual, se acepte o no: el servicio corre sin él.
+ */
+@Composable
+private fun rememberIniciarConPermisoNotificaciones(iniciar: () -> Unit): () -> Unit {
+    val context = LocalContext.current
+    val lanzador = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { iniciar() }
+    return {
+        val falta = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        if (falta) lanzador.launch(Manifest.permission.POST_NOTIFICATIONS) else iniciar()
     }
 }

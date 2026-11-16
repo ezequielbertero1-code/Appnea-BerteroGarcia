@@ -71,12 +71,18 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.compose.material.icons.core)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.org.json) // org.json real: el de android.jar en los tests de JVM es un stub
     androidTestImplementation(libs.androidx.room.testing)
+    constraints {
+        // room-testing (MigrationTestHelper) necesita 1.8.1; Navigation trae 1.7.3 y el APK de test
+        // usa la versión de la app. 1.8 es compatible hacia atrás con 1.7.
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1")
+    }
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
