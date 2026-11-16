@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.FactorEntrenamiento
 import androidx.room.withTransaction
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import java.time.LocalDate
@@ -391,18 +392,18 @@ object SeedDemo {
             val diasAtras = (total - i) * 4L - random.nextInt(0, 3)
 
             val factores = buildSet {
-                if (random.nextFloat() < 0.6f) add("Dormí bien")
-                if (random.nextFloat() < 0.45f) add("Comí liviano")
-                if (random.nextFloat() < 0.5f) add("Buena hidratación")
-                if (random.nextFloat() < 0.3f) add("Estrés / ansiedad")
-                if (random.nextFloat() < 0.25f) add("Cansancio físico")
-                if (random.nextFloat() < 0.7f) add("Entrené acompañado")
+                if (random.nextFloat() < 0.6f) add(FactorEntrenamiento.DURMIO_BIEN)
+                if (random.nextFloat() < 0.45f) add(FactorEntrenamiento.COMIO_LIVIANO)
+                if (random.nextFloat() < 0.5f) add(FactorEntrenamiento.HIDRATACION)
+                if (random.nextFloat() < 0.3f) add(FactorEntrenamiento.ESTRES)
+                if (random.nextFloat() < 0.25f) add(FactorEntrenamiento.CANSANCIO)
+                if (random.nextFloat() < 0.7f) add(FactorEntrenamiento.ACOMPANADO)
             }
             var chance = 0.6f
-            if ("Dormí bien" in factores) chance += 0.25f
-            if ("Estrés / ansiedad" in factores) chance -= 0.35f
-            if ("Cansancio físico" in factores) chance -= 0.25f
-            if ("Buena hidratación" in factores) chance += 0.05f
+            if (FactorEntrenamiento.DURMIO_BIEN in factores) chance += 0.25f
+            if (FactorEntrenamiento.ESTRES in factores) chance -= 0.35f
+            if (FactorEntrenamiento.CANSANCIO in factores) chance -= 0.25f
+            if (FactorEntrenamiento.HIDRATACION in factores) chance += 0.05f
             val completada = random.nextFloat() < chance.coerceIn(0.1f, 0.95f)
 
             val (faseAlcanzada, marca) = if (completada) {

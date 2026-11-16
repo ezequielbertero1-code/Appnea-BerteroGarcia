@@ -1,6 +1,7 @@
 package com.berterogarcia.appnea.ui.clima
 
-import android.content.Context
+import com.berterogarcia.appnea.dominio.FuenteCondiciones
+import com.berterogarcia.appnea.dominio.ServicioUbicacion
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,10 +9,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.condiciones.Condiciones
-import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
 import com.berterogarcia.appnea.data.local.Ubicacion
-import com.berterogarcia.appnea.data.local.UbicacionHelper
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import kotlinx.coroutines.Job
@@ -34,7 +33,10 @@ data class ClimaUiState(
  * Carga todas las condiciones (clima, mar, mareas, sol, luna).
  * Lo usan la sección de clima de Inicio y la pantalla completa de Condiciones.
  */
-class ClimaViewModel(private val appContext: Context) : ViewModel() {
+class ClimaViewModel(
+    private val condiciones: FuenteCondiciones,
+    private val ubicacionTelefono: ServicioUbicacion
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ClimaUiState())
     val uiState: StateFlow<ClimaUiState> = _uiState
@@ -55,7 +57,7 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
     }
 
     fun usarMiUbicacion() {
-        if (!UbicacionHelper.tienePermiso(appContext)) {
+        if (!ubicacionTelefono.tienePermiso()) {
             permisoDenegado()
             return
         }
@@ -67,11 +69,11 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
 
             val motivo: TextoUi?
             val ubicacion: Ubicacion?
-            if (!UbicacionHelper.ubicacionActivada(appContext)) {
+            if (!ubicacionTelefono.ubicacionActivada()) {
                 motivo = textoUi(R.string.clima_error_ubicacion_desactivada)
                 ubicacion = null
             } else {
-                ubicacion = UbicacionHelper.obtenerUbicacionActual(appContext)
+                ubicacion = ubicacionTelefono.actual()
                 motivo = if (ubicacion == null)
                     textoUi(R.string.clima_error_ubicacion)
                 else null
@@ -107,7 +109,7 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
     /** [aviso]: mensaje que queda visible al terminar (ej.: por qué se volvió a Comodoro). */
     private suspend fun cargar(ubicacion: Ubicacion, aviso: TextoUi? = null) {
         _uiState.update { it.copy(cargando = true, error = null) }
-        val resultado = CondicionesRepository.obtener(ubicacion)
+        val resultado = condiciones.obtener(ubicacion)
         currentCoroutineContext().ensureActive()   // si se canceló mientras cargaba, no toca el estado
         resultado.fold(
             onSuccess = { condiciones ->
@@ -132,8 +134,8 @@ class ClimaViewModel(private val appContext: Context) : ViewModel() {
     companion object {
         private const val TAG = "Clima"
 
-        fun Factory(appContext: Context) = viewModelFactory {
-            initializer { ClimaViewModel(appContext) }
+        fun Factory(condiciones: FuenteCondiciones, ubicacion: ServicioUbicacion) = viewModelFactory {
+            initializer { ClimaViewModel(condiciones, ubicacion) }
         }
     }
 }

@@ -290,7 +290,7 @@ private fun PestaniaEntrenamiento(
             val promedio = r.porcentajeCompletas / 100f
             r.factores.forEach { f ->
                 BarraHorizontal(
-                    etiqueta = f.factor,
+                    etiqueta = stringResource(f.factor.etiqueta),
                     valor = stringResource(R.string.estadisticas_factor_valor, f.porcentajeCompletas, f.sesiones),
                     fraccion = f.porcentajeCompletas / 100f,
                     marca = promedio,

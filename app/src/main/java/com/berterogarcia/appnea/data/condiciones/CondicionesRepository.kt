@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.condiciones
 
+import com.berterogarcia.appnea.dominio.FuenteCondiciones
 import com.berterogarcia.appnea.util.intentar
 import com.berterogarcia.appnea.data.local.CondicionesRegistro
 import com.berterogarcia.appnea.data.local.Ubicacion
@@ -15,11 +16,11 @@ import java.time.temporal.ChronoUnit
  * Junta toodo: pronóstico (Open-Meteo), mar y mareas (Open-Meteo Marine) y astronomía
  * (cálculo propio).
  */
-object CondicionesRepository {
+object CondicionesRepository : FuenteCondiciones {
 
     private val HH_MM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
-    suspend fun obtener(ubicacion: Ubicacion): Result<Condiciones> {
+    override suspend fun obtener(ubicacion: Ubicacion): Result<Condiciones> {
         val pronostico = OpenMeteoService.obtenerPronostico(ubicacion.latitud, ubicacion.longitud)
             .getOrElse { return Result.failure(it) }
         val mar = OpenMeteoService.obtenerMar(ubicacion.latitud, ubicacion.longitud).getOrNull()
@@ -81,7 +82,7 @@ object CondicionesRepository {
      * Condiciones para guardar junto a una inmersión.
      * Nunca falla: si no hay internet guarda solo lo astronómico (luna).
      */
-    suspend fun registroPara(latitud: Double, longitud: Double, momento: LocalDateTime): CondicionesRegistro {
+    override suspend fun registroPara(latitud: Double, longitud: Double, momento: LocalDateTime): CondicionesRegistro {
         val fecha: LocalDate = momento.toLocalDate()
         val pronostico = OpenMeteoService.obtenerPronostico(latitud, longitud, fecha).getOrNull()
         val mar = OpenMeteoService.obtenerMar(latitud, longitud, fecha).getOrNull().orEmpty()

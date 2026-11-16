@@ -10,6 +10,8 @@ import com.berterogarcia.appnea.data.local.SonidoManager
 import com.berterogarcia.appnea.data.repository.CuentaGoogleRepository
 import com.berterogarcia.appnea.data.trabajos.CompletarCondicionesWorker
 import com.berterogarcia.appnea.dominio.RegistrarInmersion
+import com.berterogarcia.appnea.dominio.ServicioUbicacion
+import com.berterogarcia.appnea.data.local.UbicacionAndroid
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.PerfilRepository
 import com.berterogarcia.appnea.data.repository.RegistroRepository
@@ -40,6 +42,8 @@ class MyApplication : Application() {
     }
     val sesionApneaRepository by lazy { SesionApneaRepository(database.sesionApneaDao(), sessionManager) }
     val registroRepository by lazy { RegistroRepository(database) }
+    // GPS + geocoder detrás de una interfaz (los ViewModels no usan Context)
+    val ubicacion: ServicioUbicacion by lazy { UbicacionAndroid(this) }
     // Guardar inmersión sin esperar a internet: clima y mar los completa WorkManager después
     val registrarInmersion by lazy {
         RegistrarInmersion(inmersionRepository, CompletarCondicionesWorker.Programador(this))

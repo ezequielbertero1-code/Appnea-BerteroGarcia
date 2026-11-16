@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.FactorEntrenamiento
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -30,7 +31,7 @@ data class SesionApneaEntity(
     val faseAlcanzada: Int,      // número de fase (1-based) donde terminó o abortó
     val totalFases: Int,
     val marcaSegundos: Int,      // mejor tiempo de apnea sostenido durante la sesión
-    val factores: Set<String>,   // checklist: descanso, alimentación, estrés, etc.
+    val factores: Set<FactorEntrenamiento>,   // checklist: descanso, alimentación, estrés, etc.
     val sensaciones: String,     // descripción libre de cómo se sintió
     // [NUEVO v7] Dueño, lo completa SesionApneaRepository.
     val nombreUsuario: String = ""

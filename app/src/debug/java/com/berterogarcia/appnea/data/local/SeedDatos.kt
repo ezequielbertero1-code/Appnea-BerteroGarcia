@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.FactorEntrenamiento
 import com.berterogarcia.appnea.util.intentar
 import android.content.Context
 import androidx.core.content.edit
@@ -164,7 +165,7 @@ object SeedDatos {
             faseAlcanzada = 8,
             totalFases = 8,
             marcaSegundos = 90,
-            factores = setOf("Dormí bien", "Entrené acompañado"),
+            factores = setOf(FactorEntrenamiento.DURMIO_BIEN, FactorEntrenamiento.ACOMPANADO),
             sensaciones = "Relajado, las contracciones llegaron recién en la última."
         ),
         SesionApneaEntity(
@@ -174,7 +175,7 @@ object SeedDatos {
             faseAlcanzada = 8,
             totalFases = 10,
             marcaSegundos = 75,
-            factores = setOf("Estrés / ansiedad", "Cansancio físico"),
+            factores = setOf(FactorEntrenamiento.ESTRES, FactorEntrenamiento.CANSANCIO),
             sensaciones = "Día largo de trabajo, corté antes del último escalón."
         ),
         SesionApneaEntity(
@@ -184,7 +185,7 @@ object SeedDatos {
             faseAlcanzada = 6,
             totalFases = 6,
             marcaSegundos = 180,
-            factores = setOf("Dormí bien", "Comí liviano", "Buena hidratación"),
+            factores = setOf(FactorEntrenamiento.DURMIO_BIEN, FactorEntrenamiento.COMIO_LIVIANO, FactorEntrenamiento.HIDRATACION),
             sensaciones = "Mejor marca: 3 minutos en la última apnea."
         )
     )

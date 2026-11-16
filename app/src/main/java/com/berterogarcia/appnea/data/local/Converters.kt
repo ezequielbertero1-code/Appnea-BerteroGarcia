@@ -5,6 +5,7 @@
 package com.berterogarcia.appnea.data.local
 
 import androidx.room.TypeConverter
+import com.berterogarcia.appnea.dominio.FactorEntrenamiento
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.time.Duration
@@ -18,6 +19,14 @@ class Converters {
     @TypeConverter
     fun toSet(value: String): Set<String> =
         if (value.isBlank()) emptySet() else value.split(",").toSet()
+
+    // Factores de entrenamiento <-> claves estables separadas por coma ("DURMIO_BIEN,ESTRES")
+    @TypeConverter
+    fun fromFactores(value: Set<FactorEntrenamiento>): String = value.joinToString(",") { it.name }
+
+    @TypeConverter
+    fun toFactores(value: String): Set<FactorEntrenamiento> =
+        value.split(",").mapNotNull { FactorEntrenamiento.desdeClave(it.trim()) }.toSet()
 
     // LocalDate <-> epoch day (Long): ordena bien numéricamente en SQL
     @TypeConverter

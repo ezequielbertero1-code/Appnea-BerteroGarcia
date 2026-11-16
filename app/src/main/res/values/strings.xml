@@ -166,6 +166,12 @@
     <string name="entrenar_mejor">Mejor</string>
     <string name="fase_preparacion">Preparación</string>
     <string name="fase_apnea">Apnea</string>
+    <string name="factor_durmio_bien">Dormí bien</string>
+    <string name="factor_comio_liviano">Comí liviano</string>
+    <string name="factor_hidratacion">Buena hidratación</string>
+    <string name="factor_estres">Estrés / ansiedad</string>
+    <string name="factor_cansancio">Cansancio físico</string>
+    <string name="factor_acompanado">Entrené acompañado</string>
     <string name="notif_canal_entrenamiento">Entrenamiento en curso</string>
     <string name="notif_entrenamiento_en_curso">Entrenamiento en curso</string>
     <string name="notif_entrenamiento_fase">%1$s · fase %2$d de %3$d</string>

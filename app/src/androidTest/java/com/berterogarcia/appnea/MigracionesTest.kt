@@ -46,7 +46,7 @@ class MigracionesTest {
             )
         }
 
-        val db = helper.runMigrationsAndValidate(nombreBase, 10, true, *todas)
+        val db = helper.runMigrationsAndValidate(nombreBase, 11, true, *todas)
 
         db.query("SELECT id, tipo, lastreKg, visibilidad, apnea, lugar FROM inmersiones ORDER BY id").use { c ->
             assertEquals(2, c.count)
@@ -78,5 +78,26 @@ class MigracionesTest {
         }
         db.query("SELECT name FROM sqlite_master WHERE name = 'salidas_pesca'").use { assertEquals(0, it.count) }
         db.close()
+    }
+
+    @Test
+    fun de10a11PasaLosFactoresAClaves() {
+        helper.createDatabase(nombreBase, 10).use { db ->
+            db.execSQL("INSERT INTO usuarios (nombreUsuario, password) VALUES ('ana', 'x')")
+            listOf(1 to "Dormí bien,Entrené acompañado", 2 to "", 3 to "Estrés / ansiedad", 4 to "Cansancio físico,Comí liviano,Buena hidratación")
+                .forEach { (id, f) ->
+                    db.execSQL(
+                        "INSERT INTO sesiones_apnea (id, fecha, nombreTabla, completada, faseAlcanzada, totalFases, " +
+                            "marcaSegundos, factores, sensaciones, nombreUsuario) VALUES (?, 20000, 'T', 1, 3, 3, 60, ?, '', 'ana')",
+                        arrayOf<Any>(id, f)
+                    )
+                }
+        }
+        val db = helper.runMigrationsAndValidate(nombreBase, 11, true, Migraciones.De10a11)
+        val esperado = listOf("DURMIO_BIEN,ACOMPANADO", "", "ESTRES", "CANSANCIO,COMIO_LIVIANO,HIDRATACION")
+        db.query("SELECT factores FROM sesiones_apnea ORDER BY id").use { c ->
+            val leidos = buildList { while (c.moveToNext()) add(c.getString(0)) }
+            assertEquals(esperado, leidos)
+        }
     }
 }

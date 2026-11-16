@@ -1,7 +1,6 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
 import com.berterogarcia.appnea.util.intentar
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.createSavedStateHandle
@@ -10,17 +9,16 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.dominio.RegistrarInmersion
+import com.berterogarcia.appnea.dominio.ServicioUbicacion
 import com.berterogarcia.appnea.data.local.BajadaApnea
 import com.berterogarcia.appnea.data.local.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.EquipoEntity
-import com.berterogarcia.appnea.data.local.Geocodificador
 import com.berterogarcia.appnea.data.local.InmersionEntity
 import com.berterogarcia.appnea.data.local.RegistroApnea
 import com.berterogarcia.appnea.data.local.ResumenApnea
 import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.local.UBICACION_COMODORO_RIVADAVIA
 import com.berterogarcia.appnea.data.local.Ubicacion
-import com.berterogarcia.appnea.data.local.UbicacionHelper
 import com.berterogarcia.appnea.data.local.Visibilidad
 import com.berterogarcia.appnea.data.local.descripcion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
@@ -62,8 +60,8 @@ enum class Etapa(val campos: Set<Campo>) {
     NOTAS(emptySet())
 }
 
-private val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy", Locale.US)
-private val FORMATO_HORA: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.US)
+internal val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yy", Locale.US)
+internal val FORMATO_HORA: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.US)
 private val REGEX_TIEMPO_FONDO = Regex("^\\d{2}[0-5]\\d\$") // 4 dígitos, segundos 00-59
 
 /** El campo se llena desde el final ("500" = 05:00), así que se valida el texto completado a 4 dígitos. */
@@ -72,7 +70,7 @@ internal fun tiempoValido(v: String): Boolean = v.isNotEmpty() && REGEX_TIEMPO_F
 /** Categorías que solo tienen sentido en buceo con tanque: en Apnea no se ofrecen. */
 private val SOLO_BUCEO = setOf(CategoriaEquipo.REGULADOR, CategoriaEquipo.CHALECO, CategoriaEquipo.TUBO)
 
-private fun parseTiempoFondo(v: String): Duration {
+internal fun parseTiempoFondo(v: String): Duration {
     val digitos = v.padStart(4, '0')
     val minutos = digitos.substring(0, 2).toInt()
     val segundos = digitos.substring(2, 4).toInt()
@@ -82,10 +80,10 @@ private fun parseTiempoFondo(v: String): Duration {
 // ---- De lo guardado al texto de los campos (modo edición) ----
 
 /** 18.0 → "18", 18.5 → "18.5" */
-private fun numeroEditable(v: Float): String = if (v % 1f == 0f) v.toInt().toString() else v.toString()
+internal fun numeroEditable(v: Float): String = if (v % 1f == 0f) v.toInt().toString() else v.toString()
 
 /** Campos que solo aceptan dígitos (lastre, protección, visibilidad). */
-private fun enteroEditable(v: Float?): String = v?.roundToInt()?.coerceAtLeast(0)?.toString() ?: ""
+internal fun enteroEditable(v: Float?): String = v?.roundToInt()?.coerceAtLeast(0)?.toString() ?: ""
 
 /** Una bajada en el formulario: profundidad en metros y tiempo "mmss" (solo dígitos). */
 data class BajadaForm(val profundidad: String = "", val tiempo: String = "")
@@ -104,10 +102,10 @@ private fun BajadaForm.aBajadaApnea(): BajadaApnea? {
     return if (p > 0f) BajadaApnea(p, t) else null
 }
 
-private fun BajadaApnea.aForm() = BajadaForm(numeroEditable(profundidadMetros), tiempoFondoEditable(tiempoSegundos.seconds))
+internal fun BajadaApnea.aForm() = BajadaForm(numeroEditable(profundidadMetros), tiempoFondoEditable(tiempoSegundos.seconds))
 
 /** 41 min 05 s → "4105" (el campo guarda solo dígitos y muestra mm:ss). */
-private fun tiempoFondoEditable(d: Duration): String {
+internal fun tiempoFondoEditable(d: Duration): String {
     val total = d.inWholeSeconds.coerceAtLeast(0)
     val minutos = (total / 60).coerceAtMost(99)
     val segundos = if (total / 60 > 99) 59L else total % 60
@@ -209,7 +207,7 @@ class NuevaInmersionViewModel(
     private val repository: InmersionRepository,
     private val registrar: RegistrarInmersion,
     perfilRepository: PerfilRepository,
-    private val appContext: Context,
+    private val ubicacionTelefono: ServicioUbicacion,
     /** null = alta de una inmersión nueva; con id = edición de esa inmersión. */
     private val idEditar: Long? = null,
     /** Guarda el borrador del formulario por si Android mata la app en segundo plano. */
@@ -308,38 +306,7 @@ class NuevaInmersionViewModel(
                 _uiState.update { it.copy(cargandoEdicion = false) }
                 return@launch
             }
-            _uiState.update {
-                it.copy(
-                    cargandoEdicion = false,
-                    tipo = i.tipo,
-                    fecha = i.fecha.format(FORMATO_FECHA),
-                    lugar = i.lugar,
-                    latitud = i.latitud,
-                    longitud = i.longitud,
-                    profundidadMetros = numeroEditable(i.profundidadMetros),
-                    paradaSeguridadMin = if (i.tipo == TipoInmersion.APNEA) "" else numeroEditable(i.paradaSeguridadMin),
-                    tiempoFondo = tiempoFondoEditable(i.tiempoFondo),
-                    horaEntrada = i.horaEntrada.format(FORMATO_HORA),
-                    horaSalida = i.horaSalida.format(FORMATO_HORA),
-                    caracteristicasAgua = i.caracteristicasAgua,
-                    usoLastre = i.lastreKg != null,
-                    lastreKg = enteroEditable(i.lastreKg),
-                    usoProteccion = i.proteccionMm != null,
-                    proteccionMm = enteroEditable(i.proteccionMm),
-                    equipamiento = i.equipamiento,
-                    temperaturaAireC = numeroEditable(i.temperaturaAireC),
-                    temperaturaAguaC = numeroEditable(i.temperaturaAguaC),
-                    visibilidad = i.visibilidad,
-                    visibilidadMetros = enteroEditable(i.visibilidadMetros),
-                    // Apnea guardada antes de las bajadas (sin registro): cuenta como una sola bajada
-                    cantidadBajadas = i.apnea?.cantidadBajadas?.toString() ?: if (i.tipo == TipoInmersion.APNEA) "1" else "",
-                    cargarDetalleBajadas = i.apnea?.bajadas?.isNotEmpty() == true,
-                    bajadas = i.apnea?.bajadas.orEmpty().map { b -> b.aForm() },
-                    sincope = i.apnea?.sincope ?: false,
-                    actividad = i.actividad,
-                    comentarios = i.comentarios
-                )
-            }
+            _uiState.update { it.conInmersion(i) }
         }
     }
 
@@ -369,7 +336,7 @@ class NuevaInmersionViewModel(
     fun centroInicialMapa(): Ubicacion {
         val s = _uiState.value
         return if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
-        else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
+        else ubicacionTelefono.ultima() ?: UBICACION_COMODORO_RIVADAVIA
     }
 
     /** Viene del mapa. Si el nombre quedó vacío, se mantiene el que ya estaba escrito. */
@@ -388,19 +355,19 @@ class NuevaInmersionViewModel(
         if (_uiState.value.buscandoUbicacion) return
         _uiState.update { it.copy(buscandoUbicacion = true, avisoUbicacion = null) }
         viewModelScope.launch {
-            val u = intentar("NuevaInmersionViewModel") { UbicacionHelper.obtenerUbicacionActual(appContext, 15.seconds) }.getOrNull()
+            val u = intentar("NuevaInmersionViewModel") { ubicacionTelefono.actual(15.seconds) }.getOrNull()
             _uiState.update {
                 if (u != null) it.copy(latitud = u.latitud, longitud = u.longitud, buscandoUbicacion = false)
                 else it.copy(
                     buscandoUbicacion = false,
-                    avisoUbicacion = if (!UbicacionHelper.ubicacionActivada(appContext))
+                    avisoUbicacion = if (!ubicacionTelefono.ubicacionActivada())
                         textoUi(R.string.nueva_aviso_activar_ubicacion)
                     else textoUi(R.string.nueva_aviso_sin_ubicacion)
                 )
             }
             // Si el campo Lugar está vacío, se completa con el nombre encontrado
             if (u != null && _uiState.value.lugar.isBlank()) {
-                Geocodificador.nombrePara(appContext, u.latitud, u.longitud)?.let { nombre ->
+                ubicacionTelefono.nombreDelLugar(u.latitud, u.longitud)?.let { nombre ->
                     _uiState.update { s ->
                         if (s.lugar.isBlank()) s.copy(lugar = nombre, errores = s.errores - Campo.LUGAR) else s
                     }
@@ -546,42 +513,11 @@ class NuevaInmersionViewModel(
         _uiState.update { it.copy(guardando = true, errores = emptyMap(), errorGuardado = null) }
 
         viewModelScope.launch {
-            val fecha = LocalDate.parse(s.fecha, FORMATO_FECHA)
-            val horaEntrada = LocalTime.parse(s.horaEntrada)
             val anterior = original
             // Condiciones del LUGAR marcado. Sin marcar: ubicación del teléfono → Comodoro.
             val ubicacion = if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
-            else UbicacionHelper.obtenerUltimaUbicacion(appContext) ?: UBICACION_COMODORO_RIVADAVIA
-            val esApnea = s.tipo == TipoInmersion.APNEA
-            val registroApnea = if (esApnea) s.registroApnea else null
-            val entidad = InmersionEntity(
-                    fecha = fecha,
-                    lugar = s.lugar,
-                    // Apnea: la máxima del registro; buceo: lo escrito (ya validado)
-                    profundidadMetros = registroApnea?.profundidadMaximaMetros ?: s.profundidadMetros.toFloat(),
-                    paradaSeguridadMin =
-                        if (s.tipo == TipoInmersion.APNEA) 0f
-                        else s.paradaSeguridadMin.toFloatOrNull() ?: 0f,
-                    // Apnea: suma de las bajadas cargadas (0 si no se cargó el detalle)
-                    tiempoFondo = if (esApnea) (registroApnea?.resumen()?.tiempoTotalSegundos ?: 0).seconds
-                    else parseTiempoFondo(s.tiempoFondo), // "mm:ss" -> Duration
-                    horaEntrada = horaEntrada,                      // "HH:mm" -> LocalTime
-                    horaSalida = LocalTime.parse(s.horaSalida),
-                    caracteristicasAgua = s.caracteristicasAgua,
-                    lastreKg = if (s.usoLastre) s.lastreKg.toFloatOrNull() else null,
-                    proteccionMm = if (s.usoProteccion) s.proteccionMm.toFloatOrNull() else null,
-                    equipamiento = s.equipamiento,
-                    temperaturaAireC = s.temperaturaAireC.toFloatOrNull() ?: 0f,
-                    temperaturaAguaC = s.temperaturaAguaC.toFloatOrNull() ?: 0f,
-                    visibilidad = s.visibilidad,
-                    visibilidadMetros = s.visibilidadMetros.toFloatOrNull(),
-                    actividad = s.actividad,
-                    comentarios = s.comentarios,
-                    tipo = s.tipo,
-                    latitud = s.latitud,   // solo lo marcado; null si no se marcó nada
-                    longitud = s.longitud,
-                    apnea = registroApnea
-                )
+            else ubicacionTelefono.ultima() ?: UBICACION_COMODORO_RIVADAVIA
+            val entidad = s.aEntidad()
             // Guarda al instante; clima y mar se completan en segundo plano (RegistrarInmersion)
             val ok = intentar("NuevaInmersionViewModel") { registrar(entidad, anterior, ubicacion) }.getOrDefault(false)
             _uiState.update {
@@ -598,12 +534,12 @@ class NuevaInmersionViewModel(
             repository: InmersionRepository,
             registrar: RegistrarInmersion,
             perfilRepository: PerfilRepository,
-            appContext: Context,
+            ubicacionTelefono: ServicioUbicacion,
             idEditar: Long? = null
         ) = viewModelFactory {
             initializer {
                 NuevaInmersionViewModel(
-                    repository, registrar, perfilRepository, appContext, idEditar, createSavedStateHandle()
+                    repository, registrar, perfilRepository, ubicacionTelefono, idEditar, createSavedStateHandle()
                 )
             }
         }

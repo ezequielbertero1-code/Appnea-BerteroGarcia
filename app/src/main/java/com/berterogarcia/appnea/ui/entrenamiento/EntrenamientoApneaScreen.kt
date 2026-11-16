@@ -6,6 +6,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.BackHandler
+import com.berterogarcia.appnea.dominio.FactorEntrenamiento
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -362,10 +363,14 @@ fun ResultadoEntrenamiento(
                 color = TextoSuperficie,
                 modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 8.dp)
             )
+            // Los chips trabajan con texto: se traduce factor <-> etiqueta
+            val etiquetas = FactorEntrenamiento.entries.associateWith { stringResource(it.etiqueta) }
             ChipsSeleccionMultiple(
-                opciones = FACTORES_DISPONIBLES,
-                seleccionadas = estado.factoresSeleccionados,
-                onCambio = viewModel::onFactorToggle
+                opciones = etiquetas.values.toList(),
+                seleccionadas = estado.factoresSeleccionados.mapNotNull { etiquetas[it] }.toSet(),
+                onCambio = { etiqueta, marcada ->
+                    etiquetas.entries.firstOrNull { it.value == etiqueta }?.let { viewModel.onFactorToggle(it.key, marcada) }
+                }
             )
 
             CampoTexto(

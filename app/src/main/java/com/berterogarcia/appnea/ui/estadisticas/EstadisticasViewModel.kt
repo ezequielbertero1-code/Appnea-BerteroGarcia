@@ -11,7 +11,7 @@ import com.berterogarcia.appnea.data.local.SesionApneaEntity
 import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
-import com.berterogarcia.appnea.ui.entrenamiento.FACTORES_DISPONIBLES
+import com.berterogarcia.appnea.dominio.FactorEntrenamiento
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,7 +43,7 @@ enum class PeriodoEstadisticas(@param:StringRes val etiqueta: Int, val meses: Lo
 const val MIN_SESIONES_FACTOR = 3
 
 data class LugarFrecuente(val lugar: String, val cantidad: Int)
-data class InfluenciaFactor(val factor: String, val porcentajeCompletas: Int, val sesiones: Int)
+data class InfluenciaFactor(val factor: FactorEntrenamiento, val porcentajeCompletas: Int, val sesiones: Int)
 
 data class ResumenInmersiones(
     val cantidad: Int = 0,
@@ -189,7 +189,7 @@ internal fun resumirEntrenamiento(
     fun porcentaje(lista: List<SesionApneaEntity>): Int =
         if (lista.isEmpty()) 0 else (lista.count { it.completada } * 100f / lista.size).roundToInt()
 
-    val factores = FACTORES_DISPONIBLES.mapNotNull { factor ->
+    val factores = FactorEntrenamiento.entries.mapNotNull { factor ->
         val conFactor = filtradas.filter { factor in it.factores }
         if (conFactor.size < MIN_SESIONES_FACTOR) null
         else InfluenciaFactor(factor, porcentaje(conFactor), conFactor.size)

@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.FactorEntrenamiento
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
@@ -24,7 +25,8 @@ object Migraciones {
         De6a7(usuarioSesion),
         De7a8,
         De8a9,
-        De9a10
+        De9a10,
+        De10a11
     )
 
     /**
@@ -185,6 +187,25 @@ object Migraciones {
             db.execSQL("DROP TABLE `inmersiones`")
             db.execSQL("ALTER TABLE `inmersiones_nueva` RENAME TO `inmersiones`")
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_inmersiones_nombreUsuario` ON `inmersiones` (`nombreUsuario`)")
+        }
+    }
+
+    /**
+     * v10 → v11: los factores de las sesiones de apnea se guardaban con el texto visible
+     * ("Dormí bien"); pasan a la clave del enum (DURMIO_BIEN). El esquema no cambia.
+     * Se reemplaza cada texto entre comas (",x," sobre ",lista,") para no tocar subcadenas.
+     */
+    object De10a11 : Migration(10, 11) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("UPDATE `sesiones_apnea` SET `factores` = ',' || `factores` || ','")
+            FactorEntrenamiento.entries.forEach { f ->
+                db.execSQL(
+                    "UPDATE `sesiones_apnea` SET `factores` = REPLACE(`factores`, ?, ?)",
+                    arrayOf(",${f.textoV10},", ",${f.name},")
+                )
+            }
+            // Saca las comas de los extremos (",A,B," -> "A,B"; ",," -> "")
+            db.execSQL("UPDATE `sesiones_apnea` SET `factores` = TRIM(`factores`, ',')")
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.navigation
 
+import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import android.net.Uri
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -205,7 +206,7 @@ fun AppNavHost(
         // Registrar inmersión primero, últimas inmersiones y resumen del clima.
         composable(AppDestinations.INICIO.name) {
             val climaViewModel: ClimaViewModel = viewModel(
-                factory = ClimaViewModel.Factory(app.applicationContext)
+                factory = ClimaViewModel.Factory(CondicionesRepository, app.ubicacion)
             )
             val inicioViewModel: InicioViewModel = viewModel(
                 factory = InicioViewModel.Factory(app.inmersionRepository)
@@ -235,7 +236,7 @@ fun AppNavHost(
             } ?: entrada
             val climaViewModel: ClimaViewModel = viewModel(
                 viewModelStoreOwner = duenio,
-                factory = ClimaViewModel.Factory(app.applicationContext)
+                factory = ClimaViewModel.Factory(CondicionesRepository, app.ubicacion)
             )
             CondicionesScreen(viewModel = climaViewModel, onVolver = { navController.volverDesde(entrada) })
         }
@@ -285,7 +286,7 @@ fun AppNavHost(
                     repository = app.inmersionRepository,
                     registrar = app.registrarInmersion,
                     perfilRepository = app.perfilRepository,
-                    appContext = app.applicationContext
+                    ubicacionTelefono = app.ubicacion
                 )
             )
             NuevaInmersionScreen(
@@ -306,7 +307,7 @@ fun AppNavHost(
                     repository = app.inmersionRepository,
                     registrar = app.registrarInmersion,
                     perfilRepository = app.perfilRepository,
-                    appContext = app.applicationContext,
+                    ubicacionTelefono = app.ubicacion,
                     idEditar = id
                 )
             )

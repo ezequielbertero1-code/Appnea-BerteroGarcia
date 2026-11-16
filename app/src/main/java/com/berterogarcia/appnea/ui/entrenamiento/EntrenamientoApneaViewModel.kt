@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.Fase
 import com.berterogarcia.appnea.data.local.SesionApneaEntity
+import com.berterogarcia.appnea.dominio.FactorEntrenamiento
 import com.berterogarcia.appnea.entrenamiento.MotorEntrenamiento
 import com.berterogarcia.appnea.data.local.TablaApnea
 import com.berterogarcia.appnea.data.local.TablaPersonalizadaEntity
@@ -29,17 +30,6 @@ import java.time.LocalDate
 
 enum class EtapaEntrenamiento { SELECCION, EN_CURSO, GUARDANDO }
 
-/** Factor que se pre-marca en el resultado si al iniciar se tildó "Estoy acompañado". */
-const val FACTOR_ACOMPANADO = "Entrené acompañado"
-
-val FACTORES_DISPONIBLES = listOf(
-    "Dormí bien",
-    "Comí liviano",
-    "Buena hidratación",
-    "Estrés / ansiedad",
-    "Cansancio físico",
-    FACTOR_ACOMPANADO
-)
 
 data class EntrenamientoUiState(
     val tablasPredefinidas: List<TablaApnea> = TablasPredefinidas.listaBase(),
@@ -61,7 +51,7 @@ data class EntrenamientoUiState(
     // La marca se sigue calculando y guardando: la va a usar la pantalla de Estadísticas
     val marcaSegundos: Int = 0,
     val duracionSesionSegundos: Int = 0,
-    val factoresSeleccionados: Set<String> = emptySet(),
+    val factoresSeleccionados: Set<FactorEntrenamiento> = emptySet(),
     val sensaciones: String = "",
     val guardando: Boolean = false,
     val guardadoOk: Boolean = false,
@@ -142,7 +132,7 @@ class EntrenamientoApneaViewModel(
         if (motor.estado.value.corriendo || tabla.fases.isEmpty()) return
         local.update {
             it.copy(
-                factoresSeleccionados = if (it.acompanado) setOf(FACTOR_ACOMPANADO) else emptySet(),
+                factoresSeleccionados = if (it.acompanado) setOf(FactorEntrenamiento.ACOMPANADO) else emptySet(),
                 sensaciones = "",
                 guardando = false,
                 guardadoOk = false,
@@ -154,7 +144,7 @@ class EntrenamientoApneaViewModel(
 
     fun onAbortar() = motor.abortar()
 
-    fun onFactorToggle(factor: String, marcado: Boolean) = local.update {
+    fun onFactorToggle(factor: FactorEntrenamiento, marcado: Boolean) = local.update {
         it.copy(
             factoresSeleccionados = if (marcado) it.factoresSeleccionados + factor
             else it.factoresSeleccionados - factor
