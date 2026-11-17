@@ -52,9 +52,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.Fase
-import com.berterogarcia.appnea.data.local.TablaApnea
-import com.berterogarcia.appnea.data.local.TipoFase
+import com.berterogarcia.appnea.dominio.modelo.Fase
+import com.berterogarcia.appnea.dominio.modelo.TablaApnea
+import com.berterogarcia.appnea.dominio.modelo.TipoFase
 import com.berterogarcia.appnea.ui.components.formaEnGrupo
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorEntrenaApnea

@@ -1,6 +1,6 @@
 package com.berterogarcia.appnea.navigation
 
-import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
+import com.berterogarcia.appnea.data.auth.GoogleAuth
 import android.net.Uri
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -21,7 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.berterogarcia.appnea.AppDestinations
-import com.berterogarcia.appnea.data.auth.CuentaGoogle
+import com.berterogarcia.appnea.dominio.modelo.CuentaGoogle
 import com.berterogarcia.appnea.contenedor
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.condiciones.CondicionesScreen
@@ -163,7 +163,8 @@ fun AppNavHost(
                     }
                 },
                 onRegistroClick = { navController.navigate(RUTA_REGISTRO) },
-                onRegistroGoogle = { cuenta -> navController.navigate(rutaRegistroGoogle(cuenta)) }
+                onRegistroGoogle = { cuenta -> navController.navigate(rutaRegistroGoogle(cuenta)) },
+                pedirCuentaGoogle = GoogleAuth::pedirCuenta
             )
         }
         composable(RUTA_REGISTRO) {
@@ -225,7 +226,7 @@ fun AppNavHost(
         //================================INICIO================================================
         // Registrar inmersión primero, últimas inmersiones y resumen del clima.
         composable(AppDestinations.INICIO.name) {
-            val climaViewModel: ClimaViewModel = viewModel { ClimaViewModel(CondicionesRepository, app.ubicacion) }
+            val climaViewModel: ClimaViewModel = viewModel { ClimaViewModel(app.condiciones, app.ubicacion) }
             val inicioViewModel: InicioViewModel = viewModel { InicioViewModel(app.inmersionRepository) }
             val usuario by app.sessionManager.usuarioActual.collectAsStateWithLifecycle()
             // En las cuentas de Google el usuario es el email: se saluda con el nombre del perfil
@@ -252,7 +253,7 @@ fun AppNavHost(
             } ?: entrada
             val climaViewModel: ClimaViewModel = viewModel(viewModelStoreOwner = duenio) {
                 ClimaViewModel(
-                    CondicionesRepository,
+                    app.condiciones,
                     app.ubicacion
                 )
             }
@@ -345,7 +346,7 @@ fun AppNavHost(
                 DetalleInmersionViewModel(
                     app.inmersionRepository,
                     id,
-                    app.contexto
+                    app.exportador
                 )
             }
             DetalleInmersionScreen(

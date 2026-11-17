@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.dominio.modelo
 
 import com.berterogarcia.appnea.util.intentar
 import org.json.JSONArray

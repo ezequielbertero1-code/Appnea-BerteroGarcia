@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
+import java.time.Clock
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -7,19 +8,18 @@ import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.dominio.RegistrarInmersion
 import com.berterogarcia.appnea.dominio.ServicioUbicacion
-import com.berterogarcia.appnea.data.local.BajadaApnea
-import com.berterogarcia.appnea.data.local.CategoriaEquipo
-import com.berterogarcia.appnea.data.local.EquipoEntity
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.RegistroApnea
-import com.berterogarcia.appnea.data.local.ResumenApnea
-import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.data.ubicacion.UBICACION_COMODORO_RIVADAVIA
-import com.berterogarcia.appnea.data.ubicacion.Ubicacion
-import com.berterogarcia.appnea.data.local.Visibilidad
-import com.berterogarcia.appnea.data.local.descripcion
-import com.berterogarcia.appnea.data.repository.InmersionRepository
-import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.dominio.modelo.BajadaApnea
+import com.berterogarcia.appnea.dominio.modelo.CategoriaEquipo
+import com.berterogarcia.appnea.dominio.modelo.Equipo
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.RegistroApnea
+import com.berterogarcia.appnea.dominio.modelo.ResumenApnea
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.UBICACION_COMODORO_RIVADAVIA
+import com.berterogarcia.appnea.dominio.modelo.Ubicacion
+import com.berterogarcia.appnea.dominio.modelo.Visibilidad
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioInmersiones
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioPerfil
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -115,7 +115,7 @@ internal fun tiempoFondoEditable(d: Duration): String {
  * edita el equipo, la inmersión vieja sigue mostrando lo que se usó.
  * Sin comas: el Set<String> se guarda separado por "," (ver Converters.fromSet).
  */
-val EquipoEntity.etiquetaInmersion: String
+val Equipo.etiquetaInmersion: String
     get() = (if (talle.isBlank()) descripcion else "$descripcion ($talle)").replace(',', ' ')
 
 data class NuevaInmersionUiState(
@@ -138,7 +138,7 @@ data class NuevaInmersionUiState(
     val usoProteccion: Boolean = false,   // "¿usaste protección extra?"
     val proteccionMm: String = "",
     val equipamiento: Set<String> = emptySet(),          // etiquetas (etiquetaInmersion) marcadas
-    val equipoPerfil: List<EquipoEntity> = emptyList(),  // equipo EN USO del usuario
+    val equipoPerfil: List<Equipo> = emptyList(),  // equipo EN USO del usuario
     val equipoCargado: Boolean = false,                  // false mientras se lee de la base
     val temperaturaAireC: String = "",
     val temperaturaAguaC: String = "",
@@ -160,7 +160,7 @@ data class NuevaInmersionUiState(
     val errorGuardado: TextoUi? = null,
 ) {
     /** Equipo que se ofrece según el tipo (en Apnea sin regulador, chaleco ni tubo). */
-    val equipoVisible: List<EquipoEntity>
+    val equipoVisible: List<Equipo>
         get() = equipoPerfil.filter { tipo == TipoInmersion.BUCEO || it.categoria !in SOLO_BUCEO }
 
     /** Registro de apnea tal como está cargado ahora (null si falta algo válido); alimenta el resumen en vivo. */
@@ -201,19 +201,21 @@ data class NuevaInmersionUiState(
 }
 
 class NuevaInmersionViewModel(
-    private val repository: InmersionRepository,
+    private val repository: RepositorioInmersiones,
     private val registrar: RegistrarInmersion,
-    perfilRepository: PerfilRepository,
-    private val ubicacionTelefono: ServicioUbicacion,
+    perfilRepository: RepositorioPerfil,
+    /** GPS y geocoder; también lo usa el selector de lugar en el mapa. */
+    val ubicacionTelefono: ServicioUbicacion,
     /** null = alta de una inmersión nueva; con id = edición de esa inmersión. */
     private val idEditar: Long? = null,
     /** Guarda el borrador del formulario por si Android mata la app en segundo plano. */
-    private val estadoGuardado: SavedStateHandle = SavedStateHandle()
+    private val estadoGuardado: SavedStateHandle = SavedStateHandle(),
+    private val reloj: Clock = Clock.systemDefaultZone()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         NuevaInmersionUiState(
-            fecha = LocalDate.now().format(FORMATO_FECHA),
+            fecha = LocalDate.now(reloj).format(FORMATO_FECHA),
             editando = idEditar != null,
             cargandoEdicion = idEditar != null
         )
@@ -221,13 +223,13 @@ class NuevaInmersionViewModel(
     val uiState: StateFlow<NuevaInmersionUiState> = _uiState
 
     /** Inmersiones anteriores, para pre-marcar el equipo de la última del mismo tipo. */
-    private var inmersionesPrevias: List<InmersionEntity> = emptyList()
+    private var inmersionesPrevias: List<Inmersion> = emptyList()
 
     /** true cuando el usuario tocó algún equipo: desde ahí no se pre-marca nada solo. */
     private var equipoTocado = false
 
     /** La inmersión tal como estaba guardada (solo en modo edición). */
-    private var original: InmersionEntity? = null
+    private var original: Inmersion? = null
 
     init {
         val borrador = estadoGuardado.get<String>(CLAVE_BORRADOR)
@@ -275,7 +277,7 @@ class NuevaInmersionViewModel(
             val base = if (equipoTocado) s.equipamiento else {
                 inmersionesPrevias
                     .filter { it.tipo == s.tipo }
-                    .maxWithOrNull(compareBy<InmersionEntity> { it.fecha }.thenBy { it.horaEntrada })
+                    .maxWithOrNull(compareBy<Inmersion> { it.fecha }.thenBy { it.horaEntrada })
                     ?.equipamiento
                     .orEmpty()
             }
@@ -514,9 +516,9 @@ class NuevaInmersionViewModel(
             // Condiciones del LUGAR marcado. Sin marcar: ubicación del teléfono → Comodoro.
             val ubicacion = if (s.latitud != null && s.longitud != null) Ubicacion(s.latitud, s.longitud)
             else ubicacionTelefono.ultima() ?: UBICACION_COMODORO_RIVADAVIA
-            val entidad = s.aEntidad()
+            val inmersion = s.aInmersion()
             // Guarda al instante; clima y mar se completan en segundo plano (RegistrarInmersion)
-            val ok = intentar("NuevaInmersionViewModel") { registrar(entidad, anterior, ubicacion) }.getOrDefault(false)
+            val ok = intentar("NuevaInmersionViewModel") { registrar(inmersion, anterior, ubicacion) }.getOrDefault(false)
             _uiState.update {
                 if (ok) it.copy(guardadoOk = true, guardando = false)
                 else it.copy(guardando = false, errorGuardado = textoUi(R.string.nueva_error_guardar))

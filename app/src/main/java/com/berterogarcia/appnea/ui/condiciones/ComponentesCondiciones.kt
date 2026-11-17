@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.condiciones.Aptitud
-import com.berterogarcia.appnea.data.remote.direccionCardinal
+import com.berterogarcia.appnea.dominio.modelo.Aptitud
+import com.berterogarcia.appnea.dominio.modelo.direccionCardinal
 import com.berterogarcia.appnea.ui.theme.ColorBueno
 import com.berterogarcia.appnea.ui.theme.ColorMalo
 import com.berterogarcia.appnea.ui.theme.ColorRegular

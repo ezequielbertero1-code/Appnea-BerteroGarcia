@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.dominio.modelo
 
 /**
  * Tipo de inmersión. Se guarda por NOMBRE (ver Converters): si algún día se renombra una

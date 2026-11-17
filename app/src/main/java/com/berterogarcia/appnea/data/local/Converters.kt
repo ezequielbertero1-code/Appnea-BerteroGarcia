@@ -4,8 +4,14 @@
 
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.modelo.CondicionesRegistro
+import com.berterogarcia.appnea.dominio.modelo.Fase
+import com.berterogarcia.appnea.dominio.modelo.RegistroApnea
+import com.berterogarcia.appnea.dominio.modelo.TipoFase
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.Visibilidad
 import androidx.room.TypeConverter
-import com.berterogarcia.appnea.dominio.FactorEntrenamiento
+import com.berterogarcia.appnea.dominio.modelo.FactorEntrenamiento
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.time.Duration

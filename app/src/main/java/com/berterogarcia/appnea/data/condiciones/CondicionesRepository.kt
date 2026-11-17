@@ -1,9 +1,11 @@
 package com.berterogarcia.appnea.data.condiciones
 
+import com.berterogarcia.appnea.dominio.modelo.Condiciones
+import com.berterogarcia.appnea.dominio.modelo.HoraMar
 import com.berterogarcia.appnea.dominio.FuenteCondiciones
 import com.berterogarcia.appnea.util.intentar
-import com.berterogarcia.appnea.data.local.CondicionesRegistro
-import com.berterogarcia.appnea.data.ubicacion.Ubicacion
+import com.berterogarcia.appnea.dominio.modelo.CondicionesRegistro
+import com.berterogarcia.appnea.dominio.modelo.Ubicacion
 import com.berterogarcia.appnea.data.remote.OpenMeteoService
 import com.berterogarcia.appnea.data.remote.PronosticoClima
 import java.time.LocalDate
@@ -128,7 +130,7 @@ object CondicionesRepository : FuenteCondiciones {
     }
 
     /** Solo lo astronómico (sin internet). Se usa en los datos de ejemplo. */
-    fun registroAstronomico(latitud: Double, longitud: Double, momento: LocalDateTime): CondicionesRegistro {
+    override fun registroAstronomico(latitud: Double, longitud: Double, momento: LocalDateTime): CondicionesRegistro {
         val astro = Astronomia.calcularDia(momento.toLocalDate(), latitud, longitud, ZoneId.systemDefault())
         return CondicionesRegistro(
             faseLunar = astro.fase,

@@ -43,7 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.NavegacionBarra
 import com.berterogarcia.appnea.ui.theme.Acento
@@ -94,7 +94,7 @@ fun DetalleInmersionScreen(
         ActivityResultContracts.CreateDocument("application/octet-stream")
     ) { uri ->
         if (uri != null) scope.launch {
-            val ok = viewModel.exportarUddf(uri)
+            val ok = viewModel.exportarUddf(uri.toString())
             Toast.makeText(context, if (ok) textoExportada else textoNoExportada, Toast.LENGTH_SHORT).show()
         }
     }
@@ -223,7 +223,7 @@ fun DetalleInmersionScreen(
 // ============================ Pestañas ============================
 
 // Minutos entre entrada y salida (si cruza la medianoche, suma 24 h)
-internal fun minutosEnAgua(i: InmersionEntity): Long {
+internal fun minutosEnAgua(i: Inmersion): Long {
     val m = JDuration.between(i.horaEntrada, i.horaSalida).toMinutes()
     return if (m >= 0) m else m + 24 * 60
 }

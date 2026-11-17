@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.ubicacion
 
+import com.berterogarcia.appnea.dominio.modelo.Ubicacion
 import com.berterogarcia.appnea.util.intentar
 import android.Manifest
 import android.annotation.SuppressLint
@@ -20,22 +21,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-
-/**
- * Resultado simple de una ubicación: latitud, longitud y (opcionalmente) un nombre legible.
- */
-data class Ubicacion(
-    val latitud: Double,
-    val longitud: Double,
-    val nombre: String? = null
-)
-
-/** Comodoro Rivadavia, Chubut. Se usa como ubicación por defecto para el Clima. */
-val UBICACION_COMODORO_RIVADAVIA = Ubicacion(
-    latitud = -45.8641,
-    longitud = -67.4966,
-    nombre = "Comodoro Rivadavia"
-)
 
 /**
  * Helper liviano para obtener la última ubicación conocida del dispositivo, sin depender

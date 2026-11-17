@@ -1,6 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
-import com.berterogarcia.appnea.dominio.FactorEntrenamiento
+import com.berterogarcia.appnea.dominio.modelo.FactorEntrenamiento
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index

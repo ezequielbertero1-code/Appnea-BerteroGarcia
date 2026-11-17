@@ -1,5 +1,8 @@
 package com.berterogarcia.appnea.data.condiciones
 
+import com.berterogarcia.appnea.dominio.modelo.EstadoMarea
+import com.berterogarcia.appnea.dominio.modelo.ExtremoMarea
+import com.berterogarcia.appnea.dominio.modelo.HoraMar
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 

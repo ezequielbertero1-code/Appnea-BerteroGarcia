@@ -2,15 +2,15 @@ package com.berterogarcia.appnea.ui.cuenta
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.berterogarcia.appnea.data.local.CertificadoEntity
-import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
-import com.berterogarcia.appnea.data.local.EquipoEntity
-import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
-import com.berterogarcia.appnea.data.sesion.SessionManager
-import com.berterogarcia.appnea.data.local.formatearDuracion
-import com.berterogarcia.appnea.data.repository.InmersionRepository
-import com.berterogarcia.appnea.data.repository.PerfilRepository
-import com.berterogarcia.appnea.data.repository.SesionApneaRepository
+import com.berterogarcia.appnea.dominio.modelo.Certificado
+import com.berterogarcia.appnea.dominio.modelo.ContactoEmergencia
+import com.berterogarcia.appnea.dominio.modelo.Equipo
+import com.berterogarcia.appnea.dominio.modelo.PerfilUsuario
+import com.berterogarcia.appnea.dominio.GestorSesion
+import com.berterogarcia.appnea.dominio.modelo.formatearDuracion
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioInmersiones
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioPerfil
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioSesionesApnea
 import com.berterogarcia.appnea.ui.perfil.certificados.ordenarCertificados
 import com.berterogarcia.appnea.ui.perfil.comun.EstadoVencimiento
 import com.berterogarcia.appnea.ui.perfil.comun.estadoVencimiento
@@ -32,20 +32,20 @@ import kotlin.time.Duration
  */
 data class ResumenPerfil(
     val cargando: Boolean = true,
-    val perfil: PerfilUsuarioEntity? = null,
-    val equipos: List<EquipoEntity> = emptyList(),
-    val certificados: List<CertificadoEntity> = emptyList(),
-    val contactos: List<ContactoEmergenciaEntity> = emptyList(),
+    val perfil: PerfilUsuario? = null,
+    val equipos: List<Equipo> = emptyList(),
+    val certificados: List<Certificado> = emptyList(),
+    val contactos: List<ContactoEmergencia> = emptyList(),
     val error: Boolean = false
 ) {
-    val equiposEnUso: List<EquipoEntity> get() = equipos.filter { it.enUso }
+    val equiposEnUso: List<Equipo> get() = equipos.filter { it.enUso }
 
     val equiposConServicePendiente: Int
         get() = equiposEnUso.count {
             estadoVencimiento(it.proximoMantenimiento) in setOf(EstadoVencimiento.POR_VENCER, EstadoVencimiento.VENCIDO)
         }
 
-    val contactoPrincipal: ContactoEmergenciaEntity?
+    val contactoPrincipal: ContactoEmergencia?
         get() = contactos.firstOrNull { it.esPrincipal } ?: contactos.firstOrNull()
 }
 
@@ -63,10 +63,10 @@ data class EstadisticasCuenta(
 )
 
 class CuentaViewModel(
-    private val sessionManager: SessionManager,
-    perfilRepository: PerfilRepository,
-    inmersionRepository: InmersionRepository,
-    sesionApneaRepository: SesionApneaRepository,
+    private val sessionManager: GestorSesion,
+    perfilRepository: RepositorioPerfil,
+    inmersionRepository: RepositorioInmersiones,
+    sesionApneaRepository: RepositorioSesionesApnea,
     entrenando: Flow<Boolean> = flowOf(false)
 ) : ViewModel() {
     /** true mientras corre una tabla: al cerrar sesión se corta, así que se pide confirmación. */

@@ -4,9 +4,9 @@ import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.CategoriaEquipo
-import com.berterogarcia.appnea.data.local.EquipoEntity
-import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.dominio.modelo.CategoriaEquipo
+import com.berterogarcia.appnea.dominio.modelo.Equipo
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioPerfil
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_CARGAR
@@ -49,27 +49,27 @@ data class EquipoFormUiState(
  * @param idEquipo null = alta; si viene un id se carga ese equipo para editarlo.
  */
 class EquipoFormViewModel(
-    private val repository: PerfilRepository,
+    private val repository: RepositorioPerfil,
     private val idEquipo: Long?
 ) : ViewModel() {
-    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
-    private val usuario: String? = repository.usuarioActual
+    /** Si había sesión al abrir la pantalla (el repositorio trabaja siempre sobre el usuario logueado). */
+    private val haySesion: Boolean = repository.haySesion
 
     private val _uiState = MutableStateFlow(EquipoFormUiState(esEdicion = idEquipo != null))
     val uiState: StateFlow<EquipoFormUiState> = _uiState.asStateFlow()
 
     init {
         when {
-            usuario == null ->
+            !haySesion ->
                 _uiState.update { it.copy(bloqueado = true, errorGeneral = MENSAJE_SIN_SESION) }
-            idEquipo != null -> cargar(usuario, idEquipo)
+            idEquipo != null -> cargar(idEquipo)
         }
     }
 
-    private fun cargar(usuario: String, id: Long) {
+    private fun cargar(id: Long) {
         _uiState.update { it.copy(cargando = true) }
         viewModelScope.launch {
-            val equipo = intentar("EquipoFormViewModel") { repository.obtenerEquipo(id, usuario) }.getOrElse {
+            val equipo = intentar("EquipoFormViewModel") { repository.obtenerEquipo(id) }.getOrElse {
                 _uiState.update { it.copy(cargando = false, bloqueado = true, errorGeneral = MENSAJE_ERROR_CARGAR) }
                 return@launch
             }
@@ -108,7 +108,7 @@ class EquipoFormViewModel(
 
     fun guardar() {
         val s = _uiState.value
-        if (s.guardando || !s.puedeGuardar || usuario == null) return
+        if (s.guardando || !s.puedeGuardar || !haySesion) return
 
         val errores = validar(s)
         val categoria = s.categoria
@@ -119,9 +119,8 @@ class EquipoFormViewModel(
 
         _uiState.update { it.copy(guardando = true, errorGeneral = null) }
         viewModelScope.launch {
-            val equipo = EquipoEntity(
+            val equipo = Equipo(
                 id = idEquipo ?: 0L,
-                nombreUsuario = usuario,
                 categoria = categoria,
                 marca = s.marca.trim(),
                 modelo = s.modelo.trim(),

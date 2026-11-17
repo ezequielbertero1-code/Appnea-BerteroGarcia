@@ -1,15 +1,13 @@
 package com.berterogarcia.appnea.ui.detalleinmersion
 
+import com.berterogarcia.appnea.dominio.ExportadorInmersiones
 import com.berterogarcia.appnea.util.intentar
-import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.berterogarcia.appnea.data.export.UddfExporter
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado
-import com.berterogarcia.appnea.data.perfil.PuntoPerfil
-import com.berterogarcia.appnea.data.repository.InmersionRepository
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.PerfilSimulado
+import com.berterogarcia.appnea.dominio.PuntoPerfil
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioInmersiones
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,15 +17,14 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class DetalleInmersionViewModel(
-    private val repository: InmersionRepository,
+    private val repository: RepositorioInmersiones,
     id: Long,
-    private val appContext: Context
+    private val exportador: ExportadorInmersiones
 ) : ViewModel() {
 
-    val inmersion: StateFlow<InmersionEntity?> = repository.obtenerPorId(id).stateIn(
+    val inmersion: StateFlow<Inmersion?> = repository.obtenerPorId(id).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = null
@@ -59,16 +56,9 @@ class DetalleInmersionViewModel(
         _eliminada.value = null
     }
 
-    /** Escribe el UDDF en el archivo que eligió el usuario. Devuelve true si salió bien. */
-    suspend fun exportarUddf(uri: Uri): Boolean {
+    /** Escribe el UDDF en el archivo que eligió el usuario ([destino]: la Uri como texto). */
+    suspend fun exportarUddf(destino: String): Boolean {
         val i = inmersion.value ?: return false
-        val contenido = UddfExporter.generar(i)
-        return withContext(Dispatchers.IO) {
-            intentar("DetalleInmersionViewModel") {
-                appContext.contentResolver.openOutputStream(uri)
-                    ?.use { it.write(contenido.toByteArray(Charsets.UTF_8)) }
-                    ?: error("No se pudo abrir el archivo")
-            }.isSuccess
-        }
+        return exportador.exportar(i, destino)
     }
 }

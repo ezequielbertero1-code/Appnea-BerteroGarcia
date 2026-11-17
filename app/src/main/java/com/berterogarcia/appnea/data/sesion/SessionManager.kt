@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.sesion
 
+import com.berterogarcia.appnea.dominio.GestorSesion
 import android.content.Context
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,20 +14,20 @@ import kotlinx.coroutines.flow.asStateFlow
  * CAMBIO Ahora implementa [ProveedorUsuario]. La API anterior (guardarUsuario,
  * obtenerUsuario, cerrarSesion) sigue igual, así que el resto del código no cambia.
  */
-class SessionManager(context: Context) : ProveedorUsuario {
+class SessionManager(context: Context) : GestorSesion {
     private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     private val _usuarioActual = MutableStateFlow(prefs.getString(CLAVE_USUARIO, null))
     override val usuarioActual: StateFlow<String?> = _usuarioActual.asStateFlow()
 
-    fun guardarUsuario(nombreUsuario: String) {
+    override fun guardarUsuario(nombreUsuario: String) {
         prefs.edit { putString(CLAVE_USUARIO, nombreUsuario) }
         _usuarioActual.value = nombreUsuario
     }
 
-    fun obtenerUsuario(): String? = _usuarioActual.value
+    override fun obtenerUsuario(): String? = _usuarioActual.value
 
-    fun cerrarSesion() {
+    override fun cerrarSesion() {
         prefs.edit { remove(CLAVE_USUARIO) }
         _usuarioActual.value = null
     }

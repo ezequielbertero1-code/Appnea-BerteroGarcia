@@ -17,8 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.berterogarcia.appnea.data.local.formatearDuracion
-import com.berterogarcia.appnea.data.perfil.PuntoPerfil
+import com.berterogarcia.appnea.dominio.modelo.formatearDuracion
+import com.berterogarcia.appnea.dominio.PuntoPerfil
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorBajamar
 import com.berterogarcia.appnea.ui.theme.Contorno

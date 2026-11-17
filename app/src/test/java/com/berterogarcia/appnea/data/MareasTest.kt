@@ -1,6 +1,6 @@
 package com.berterogarcia.appnea.data
 
-import com.berterogarcia.appnea.data.condiciones.HoraMar
+import com.berterogarcia.appnea.dominio.modelo.HoraMar
 import com.berterogarcia.appnea.data.condiciones.Mareas
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

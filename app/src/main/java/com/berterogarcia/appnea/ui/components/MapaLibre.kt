@@ -32,7 +32,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.ubicacion.Ubicacion
+import com.berterogarcia.appnea.dominio.modelo.Ubicacion
 import com.berterogarcia.appnea.data.ubicacion.UbicacionHelper
 import com.berterogarcia.appnea.ui.theme.ColorMalo
 import com.berterogarcia.appnea.ui.theme.FondoIntermedio

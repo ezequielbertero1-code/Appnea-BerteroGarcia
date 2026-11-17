@@ -1,15 +1,9 @@
 package com.berterogarcia.appnea.dominio
 
-import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.ubicacion.Ubicacion
-import com.berterogarcia.appnea.data.repository.InmersionRepository
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.Ubicacion
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioInmersiones
 import java.time.LocalDateTime
-
-/** Pide (más tarde, cuando haya internet) el clima y el mar de una inmersión ya guardada. */
-fun interface ProgramadorCondiciones {
-    fun programar(idInmersion: Long, ubicacion: Ubicacion, momento: LocalDateTime)
-}
 
 /**
  * Caso de uso "guardar una inmersión" (nueva o editada).
@@ -22,21 +16,22 @@ fun interface ProgramadorCondiciones {
  * que ya tenía (no tiene sentido volver a pedirlas).
  */
 class RegistrarInmersion(
-    private val repository: InmersionRepository,
+    private val repository: RepositorioInmersiones,
+    private val condiciones: FuenteCondiciones,
     private val programador: ProgramadorCondiciones
 ) {
     /**
      * @param ubicacion de dónde pedir las condiciones (lugar marcado, o el teléfono, o Comodoro).
      * @return true si se guardó.
      */
-    suspend operator fun invoke(inmersion: InmersionEntity, anterior: InmersionEntity?, ubicacion: Ubicacion): Boolean {
+    suspend operator fun invoke(inmersion: Inmersion, anterior: Inmersion?, ubicacion: Ubicacion): Boolean {
         val momento = inmersion.fecha.atTime(inmersion.horaEntrada)
         val mismoMomentoYLugar = anterior != null &&
             anterior.fecha == inmersion.fecha && anterior.horaEntrada == inmersion.horaEntrada &&
             anterior.latitud == inmersion.latitud && anterior.longitud == inmersion.longitud
 
         val condiciones = if (mismoMomentoYLugar) anterior.condiciones
-        else CondicionesRepository.registroAstronomico(ubicacion.latitud, ubicacion.longitud, momento)
+        else condiciones.registroAstronomico(ubicacion.latitud, ubicacion.longitud, momento)
 
         val aGuardar = inmersion.copy(condiciones = condiciones)
         val id = if (anterior != null) {

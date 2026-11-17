@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.dominio.modelo
 
 /**
  * Visibilidad subjetiva del agua. Se guarda por NOMBRE (ver Converters): si algún día se

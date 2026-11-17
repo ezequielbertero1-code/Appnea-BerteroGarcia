@@ -1,15 +1,12 @@
 package com.berterogarcia.appnea.ui
 
-import com.berterogarcia.appnea.data.local.IntentoApneaDao
-import com.berterogarcia.appnea.data.local.IntentoApneaEntity
-import com.berterogarcia.appnea.data.repository.IntentoApneaRepository
-import com.berterogarcia.appnea.data.sesion.ProveedorUsuario
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioIntentos
+import com.berterogarcia.appnea.dominio.modelo.IntentoLibre
 import com.berterogarcia.appnea.ui.entrenamiento.CronometroViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -23,33 +20,28 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-/** DAO en memoria: suficiente para probar el ViewModel sin Room. */
-private class IntentosEnMemoria : IntentoApneaDao {
-    val filas = MutableStateFlow<List<IntentoApneaEntity>>(emptyList())
-    override suspend fun insertar(intento: IntentoApneaEntity): Long {
+/** Repositorio en memoria: suficiente para probar el ViewModel sin Room. */
+private class IntentosEnMemoria : RepositorioIntentos {
+    val filas = MutableStateFlow<List<IntentoLibre>>(emptyList())
+    override val todosLosIntentos: Flow<List<IntentoLibre>> = filas
+    override fun delDia(fecha: LocalDate): Flow<List<IntentoLibre>> = filas.map { l -> l.filter { it.fecha == fecha } }
+    override suspend fun guardar(intento: IntentoLibre): Boolean {
         filas.value = listOf(intento.copy(id = filas.value.size + 1L)) + filas.value
-        return filas.value.size.toLong()
+        return true
     }
-    override fun obtenerTodos(nombreUsuario: String): Flow<List<IntentoApneaEntity>> =
-        filas.map { l -> l.filter { it.nombreUsuario == nombreUsuario } }
-    override fun obtenerDelDia(nombreUsuario: String, fecha: LocalDate): Flow<List<IntentoApneaEntity>> =
-        filas.map { l -> l.filter { it.nombreUsuario == nombreUsuario && it.fecha == fecha } }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CronometroViewModelTest {
 
     private val dao = IntentosEnMemoria()
-    private val sesion = object : ProveedorUsuario {
-        override val usuarioActual: StateFlow<String?> = MutableStateFlow("ana")
-    }
     private var relojMs = 0L
     private val fin = LocalDateTime.of(2026, 11, 16, 10, 0, 0)
 
     @Before fun antes() = Dispatchers.setMain(UnconfinedTestDispatcher())
     @After fun despues() = Dispatchers.resetMain()
 
-    private fun viewModel() = CronometroViewModel(IntentoApneaRepository(dao, sesion), reloj = { relojMs }, ahora = { fin })
+    private fun viewModel() = CronometroViewModel(dao, reloj = { relojMs }, ahora = { fin })
 
     @Test
     fun pararGuardaElIntentoConSuHoraDeInicio() {
@@ -58,7 +50,6 @@ class CronometroViewModelTest {
         relojMs = 95_400
         vm.onParar()
         val guardado = dao.filas.value.single()
-        assertEquals("ana", guardado.nombreUsuario)
         assertEquals(95_400, guardado.duracionMs)
         assertEquals(LocalTime.of(9, 58, 24), guardado.hora) // 10:00:00 menos 1:35,4
         assertEquals(1, vm.uiState.value.intentos.size)

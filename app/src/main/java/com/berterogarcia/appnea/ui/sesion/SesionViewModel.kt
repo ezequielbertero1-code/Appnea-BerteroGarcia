@@ -4,7 +4,7 @@ import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.AppDestinations
-import com.berterogarcia.appnea.data.repository.SesionRepository
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioSesion
 import com.berterogarcia.appnea.navigation.RUTA_LOGIN
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,7 +28,7 @@ sealed interface EstadoArranque {
  * aunque el usuario quedaba guardado en SharedPreferences, al abrir la app siempre
  * arrancaba en el login. Ahora el destino inicial se decide ANTES de crear el NavHost.
  */
-class SesionViewModel(private val sesionRepository: SesionRepository) : ViewModel() {
+class SesionViewModel(private val sesionRepository: RepositorioSesion) : ViewModel() {
 
     private val _estado = MutableStateFlow<EstadoArranque>(EstadoArranque.Verificando)
     val estado: StateFlow<EstadoArranque> = _estado.asStateFlow()

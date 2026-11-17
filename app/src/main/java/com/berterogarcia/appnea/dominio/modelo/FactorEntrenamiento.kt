@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.dominio
+package com.berterogarcia.appnea.dominio.modelo
 
 import androidx.annotation.StringRes
 import com.berterogarcia.appnea.R

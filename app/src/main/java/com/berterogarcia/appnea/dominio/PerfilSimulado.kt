@@ -1,9 +1,9 @@
-package com.berterogarcia.appnea.data.perfil
+package com.berterogarcia.appnea.dominio
 
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado.MAX_PUNTOS
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado.PROF_PARADA_M
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.PerfilSimulado.MAX_PUNTOS
+import com.berterogarcia.appnea.dominio.PerfilSimulado.PROF_PARADA_M
 import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -53,7 +53,7 @@ data class PuntoPerfil(val segundo: Int, val profundidadM: Double)
  * ── Supuestos del modelo ────────────────────────────────────────────────────────
  *
  *  1. Tipo de inmersión:
- *     Se considera APNEA si [InmersionEntity.actividad] contiene "apnea" (sin
+ *     Se considera APNEA si [Inmersion.actividad] contiene "apnea" (sin
  *     importar mayúsculas) o si la parada de seguridad es 0. Si no, es BUCEO.
  *
  *  2. Buceo (5 tramos):
@@ -75,7 +75,7 @@ data class PuntoPerfil(val segundo: Int, val profundidadM: Double)
  *       velocidades y el fondo queda en 0 (perfil en "V").
  *     - Si tiempoFondo es 0, se usa solo bajada + subida a 1 m/s.
  *
- *  3b. Apnea con varias bajadas (inmersión con [InmersionEntity.apnea]):
+ *  3b. Apnea con varias bajadas (inmersión con [Inmersion.apnea]):
  *     Se dibuja un ciclo bajada ─▶ fondo ─▶ subida POR CADA bajada, con una pausa en
  *     superficie entre una y otra ([PAUSA_SUPERFICIE_S], SUPUESTO).
  *     - Con el detalle cargado, cada ciclo usa la profundidad y el tiempo de esa bajada.
@@ -144,16 +144,16 @@ object PerfilSimulado {
 
     private class Tramo(val desde: Double, val hasta: Double, val duracion: Double)
 
-    fun esApnea(i: InmersionEntity): Boolean = i.tipo == TipoInmersion.APNEA
+    fun esApnea(i: Inmersion): Boolean = i.tipo == TipoInmersion.APNEA
 
     /** Nunca crashea: si los datos no alcanzan, devuelve lista vacía. */
-    fun generar(i: InmersionEntity): List<PuntoPerfil> = runCatching {
+    fun generar(i: Inmersion): List<PuntoPerfil> = runCatching {
         val tramos = if (esApnea(i)) tramosApnea(i) else tramosBuceo(i)
         muestrear(tramos, i.profundidadMetros.toDouble())
     }.getOrElse { emptyList() }
 
     // Buceo: descenso → fondo → ascenso a 5 m → parada → superficie
-    private fun tramosBuceo(i: InmersionEntity): List<Tramo> {
+    private fun tramosBuceo(i: Inmersion): List<Tramo> {
         val prof = i.profundidadMetros.toDouble()
         val paradaSeg = i.paradaSeguridadMin * 60.0
         val conParada = paradaSeg > 0 && prof > PROF_PARADA_M
@@ -168,7 +168,7 @@ object PerfilSimulado {
     }
 
     // Apnea: tiempoFondo = duración total de la apnea (bajar + quedarse + subir)
-    private fun tramosApnea(i: InmersionEntity): List<Tramo> {
+    private fun tramosApnea(i: Inmersion): List<Tramo> {
         val registro = i.apnea
         if (registro != null && registro.cantidadBajadas > 0) {
             val ciclos = if (registro.bajadas.isNotEmpty()) {

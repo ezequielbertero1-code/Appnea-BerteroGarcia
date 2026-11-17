@@ -4,14 +4,14 @@ import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.auth.CuentaGoogle
-import com.berterogarcia.appnea.data.auth.ResultadoGoogle
-import com.berterogarcia.appnea.data.seguridad.EstadoIntentos
-import com.berterogarcia.appnea.data.seguridad.PoliticaIntentos
-import com.berterogarcia.appnea.data.sesion.PreferenciasLogin
-import com.berterogarcia.appnea.data.sesion.SessionManager
-import com.berterogarcia.appnea.data.repository.CuentaGoogleRepository
-import com.berterogarcia.appnea.data.repository.UsuarioRepository
+import com.berterogarcia.appnea.dominio.modelo.CuentaGoogle
+import com.berterogarcia.appnea.dominio.modelo.ResultadoGoogle
+import com.berterogarcia.appnea.dominio.EstadoIntentos
+import com.berterogarcia.appnea.dominio.PoliticaIntentos
+import com.berterogarcia.appnea.dominio.PreferenciasLogin
+import com.berterogarcia.appnea.dominio.GestorSesion
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioCuentaGoogle
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioUsuarios
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.pluralUi
 import com.berterogarcia.appnea.ui.components.textoUi
@@ -51,9 +51,9 @@ data class LoginUiState(
 }
 
 class LoginViewModel(
-    private val repository: UsuarioRepository,
-    private val cuentaGoogleRepository: CuentaGoogleRepository,
-    private val sessionManager: SessionManager,
+    private val repository: RepositorioUsuarios,
+    private val cuentaGoogleRepository: RepositorioCuentaGoogle,
+    private val sessionManager: GestorSesion,
     private val preferencias: PreferenciasLogin,
     private val reloj: () -> Long = System::currentTimeMillis
 ) : ViewModel() {

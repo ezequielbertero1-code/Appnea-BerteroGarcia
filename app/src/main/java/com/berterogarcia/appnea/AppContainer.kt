@@ -1,8 +1,23 @@
 package com.berterogarcia.appnea
 
+import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
+import com.berterogarcia.appnea.dominio.FuenteCondiciones
+import com.berterogarcia.appnea.data.export.ExportadorUddf
+import com.berterogarcia.appnea.dominio.ExportadorInmersiones
+import com.berterogarcia.appnea.dominio.GestorSesion
+import com.berterogarcia.appnea.dominio.PreferenciasLogin
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioUsuarios
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioCuentaGoogle
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioInmersiones
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioTablas
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioSesionesApnea
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioIntentos
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioRegistro
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioPerfil
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioSesion
 import android.content.Context
 import com.berterogarcia.appnea.data.local.AppDatabase
-import com.berterogarcia.appnea.data.sesion.PreferenciasLogin
+import com.berterogarcia.appnea.data.sesion.PreferenciasLoginAndroid
 import com.berterogarcia.appnea.data.sesion.SessionManager
 import com.berterogarcia.appnea.data.sonido.SonidoManager
 import com.berterogarcia.appnea.data.ubicacion.UbicacionAndroid
@@ -35,30 +50,33 @@ class AppContainer(context: Context) {
     /** Context de la aplicación (nunca el de una Activity: el contenedor vive todo el proceso). */
     val contexto: Context = context.applicationContext
 
-
     val database by lazy { AppDatabase.getDatabase(contexto) }
-    val sessionManager by lazy { SessionManager(contexto) }
+    val sessionManager: GestorSesion by lazy { SessionManager(contexto) }
     val sonidoManager by lazy { SonidoManager(contexto) }
-    val usuarioRepository by lazy { UsuarioRepository(database.usuarioDao()) }
-    val cuentaGoogleRepository by lazy { CuentaGoogleRepository(database) }
+    val usuarioRepository: RepositorioUsuarios by lazy { UsuarioRepository(database.usuarioDao()) }
+    val cuentaGoogleRepository: RepositorioCuentaGoogle by lazy { CuentaGoogleRepository(database) }
     // Estos repositorios reciben la sesión: trabajan siempre sobre el usuario logueado.
-    val preferenciasLogin by lazy { PreferenciasLogin(contexto) }
-    val inmersionRepository by lazy { InmersionRepository(database.inmersionDao(), sessionManager) }
-    val tablaPersonalizadaRepository by lazy {
+    val preferenciasLogin: PreferenciasLogin by lazy { PreferenciasLoginAndroid(contexto) }
+    val inmersionRepository: RepositorioInmersiones by lazy { InmersionRepository(database.inmersionDao(), sessionManager) }
+    val tablaPersonalizadaRepository: RepositorioTablas by lazy {
         TablaPersonalizadaRepository(database.tablaPersonalizadaDao(), sessionManager)
     }
-    val sesionApneaRepository by lazy { SesionApneaRepository(database.sesionApneaDao(), sessionManager) }
-    val intentoApneaRepository by lazy { IntentoApneaRepository(database.intentoApneaDao(), sessionManager) }
-    val registroRepository by lazy { RegistroRepository(database) }
+    val sesionApneaRepository: RepositorioSesionesApnea by lazy { SesionApneaRepository(database.sesionApneaDao(), sessionManager) }
+    val intentoApneaRepository: RepositorioIntentos by lazy { IntentoApneaRepository(database.intentoApneaDao(), sessionManager) }
+    val registroRepository: RepositorioRegistro by lazy { RegistroRepository(database) }
+    // Clima, mar y astronomía (Open-Meteo + cálculos propios)
+    val condiciones: FuenteCondiciones = CondicionesRepository
+    // Exportar UDDF: el ViewModel no usa Context ni Uri
+    val exportador: ExportadorInmersiones by lazy { ExportadorUddf(contexto, sessionManager) }
     // GPS + geocoder detrás de una interfaz (los ViewModels no usan Context)
     val ubicacion: ServicioUbicacion by lazy { UbicacionAndroid(contexto) }
     // Guardar inmersión sin esperar a internet: clima y mar los completa WorkManager después
     val registrarInmersion by lazy {
-        RegistrarInmersion(inmersionRepository, CompletarCondicionesWorker.Programador(contexto))
+        RegistrarInmersion(inmersionRepository, condiciones, CompletarCondicionesWorker.Programador(contexto))
     }
 
-    // [NUEVO] Perfil (datos personales, equipamiento, certificados, contactos)
-    val perfilRepository by lazy {
+    // Perfil (datos personales, equipamiento, certificados, contactos)
+    val perfilRepository: RepositorioPerfil by lazy {
         PerfilRepository(
             perfilDao = database.perfilUsuarioDao(),
             equipoDao = database.equipoDao(),
@@ -68,8 +86,8 @@ class AppContainer(context: Context) {
         )
     }
 
-    // [NUEVO] Valida la sesión guardada al abrir la app
-    val sesionRepository by lazy { SesionRepository(sessionManager, database.usuarioDao()) }
+    // Valida la sesión guardada al abrir la app
+    val sesionRepository: RepositorioSesion by lazy { SesionRepository(sessionManager, database.usuarioDao()) }
 
     // Timer de las tablas de apnea: vive con el proceso (no con la pantalla). Mientras corre,
     // ServicioEntrenamiento mantiene la app viva con la pantalla bloqueada.

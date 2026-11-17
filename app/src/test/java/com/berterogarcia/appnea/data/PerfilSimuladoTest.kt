@@ -1,9 +1,9 @@
 package com.berterogarcia.appnea.data
 
-import com.berterogarcia.appnea.data.local.BajadaApnea
-import com.berterogarcia.appnea.data.local.RegistroApnea
-import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado
+import com.berterogarcia.appnea.dominio.modelo.BajadaApnea
+import com.berterogarcia.appnea.dominio.modelo.RegistroApnea
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.PerfilSimulado
 import com.berterogarcia.appnea.inmersion
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

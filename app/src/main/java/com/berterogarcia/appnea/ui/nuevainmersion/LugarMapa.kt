@@ -39,16 +39,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.ubicacion.Geocodificador
-import com.berterogarcia.appnea.data.ubicacion.Ubicacion
-import com.berterogarcia.appnea.data.ubicacion.UbicacionHelper
+import com.berterogarcia.appnea.dominio.ServicioUbicacion
+import com.berterogarcia.appnea.dominio.modelo.Ubicacion
 import com.berterogarcia.appnea.ui.components.BotonContorno
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.BotonSecundario
@@ -165,11 +163,12 @@ fun SelectorLugarMapa(
     nombreInicial: String,
     onCancelar: () -> Unit,
     onConfirmar: (latitud: Double, longitud: Double, nombre: String) -> Unit,
+    /** GPS y geocoder (vienen del ViewModel: la pantalla no usa Android directamente). */
+    ubicacion: ServicioUbicacion,
     modifier: Modifier = Modifier
 ) {
     BackHandler(onBack = onCancelar) // el botón atrás cierra el mapa, no el formulario
 
-    val appContext = LocalContext.current.applicationContext
     val scope = rememberCoroutineScope()
     var mapa by remember { mutableStateOf<MapLibreMap?>(null) }
     var marcado by remember { mutableStateOf(centroInicial) }
@@ -184,7 +183,7 @@ fun SelectorLugarMapa(
     LaunchedEffect(marcado) {
         delay(600.milliseconds)
         buscandoNombre = true
-        val encontrado = Geocodificador.nombrePara(appContext, marcado.latitud, marcado.longitud)
+        val encontrado = ubicacion.nombreDelLugar(marcado.latitud, marcado.longitud)
         buscandoNombre = false
         sugerencia = encontrado
         if (encontrado != null && !nombreEditado) nombre = encontrado
@@ -202,7 +201,7 @@ fun SelectorLugarMapa(
             buscando = true
             aviso = null
             val u = intentar("LugarMapa") {
-                UbicacionHelper.obtenerUbicacionActual(appContext, 15.seconds)
+                ubicacion.actual(15.seconds)
             }.getOrNull()
             buscando = false
             if (u != null) {
@@ -211,7 +210,7 @@ fun SelectorLugarMapa(
                     CameraUpdateFactory.newLatLngZoom(LatLng(u.latitud, u.longitud), 15.0)
                 )
             } else {
-                aviso = if (!UbicacionHelper.ubicacionActivada(appContext)) avisoActivar else avisoError
+                aviso = if (!ubicacion.ubicacionActivada()) avisoActivar else avisoError
             }
         }
     }

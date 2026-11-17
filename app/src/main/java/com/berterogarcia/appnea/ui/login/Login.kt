@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.login
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,8 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.auth.CuentaGoogle
-import com.berterogarcia.appnea.data.auth.GoogleAuth
+import com.berterogarcia.appnea.dominio.modelo.CuentaGoogle
+import com.berterogarcia.appnea.dominio.modelo.ResultadoGoogle
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.CampoPassword
 import com.berterogarcia.appnea.ui.components.CampoTexto
@@ -69,7 +70,9 @@ fun LoginScreen(
     viewModel: LoginViewModel,
     onLoginExitoso: () -> Unit,
     onRegistroClick: () -> Unit,
-    onRegistroGoogle: (CuentaGoogle) -> Unit
+    onRegistroGoogle: (CuentaGoogle) -> Unit,
+    /** Abre el selector de cuentas de Google (necesita el Context de la Activity). */
+    pedirCuentaGoogle: suspend (Context) -> ResultadoGoogle
 ) {
     val s by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -172,7 +175,7 @@ fun LoginScreen(
                 onClick = {
                     teclado?.hide()
                     focusManager.clearFocus()
-                    viewModel.loginConGoogle { GoogleAuth.pedirCuenta(context) }
+                    viewModel.loginConGoogle { pedirCuentaGoogle(context) }
                 },
                 enabled = s.googleHabilitado,
                 modifier = Modifier.fillMaxWidth()

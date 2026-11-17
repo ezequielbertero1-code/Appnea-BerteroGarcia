@@ -1,5 +1,11 @@
 package com.berterogarcia.appnea.data.condiciones
 
+import com.berterogarcia.appnea.dominio.modelo.Aptitud
+import com.berterogarcia.appnea.dominio.modelo.AptitudAgua
+import com.berterogarcia.appnea.dominio.modelo.HoraClima
+import com.berterogarcia.appnea.dominio.modelo.HoraMar
+import com.berterogarcia.appnea.dominio.modelo.MotivoAptitud
+import com.berterogarcia.appnea.dominio.modelo.TipoMotivo
 import kotlin.math.roundToInt
 
 /** Semáforo para entrar al agua (buceo y apnea) con los datos de una hora. */

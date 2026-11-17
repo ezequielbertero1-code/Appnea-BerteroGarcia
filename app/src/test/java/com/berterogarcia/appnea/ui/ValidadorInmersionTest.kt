@@ -1,6 +1,6 @@
 package com.berterogarcia.appnea.ui
 
-import com.berterogarcia.appnea.data.local.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
 import com.berterogarcia.appnea.ui.nuevainmersion.BajadaForm
 import com.berterogarcia.appnea.ui.nuevainmersion.Campo
 import com.berterogarcia.appnea.ui.nuevainmersion.NuevaInmersionUiState

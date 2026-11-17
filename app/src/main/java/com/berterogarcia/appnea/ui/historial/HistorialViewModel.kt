@@ -1,12 +1,13 @@
 package com.berterogarcia.appnea.ui.historial
 
+import java.time.Clock
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.data.repository.InmersionRepository
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioInmersiones
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,7 +41,7 @@ enum class PeriodoFiltro(@param:StringRes val etiqueta: Int, @param:StringRes va
 }
 
 /** Inmersiones de un mes, para mostrarlas con su título ("Octubre 2026"). */
-data class GrupoMes(val mes: YearMonth, val inmersiones: List<InmersionEntity>)
+data class GrupoMes(val mes: YearMonth, val inmersiones: List<Inmersion>)
 
 data class HistorialUiState(
     val cargando: Boolean = true,
@@ -50,7 +51,11 @@ data class HistorialUiState(
     val grupos: List<GrupoMes> = emptyList()
 )
 
-class HistorialViewModel(repository: InmersionRepository) : ViewModel() {
+class HistorialViewModel(
+    repository: RepositorioInmersiones,
+    /** Para "este mes", "últimos 3 meses"... (en los tests se fija una fecha). */
+    private val reloj: Clock = Clock.systemDefaultZone()
+) : ViewModel() {
 
     private val _periodo = MutableStateFlow(PeriodoFiltro.TODAS)
     val periodo: StateFlow<PeriodoFiltro> = _periodo.asStateFlow()
@@ -64,7 +69,7 @@ class HistorialViewModel(repository: InmersionRepository) : ViewModel() {
 
     val uiState: StateFlow<HistorialUiState> =
         combine(repository.todasLasInmersiones, _periodo, _busqueda, _tipo) { lista, periodo, busqueda, tipo ->
-            armarEstado(lista, periodo, busqueda, hoy = LocalDate.now(), tipo = tipo)
+            armarEstado(lista, periodo, busqueda, hoy = LocalDate.now(reloj), tipo = tipo)
         }
             .flowOn(Dispatchers.Default) // filtrar y agrupar fuera del hilo principal (no traba la pantalla)
             .catch { emit(HistorialUiState(cargando = false, error = true)) } // Room falló: se avisa, no crashea
@@ -99,7 +104,7 @@ class HistorialViewModel(repository: InmersionRepository) : ViewModel() {
  * Es una función pura: se puede probar con un test unitario sin Android.
  */
 internal fun armarEstado(
-    lista: List<InmersionEntity>,
+    lista: List<Inmersion>,
     periodo: PeriodoFiltro,
     busqueda: String,
     hoy: LocalDate,
@@ -113,7 +118,7 @@ internal fun armarEstado(
         .filter { tipo == null || it.tipo == tipo }
         .filter { desde == null || !it.fecha.isBefore(desde) }
         .filter { termino.isEmpty() || normalizar(it.lugar).contains(termino) }
-        .sortedWith(compareByDescending<InmersionEntity> { it.fecha }.thenByDescending { it.horaEntrada })
+        .sortedWith(compareByDescending<Inmersion> { it.fecha }.thenByDescending { it.horaEntrada })
         .toList()
 
     // groupBy respeta el orden de llegada, así que los meses quedan del más nuevo al más viejo

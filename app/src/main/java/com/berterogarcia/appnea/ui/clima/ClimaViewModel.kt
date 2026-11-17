@@ -6,9 +6,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.condiciones.Condiciones
-import com.berterogarcia.appnea.data.ubicacion.UBICACION_COMODORO_RIVADAVIA
-import com.berterogarcia.appnea.data.ubicacion.Ubicacion
+import com.berterogarcia.appnea.dominio.modelo.Condiciones
+import com.berterogarcia.appnea.dominio.modelo.UBICACION_COMODORO_RIVADAVIA
+import com.berterogarcia.appnea.dominio.modelo.Ubicacion
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import kotlinx.coroutines.Job

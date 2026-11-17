@@ -1,5 +1,7 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.modelo.Fase
+import com.berterogarcia.appnea.dominio.modelo.TablaApnea
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index

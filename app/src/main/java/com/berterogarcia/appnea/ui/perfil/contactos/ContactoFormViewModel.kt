@@ -4,8 +4,8 @@ import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
-import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.dominio.modelo.ContactoEmergencia
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioPerfil
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_CARGAR
@@ -44,29 +44,29 @@ data class ContactoFormUiState(
 }
 
 class ContactoFormViewModel(
-    private val repository: PerfilRepository,
+    private val repository: RepositorioPerfil,
     private val idContacto: Long?
 ) : ViewModel() {
-    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
-    private val usuario: String? = repository.usuarioActual
+    /** Si había sesión al abrir la pantalla (el repositorio trabaja siempre sobre el usuario logueado). */
+    private val haySesion: Boolean = repository.haySesion
 
     private val _uiState = MutableStateFlow(ContactoFormUiState(esEdicion = idContacto != null))
     val uiState: StateFlow<ContactoFormUiState> = _uiState.asStateFlow()
 
     init {
-        if (usuario == null) {
+        if (!haySesion) {
             _uiState.update { it.copy(cargando = false, bloqueado = true, errorGeneral = MENSAJE_SIN_SESION) }
         } else {
-            cargar(usuario)
+            cargar()
         }
     }
 
     /** Siempre se lee la base: en alta para saber si es el primer contacto, en edición para traer los datos. */
-    private fun cargar(usuario: String) {
+    private fun cargar() {
         viewModelScope.launch {
             intentar("ContactoFormViewModel") {
-                val cantidad = repository.cantidadContactos(usuario)
-                val existente = idContacto?.let { repository.obtenerContacto(it, usuario) }
+                val cantidad = repository.cantidadContactos()
+                val existente = idContacto?.let { repository.obtenerContacto(it) }
                 cantidad to existente
             }.onSuccess { (cantidad, existente) ->
                 when {
@@ -112,7 +112,7 @@ class ContactoFormViewModel(
 
     fun guardar() {
         val s = _uiState.value
-        if (s.guardando || !s.puedeGuardar || usuario == null) return
+        if (s.guardando || !s.puedeGuardar || !haySesion) return
 
         val errores = validar(s)
         if (errores.isNotEmpty()) {
@@ -122,9 +122,8 @@ class ContactoFormViewModel(
 
         _uiState.update { it.copy(guardando = true, errorGeneral = null) }
         viewModelScope.launch {
-            val contacto = ContactoEmergenciaEntity(
+            val contacto = ContactoEmergencia(
                 id = idContacto ?: 0L,
-                nombreUsuario = usuario,
                 nombre = s.nombre.trim(),
                 relacion = s.relacion.trim(),
                 telefono = s.telefono.trim(),

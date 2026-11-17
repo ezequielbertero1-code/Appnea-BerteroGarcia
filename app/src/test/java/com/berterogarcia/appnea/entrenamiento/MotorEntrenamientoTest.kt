@@ -1,8 +1,8 @@
 package com.berterogarcia.appnea.entrenamiento
 
-import com.berterogarcia.appnea.data.local.Fase
-import com.berterogarcia.appnea.data.local.TablaApnea
-import com.berterogarcia.appnea.data.local.TipoFase
+import com.berterogarcia.appnea.dominio.modelo.Fase
+import com.berterogarcia.appnea.dominio.modelo.TablaApnea
+import com.berterogarcia.appnea.dominio.modelo.TipoFase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy

@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.DatePickerField
 import com.berterogarcia.appnea.ui.components.SelectorSegmentado

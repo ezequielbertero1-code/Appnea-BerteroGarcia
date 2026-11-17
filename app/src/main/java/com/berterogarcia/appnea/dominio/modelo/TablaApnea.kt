@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.dominio.modelo
 
 data class TablaApnea(
     val nombre: String,

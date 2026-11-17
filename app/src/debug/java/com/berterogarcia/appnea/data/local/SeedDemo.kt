@@ -1,7 +1,15 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.modelo.BajadaApnea
+import com.berterogarcia.appnea.dominio.modelo.CategoriaEquipo
+import com.berterogarcia.appnea.dominio.modelo.Fase
+import com.berterogarcia.appnea.dominio.modelo.RegistroApnea
+import com.berterogarcia.appnea.dominio.modelo.TipoCertificado
+import com.berterogarcia.appnea.dominio.modelo.TipoFase
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.Visibilidad
 import com.berterogarcia.appnea.data.seguridad.SeguridadPassword
-import com.berterogarcia.appnea.dominio.FactorEntrenamiento
+import com.berterogarcia.appnea.dominio.modelo.FactorEntrenamiento
 import androidx.room.withTransaction
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import java.time.LocalDate

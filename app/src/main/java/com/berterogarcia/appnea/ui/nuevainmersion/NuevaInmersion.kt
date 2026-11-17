@@ -109,6 +109,7 @@ fun NuevaInmersionScreen(
                 viewModel.onUbicacionElegida(lat, lon, nombre)
                 mapaAbierto = false
             },
+            ubicacion = viewModel.ubicacionTelefono,
             modifier = modifier
         )
         return

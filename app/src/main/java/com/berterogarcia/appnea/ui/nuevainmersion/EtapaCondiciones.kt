@@ -16,7 +16,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.Visibilidad
+import com.berterogarcia.appnea.dominio.modelo.Visibilidad
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.CheckboxGroup
 import com.berterogarcia.appnea.ui.components.ChipFiltro

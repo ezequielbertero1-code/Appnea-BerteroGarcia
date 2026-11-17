@@ -35,8 +35,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.data.local.formatearDuracion
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.formatearDuracion
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.FilaMosaicos
 import com.berterogarcia.appnea.ui.components.Mosaico

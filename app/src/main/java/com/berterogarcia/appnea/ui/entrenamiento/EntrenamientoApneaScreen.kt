@@ -6,7 +6,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.BackHandler
-import com.berterogarcia.appnea.dominio.FactorEntrenamiento
+import com.berterogarcia.appnea.dominio.modelo.FactorEntrenamiento
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -53,8 +53,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.TablaPersonalizadaEntity
-import com.berterogarcia.appnea.data.local.TipoFase
+import com.berterogarcia.appnea.dominio.modelo.TablaPersonalizada
+import com.berterogarcia.appnea.dominio.modelo.TipoFase
 import com.berterogarcia.appnea.ui.components.BarraAccionesInferior
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.BotonContorno
@@ -90,7 +90,7 @@ fun SeleccionTablaScreen(
     onCrearTabla: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var tablaABorrar by remember { mutableStateOf<TablaPersonalizadaEntity?>(null) }
+    var tablaABorrar by remember { mutableStateOf<TablaPersonalizada?>(null) }
 
     Column(modifier = modifier.fillMaxSize()) {
         // ---- Lista (scrollea) ----

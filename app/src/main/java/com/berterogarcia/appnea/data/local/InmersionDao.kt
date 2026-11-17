@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.modelo.CondicionesRegistro
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query

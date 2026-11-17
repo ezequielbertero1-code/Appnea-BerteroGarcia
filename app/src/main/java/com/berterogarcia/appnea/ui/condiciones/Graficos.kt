@@ -17,8 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.berterogarcia.appnea.data.condiciones.ExtremoMarea
-import com.berterogarcia.appnea.data.condiciones.HoraMar
+import com.berterogarcia.appnea.dominio.modelo.ExtremoMarea
+import com.berterogarcia.appnea.dominio.modelo.HoraMar
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorBajamar
 import com.berterogarcia.appnea.ui.theme.ColorRegular

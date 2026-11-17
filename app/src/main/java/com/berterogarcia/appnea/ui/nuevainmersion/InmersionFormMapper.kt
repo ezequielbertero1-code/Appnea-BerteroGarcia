@@ -1,7 +1,7 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.time.Duration.Companion.seconds
@@ -12,10 +12,10 @@ import kotlin.time.Duration.Companion.seconds
  */
 
 /** Formulario (ya validado con [validarInmersion]) -> entidad. Las condiciones las pone RegistrarInmersion. */
-internal fun NuevaInmersionUiState.aEntidad(): InmersionEntity {
+internal fun NuevaInmersionUiState.aInmersion(): Inmersion {
     val esApnea = tipo == TipoInmersion.APNEA
     val registro = if (esApnea) registroApnea else null
-    return InmersionEntity(
+    return Inmersion(
         fecha = LocalDate.parse(fecha, FORMATO_FECHA),
         lugar = lugar,
         // Apnea: la máxima del registro; buceo: lo escrito (ya validado)
@@ -46,7 +46,7 @@ internal fun NuevaInmersionUiState.aEntidad(): InmersionEntity {
 }
 
 /** Entidad guardada -> formulario, para editarla. */
-internal fun NuevaInmersionUiState.conInmersion(i: InmersionEntity): NuevaInmersionUiState = copy(
+internal fun NuevaInmersionUiState.conInmersion(i: Inmersion): NuevaInmersionUiState = copy(
     cargandoEdicion = false,
     tipo = i.tipo,
     fecha = i.fecha.format(FORMATO_FECHA),

@@ -4,8 +4,8 @@ import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
-import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.dominio.modelo.PerfilUsuario
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioPerfil
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_CARGAR
@@ -41,10 +41,10 @@ data class DatosPersonalesUiState(
 }
 
 class DatosPersonalesViewModel(
-    private val repository: PerfilRepository
+    private val repository: RepositorioPerfil
 ) : ViewModel() {
-    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
-    private val usuario: String? = repository.usuarioActual
+    /** Si había sesión al abrir la pantalla (el repositorio trabaja siempre sobre el usuario logueado). */
+    private val haySesion: Boolean = repository.haySesion
 
     private val _uiState = MutableStateFlow(DatosPersonalesUiState())
     val uiState: StateFlow<DatosPersonalesUiState> = _uiState.asStateFlow()
@@ -54,17 +54,17 @@ class DatosPersonalesViewModel(
     }
 
     private fun cargar() {
-        if (usuario == null) {
+        if (!haySesion) {
             _uiState.update { it.copy(cargando = false, bloqueado = true, errorGeneral = MENSAJE_SIN_SESION) }
             return
         }
         viewModelScope.launch {
-            intentar("DatosPersonalesViewModel") { repository.obtenerPerfil(usuario) }
+            intentar("DatosPersonalesViewModel") { repository.obtenerPerfil() }
                 .onSuccess { perfil ->
                     _uiState.update {
                         if (perfil == null) {
                             // Primera vez: proponemos el nombre de usuario como nombre.
-                            it.copy(cargando = false, nombre = usuario)
+                            it.copy(cargando = false, nombre = repository.usuarioActual.orEmpty())
                         } else {
                             it.copy(
                                 cargando = false,
@@ -100,7 +100,7 @@ class DatosPersonalesViewModel(
 
     fun guardar() {
         val s = _uiState.value
-        if (s.guardando || !s.puedeGuardar || usuario == null) return
+        if (s.guardando || !s.puedeGuardar || !haySesion) return
 
         val errores = validar(s)
         if (errores.isNotEmpty()) {
@@ -110,8 +110,7 @@ class DatosPersonalesViewModel(
 
         _uiState.update { it.copy(guardando = true, errorGeneral = null) }
         viewModelScope.launch {
-            val perfil = PerfilUsuarioEntity(
-                nombreUsuario = usuario,
+            val perfil = PerfilUsuario(
                 nombre = s.nombre.trim(),
                 apellido = s.apellido.trim(),
                 email = s.email.trim(),

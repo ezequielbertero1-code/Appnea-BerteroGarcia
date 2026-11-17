@@ -13,7 +13,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.CategoriaEquipo
+import com.berterogarcia.appnea.dominio.modelo.CategoriaEquipo
 import com.berterogarcia.appnea.ui.components.CampoFecha
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.FilaConSwitch

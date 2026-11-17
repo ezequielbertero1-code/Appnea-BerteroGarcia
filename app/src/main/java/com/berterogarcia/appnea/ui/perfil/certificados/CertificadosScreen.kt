@@ -19,8 +19,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.CertificadoEntity
-import com.berterogarcia.appnea.data.local.TipoCertificado
+import com.berterogarcia.appnea.dominio.modelo.Certificado
+import com.berterogarcia.appnea.dominio.modelo.TipoCertificado
 import com.berterogarcia.appnea.ui.components.TonoIcono
 import com.berterogarcia.appnea.ui.components.formatoLargo
 import com.berterogarcia.appnea.ui.components.nombre
@@ -101,7 +101,7 @@ fun CertificadosScreen(
 }
 
 @Composable
-private fun TarjetaCertificado(certificado: CertificadoEntity, indice: Int, total: Int, onEditar: () -> Unit, onEliminar: () -> Unit) {
+private fun TarjetaCertificado(certificado: Certificado, indice: Int, total: Int, onEditar: () -> Unit, onEliminar: () -> Unit) {
     val entidadEscuela = listOf(certificado.entidad, certificado.escuelaInstructor)
         .filter { it.isNotBlank() }
         .joinToString(" · ")

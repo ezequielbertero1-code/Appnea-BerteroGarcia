@@ -5,16 +5,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.Fase
-import com.berterogarcia.appnea.data.local.SesionApneaEntity
-import com.berterogarcia.appnea.dominio.FactorEntrenamiento
+import com.berterogarcia.appnea.dominio.modelo.Fase
+import com.berterogarcia.appnea.dominio.modelo.SesionApnea
+import com.berterogarcia.appnea.dominio.modelo.FactorEntrenamiento
 import com.berterogarcia.appnea.entrenamiento.MotorEntrenamiento
-import com.berterogarcia.appnea.data.local.TablaApnea
-import com.berterogarcia.appnea.data.local.TablaPersonalizadaEntity
-import com.berterogarcia.appnea.data.local.TablasPredefinidas
-import com.berterogarcia.appnea.data.local.TipoFase
-import com.berterogarcia.appnea.data.repository.SesionApneaRepository
-import com.berterogarcia.appnea.data.repository.TablaPersonalizadaRepository
+import com.berterogarcia.appnea.dominio.modelo.TablaApnea
+import com.berterogarcia.appnea.dominio.modelo.TablaPersonalizada
+import com.berterogarcia.appnea.dominio.modelo.TablasPredefinidas
+import com.berterogarcia.appnea.dominio.modelo.TipoFase
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioSesionesApnea
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioTablas
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +31,7 @@ enum class EtapaEntrenamiento { SELECCION, EN_CURSO, GUARDANDO }
 
 data class EntrenamientoUiState(
     val tablasPredefinidas: List<TablaApnea> = TablasPredefinidas.listaBase(),
-    val tablasPersonalizadas: List<TablaPersonalizadaEntity> = emptyList(),
+    val tablasPersonalizadas: List<TablaPersonalizada> = emptyList(),
     val tablaSeleccionada: TablaApnea? = null,
     /**
      * "Estoy acompañado": si está tildado no se muestra el aviso de seguridad.
@@ -70,8 +70,8 @@ data class EntrenamientoUiState(
 }
 
 class EntrenamientoApneaViewModel(
-    private val tablaRepository: TablaPersonalizadaRepository,
-    private val sesionRepository: SesionApneaRepository,
+    private val tablaRepository: RepositorioTablas,
+    private val sesionRepository: RepositorioSesionesApnea,
     private val motor: MotorEntrenamiento,
     /** Recuerda la tabla elegida (por nombre) si Android cierra la app en segundo plano. */
     private val estadoGuardado: SavedStateHandle = SavedStateHandle()
@@ -132,7 +132,7 @@ class EntrenamientoApneaViewModel(
 
     fun onAcompanadoChange(acompanado: Boolean) = local.update { it.copy(acompanado = acompanado) }
 
-    fun onEliminarTablaPersonalizada(tabla: TablaPersonalizadaEntity) {
+    fun onEliminarTablaPersonalizada(tabla: TablaPersonalizada) {
         // Si era la elegida, se deselecciona para no iniciar una tabla que ya no existe
         if (local.value.tablaSeleccionada == tabla.aTablaApnea()) {
             local.update { it.copy(tablaSeleccionada = null) }
@@ -177,7 +177,7 @@ class EntrenamientoApneaViewModel(
             // guardar() devuelve false si no hay sesión iniciada; si la base falla, da false
             val ok = intentar("EntrenamientoApneaViewModel") {
                 sesionRepository.guardar(
-                    SesionApneaEntity(
+                    SesionApnea(
                         fecha = resultado.inicio.toLocalDate(),
                         horaInicio = resultado.inicio.toLocalTime().withNano(0),
                         duracionSegundos = resultado.duracionSegundos,

@@ -4,9 +4,9 @@ import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.CertificadoEntity
-import com.berterogarcia.appnea.data.local.TipoCertificado
-import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.dominio.modelo.Certificado
+import com.berterogarcia.appnea.dominio.modelo.TipoCertificado
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioPerfil
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_CARGAR
@@ -48,27 +48,27 @@ data class CertificadoFormUiState(
 }
 
 class CertificadoFormViewModel(
-    private val repository: PerfilRepository,
+    private val repository: RepositorioPerfil,
     private val idCertificado: Long?
 ) : ViewModel() {
-    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
-    private val usuario: String? = repository.usuarioActual
+    /** Si había sesión al abrir la pantalla (el repositorio trabaja siempre sobre el usuario logueado). */
+    private val haySesion: Boolean = repository.haySesion
 
     private val _uiState = MutableStateFlow(CertificadoFormUiState(esEdicion = idCertificado != null))
     val uiState: StateFlow<CertificadoFormUiState> = _uiState.asStateFlow()
 
     init {
         when {
-            usuario == null ->
+            !haySesion ->
                 _uiState.update { it.copy(bloqueado = true, errorGeneral = MENSAJE_SIN_SESION) }
-            idCertificado != null -> cargar(usuario, idCertificado)
+            idCertificado != null -> cargar(idCertificado)
         }
     }
 
-    private fun cargar(usuario: String, id: Long) {
+    private fun cargar(id: Long) {
         _uiState.update { it.copy(cargando = true) }
         viewModelScope.launch {
-            val c = intentar("CertificadoFormViewModel") { repository.obtenerCertificado(id, usuario) }.getOrElse {
+            val c = intentar("CertificadoFormViewModel") { repository.obtenerCertificado(id) }.getOrElse {
                 _uiState.update { it.copy(cargando = false, bloqueado = true, errorGeneral = MENSAJE_ERROR_CARGAR) }
                 return@launch
             }
@@ -114,7 +114,7 @@ class CertificadoFormViewModel(
 
     fun guardar() {
         val s = _uiState.value
-        if (s.guardando || !s.puedeGuardar || usuario == null) return
+        if (s.guardando || !s.puedeGuardar || !haySesion) return
 
         val errores = validar(s)
         val tipo = s.tipo
@@ -125,9 +125,8 @@ class CertificadoFormViewModel(
 
         _uiState.update { it.copy(guardando = true, errorGeneral = null) }
         viewModelScope.launch {
-            val certificado = CertificadoEntity(
+            val certificado = Certificado(
                 id = idCertificado ?: 0L,
-                nombreUsuario = usuario,
                 tipo = tipo,
                 titulo = s.titulo.trim(),
                 entidad = s.entidad.trim(),

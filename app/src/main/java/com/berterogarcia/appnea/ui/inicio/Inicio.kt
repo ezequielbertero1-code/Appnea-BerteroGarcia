@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.AppDestinations
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.condiciones.Aptitud
+import com.berterogarcia.appnea.dominio.modelo.Aptitud
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.components.Avatar
 import com.berterogarcia.appnea.ui.components.BarraSuperior

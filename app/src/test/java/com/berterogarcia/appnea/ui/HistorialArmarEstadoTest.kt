@@ -1,6 +1,6 @@
 package com.berterogarcia.appnea.ui
 
-import com.berterogarcia.appnea.data.local.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
 import com.berterogarcia.appnea.inmersion
 import com.berterogarcia.appnea.ui.historial.PeriodoFiltro
 import com.berterogarcia.appnea.ui.historial.armarEstado

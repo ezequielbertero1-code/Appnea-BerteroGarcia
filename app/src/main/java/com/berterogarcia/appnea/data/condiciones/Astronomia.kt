@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.condiciones
 
+import com.berterogarcia.appnea.dominio.modelo.DiaAstro
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime

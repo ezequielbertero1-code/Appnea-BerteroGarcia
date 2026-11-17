@@ -20,9 +20,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.CategoriaEquipo
-import com.berterogarcia.appnea.data.local.EquipoEntity
-import com.berterogarcia.appnea.data.local.descripcion
+import com.berterogarcia.appnea.dominio.modelo.CategoriaEquipo
+import com.berterogarcia.appnea.dominio.modelo.Equipo
 import com.berterogarcia.appnea.ui.components.formatoLargo
 import com.berterogarcia.appnea.ui.components.nombre
 import com.berterogarcia.appnea.ui.components.resolver
@@ -103,7 +102,7 @@ fun EquipamientoScreen(
 }
 
 @Composable
-private fun TarjetaEquipo(equipo: EquipoEntity, indice: Int, total: Int, onEditar: () -> Unit, onEliminar: () -> Unit) {
+private fun TarjetaEquipo(equipo: Equipo, indice: Int, total: Int, onEditar: () -> Unit, onEliminar: () -> Unit) {
     val insignias = buildList {
         if (!equipo.enUso) add(Insignia(stringResource(R.string.perfil_retirado), TextoSuperficieVariante))
         if (equipo.enUso) insigniaMantenimiento(equipo.proximoMantenimiento)?.let { add(it) }

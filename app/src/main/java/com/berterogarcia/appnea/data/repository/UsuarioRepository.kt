@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.repository
 
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioUsuarios
 import com.berterogarcia.appnea.util.intentar
 import com.berterogarcia.appnea.data.seguridad.SeguridadPassword
 import com.berterogarcia.appnea.data.local.UsuarioDao
@@ -14,7 +15,7 @@ import kotlinx.coroutines.withContext
 class UsuarioRepository(
     private val dao: UsuarioDao,
     private val cpu: CoroutineDispatcher = Dispatchers.Default
-) {
+) : RepositorioUsuarios {
     /** Para que un usuario inexistente tarde lo mismo que una contraseña incorrecta. */
     private val hashFicticio: String by lazy { SeguridadPassword.hashear("usuario-inexistente") }
 
@@ -22,7 +23,7 @@ class UsuarioRepository(
      * @return true si usuario y contraseña son correctos.
      * Si tenía el hash viejo, lo pasa a PBKDF2 ahora (si falla, se reintenta el próximo login).
      */
-    suspend fun validar(nombreUsuario: String, password: String): Boolean {
+    override suspend fun validar(nombreUsuario: String, password: String): Boolean {
         val usuario = dao.obtenerPorUsuario(nombreUsuario)
         if (usuario == null) {
             withContext(cpu) { SeguridadPassword.verificar(password, hashFicticio) }

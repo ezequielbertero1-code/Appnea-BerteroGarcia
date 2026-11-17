@@ -3,13 +3,13 @@ package com.berterogarcia.appnea.ui.components
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.condiciones.Aptitud
-import com.berterogarcia.appnea.data.condiciones.MotivoAptitud
-import com.berterogarcia.appnea.data.condiciones.TipoMotivo
-import com.berterogarcia.appnea.data.local.CategoriaEquipo
-import com.berterogarcia.appnea.data.local.TipoCertificado
-import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.data.local.Visibilidad
+import com.berterogarcia.appnea.dominio.modelo.Aptitud
+import com.berterogarcia.appnea.dominio.modelo.MotivoAptitud
+import com.berterogarcia.appnea.dominio.modelo.TipoMotivo
+import com.berterogarcia.appnea.dominio.modelo.CategoriaEquipo
+import com.berterogarcia.appnea.dominio.modelo.TipoCertificado
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.Visibilidad
 import com.berterogarcia.appnea.ui.registro.FuerzaPassword
 
 // ============================ Etiquetas de datos para mostrar ============================

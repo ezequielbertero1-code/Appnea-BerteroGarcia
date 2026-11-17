@@ -1,17 +1,18 @@
 package com.berterogarcia.appnea.ui.estadisticas
 
+import java.time.Clock
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.IntentoApneaEntity
-import com.berterogarcia.appnea.data.local.SesionApneaEntity
-import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.data.repository.InmersionRepository
-import com.berterogarcia.appnea.data.repository.IntentoApneaRepository
-import com.berterogarcia.appnea.data.repository.SesionApneaRepository
-import com.berterogarcia.appnea.dominio.FactorEntrenamiento
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.IntentoLibre
+import com.berterogarcia.appnea.dominio.modelo.SesionApnea
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioInmersiones
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioIntentos
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioSesionesApnea
+import com.berterogarcia.appnea.dominio.modelo.FactorEntrenamiento
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -47,11 +48,11 @@ data class InfluenciaFactor(val factor: FactorEntrenamiento, val porcentajeCompl
 
 data class ResumenInmersiones(
     val cantidad: Int = 0,
-    val record: InmersionEntity? = null,
+    val record: Inmersion? = null,
     val tiempoTotal: Duration = Duration.ZERO,
     val profundidadPromedio: Float = 0f,
     /** Ordenadas de la más vieja a la más nueva (para la línea). */
-    val serie: List<InmersionEntity> = emptyList(),
+    val serie: List<Inmersion> = emptyList(),
     val porMes: List<Pair<YearMonth, Int>> = emptyList(),
     val lugares: List<LugarFrecuente> = emptyList(),
     /** Inmersiones de apnea con registro de bajadas (las viejas no lo tienen). */
@@ -66,7 +67,7 @@ data class ResumenEntrenamiento(
     val porcentajeCompletas: Int = 0,
     val apneaMasLargaSegundos: Int = 0,
     /** Sesiones con marca > 0, de la más vieja a la más nueva (para la línea). */
-    val serie: List<SesionApneaEntity> = emptyList(),
+    val serie: List<SesionApnea> = emptyList(),
     /** Sesiones cortadas antes de la primera apnea (marca 0): no entran en la línea. */
     val sinApnea: Int = 0,
     val factores: List<InfluenciaFactor> = emptyList(),
@@ -97,9 +98,10 @@ data class EstadisticasUiState(
 )
 
 class EstadisticasViewModel(
-    inmersionRepository: InmersionRepository,
-    sesionRepository: SesionApneaRepository,
-    intentoRepository: IntentoApneaRepository
+    inmersionRepository: RepositorioInmersiones,
+    sesionRepository: RepositorioSesionesApnea,
+    intentoRepository: RepositorioIntentos,
+    private val reloj: Clock = Clock.systemDefaultZone()
 ) : ViewModel() {
 
     private val _periodo = MutableStateFlow(PeriodoEstadisticas.TRES_MESES)
@@ -113,7 +115,7 @@ class EstadisticasViewModel(
         _periodo,
         _tipo
     ) { inmersiones, sesiones, intentos, periodo, tipo ->
-        val hoy = LocalDate.now()
+        val hoy = LocalDate.now(reloj)
         EstadisticasUiState(
             cargando = false,
             periodo = periodo,
@@ -141,7 +143,7 @@ class EstadisticasViewModel(
 // ============ Cálculos: funciones puras (se pueden probar con un test sin Android) ============
 
 internal fun resumirInmersiones(
-    todas: List<InmersionEntity>,
+    todas: List<Inmersion>,
     periodo: PeriodoEstadisticas,
     tipo: TipoInmersion?,
     hoy: LocalDate
@@ -150,7 +152,7 @@ internal fun resumirInmersiones(
     val desde = periodo.desde(hoy)
     val filtradas = delTipo
         .filter { desde == null || !it.fecha.isBefore(desde) }
-        .sortedWith(compareBy<InmersionEntity> { it.fecha }.thenBy { it.horaEntrada })
+        .sortedWith(compareBy<Inmersion> { it.fecha }.thenBy { it.horaEntrada })
 
     // El gráfico por mes usa sus propios meses (6 o 12 hasta hoy), respetando el tipo
     val mesActual = YearMonth.from(hoy)
@@ -185,18 +187,18 @@ internal fun resumirInmersiones(
 }
 
 internal fun resumirEntrenamiento(
-    todas: List<SesionApneaEntity>,
+    todas: List<SesionApnea>,
     periodo: PeriodoEstadisticas,
     hoy: LocalDate,
-    intentos: List<IntentoApneaEntity> = emptyList()
+    intentos: List<IntentoLibre> = emptyList()
 ): ResumenEntrenamiento {
     val desde = periodo.desde(hoy)
     val intentosPeriodo = intentos.filter { desde == null || !it.fecha.isBefore(desde) }
     val filtradas = todas
         .filter { desde == null || !it.fecha.isBefore(desde) }
-        .sortedWith(compareBy<SesionApneaEntity> { it.fecha }.thenBy { it.horaInicio }.thenBy { it.id })
+        .sortedWith(compareBy<SesionApnea> { it.fecha }.thenBy { it.horaInicio }.thenBy { it.id })
 
-    fun porcentaje(lista: List<SesionApneaEntity>): Int =
+    fun porcentaje(lista: List<SesionApnea>): Int =
         if (lista.isEmpty()) 0 else (lista.count { it.completada } * 100f / lista.size).roundToInt()
 
     val factores = FactorEntrenamiento.entries.mapNotNull { factor ->

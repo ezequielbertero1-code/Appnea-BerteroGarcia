@@ -9,6 +9,8 @@
 
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.modelo.CategoriaEquipo
+import com.berterogarcia.appnea.dominio.modelo.TipoCertificado
 import androidx.room.TypeConverter
 @Suppress("unused")
 class PerfilConverters {

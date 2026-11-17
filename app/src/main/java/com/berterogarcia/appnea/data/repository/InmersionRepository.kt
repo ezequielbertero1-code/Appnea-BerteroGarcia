@@ -1,8 +1,12 @@
 package com.berterogarcia.appnea.data.repository
 
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioInmersiones
+import com.berterogarcia.appnea.data.local.aModelo
+import com.berterogarcia.appnea.data.local.aEntidad
+import kotlinx.coroutines.flow.map
 import com.berterogarcia.appnea.data.local.InmersionDao
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.sesion.ProveedorUsuario
+import com.berterogarcia.appnea.dominio.ProveedorUsuario
 import com.berterogarcia.appnea.data.sesion.porUsuario
 import kotlinx.coroutines.flow.Flow
 
@@ -17,17 +21,17 @@ import kotlinx.coroutines.flow.Flow
 class InmersionRepository(
     private val dao: InmersionDao,
     private val sesion: ProveedorUsuario
-) {
-    val todasLasInmersiones: Flow<List<InmersionEntity>> =
-        sesion.porUsuario(emptyList()) { usuario -> dao.obtenerTodas(usuario) }
+) : RepositorioInmersiones {
+    override val todasLasInmersiones: Flow<List<Inmersion>> =
+        sesion.porUsuario(emptyList()) { usuario -> dao.obtenerTodas(usuario).map { l -> l.map { it.aModelo() } } }
 
-    fun obtenerPorId(id: Long): Flow<InmersionEntity?> =
-        sesion.porUsuario(null) { usuario -> dao.obtenerPorId(id, usuario) }
+    override fun obtenerPorId(id: Long): Flow<Inmersion?> =
+        sesion.porUsuario(null) { usuario -> dao.obtenerPorId(id, usuario).map { it?.aModelo() } }
 
     /** @return el id de la inmersión nueva, o null si no hay sesión. */
-    suspend fun guardar(inmersion: InmersionEntity): Long? {
+    override suspend fun guardar(inmersion: Inmersion): Long? {
         val usuario = sesion.usuarioActual.value ?: return null
-        return dao.insertar(inmersion.copy(nombreUsuario = usuario))
+        return dao.insertar(inmersion.aEntidad(usuario))
     }
 
     /**
@@ -35,13 +39,13 @@ class InmersionRepository(
      * @return false si no hay sesión o si esa inmersión no es del usuario logueado
      * (se verifica antes: @Update solo mira el id y podría pisar la de otro usuario).
      */
-    suspend fun actualizar(inmersion: InmersionEntity): Boolean {
+    override suspend fun actualizar(inmersion: Inmersion): Boolean {
         val usuario = sesion.usuarioActual.value ?: return false
-        return dao.actualizarSiEsDe(inmersion, usuario)
+        return dao.actualizarSiEsDe(inmersion.aEntidad(usuario), usuario)
     }
 
     /** @return true si se borró (false si no hay sesión, no existía o era de otro usuario). */
-    suspend fun eliminar(inmersion: InmersionEntity): Boolean {
+    override suspend fun eliminar(inmersion: Inmersion): Boolean {
         val usuario = sesion.usuarioActual.value ?: return false
         return dao.eliminar(inmersion.id, usuario) > 0
     }

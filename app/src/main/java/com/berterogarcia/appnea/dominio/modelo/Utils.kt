@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.dominio.modelo
 
 // Se eliminó hashearPassword (SHA-256 sin salt). Ahora se usa SeguridadPassword.hashear.
 

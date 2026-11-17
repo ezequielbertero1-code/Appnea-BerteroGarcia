@@ -1,7 +1,8 @@
 package com.berterogarcia.appnea.data.repository
 
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioSesion
+import com.berterogarcia.appnea.dominio.GestorSesion
 import com.berterogarcia.appnea.util.intentar
-import com.berterogarcia.appnea.data.sesion.SessionManager
 import com.berterogarcia.appnea.data.local.UsuarioDao
 
 /**
@@ -13,16 +14,16 @@ import com.berterogarcia.appnea.data.local.UsuarioDao
  * no existir más. Por eso se valida contra la tabla `usuarios`.
  */
 class SesionRepository(
-    private val sessionManager: SessionManager,
+    private val sessionManager: GestorSesion,
     private val usuarioDao: UsuarioDao
-) {
+) : RepositorioSesion {
     /**
      * @return el usuario logueado si la sesión es válida, o null si hay que ir al login.
      * Si el usuario guardado ya no existe en la base, limpia la sesión.
      * Si falla la lectura de la base, devuelve null pero NO borra la sesión
      * (un error puntual no debería desloguear a nadie).
      */
-    suspend fun usuarioConSesionValida(): String? {
+    override suspend fun usuarioConSesionValida(): String? {
         val guardado = sessionManager.obtenerUsuario()?.takeIf { it.isNotBlank() } ?: return null
         val existe = intentar("SesionRepository") { usuarioDao.existeUsuario(guardado) }.getOrElse { return null }
         if (!existe) sessionManager.cerrarSesion()

@@ -33,7 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.EquipoEntity
+import com.berterogarcia.appnea.dominio.modelo.Equipo
 import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.GrupoLista
@@ -148,7 +148,7 @@ internal fun PreguntaExtra(
 
 /** Toda la fila se toca (no solo el checkbox) y TalkBack la anuncia como checkbox. */
 @Composable
-internal fun FilaEquipo(equipo: EquipoEntity, marcado: Boolean, onCambio: (Boolean) -> Unit, indice: Int, total: Int) {
+internal fun FilaEquipo(equipo: Equipo, marcado: Boolean, onCambio: (Boolean) -> Unit, indice: Int, total: Int) {
     val nombre = listOf(equipo.marca, equipo.modelo)
         .filter { it.isNotBlank() }
         .joinToString(" ")

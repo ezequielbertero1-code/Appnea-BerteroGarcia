@@ -35,10 +35,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.Fase
-import com.berterogarcia.appnea.data.local.TablaPersonalizadaEntity
-import com.berterogarcia.appnea.data.local.TipoFase
-import com.berterogarcia.appnea.data.repository.TablaPersonalizadaRepository
+import com.berterogarcia.appnea.dominio.modelo.Fase
+import com.berterogarcia.appnea.dominio.modelo.TablaPersonalizada
+import com.berterogarcia.appnea.dominio.modelo.TipoFase
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioTablas
 import com.berterogarcia.appnea.ui.components.BarraAccionesInferior
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.BotonContorno
@@ -84,7 +84,7 @@ data class CrearTablaUiState(
     val puedeRepetir: Boolean get() = tieneApnea && fases.any { it.tipo == TipoFase.DESCANSO }
 }
 
-class CrearTablaViewModel(private val repository: TablaPersonalizadaRepository) : ViewModel() {
+class CrearTablaViewModel(private val repository: RepositorioTablas) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CrearTablaUiState())
     val uiState: StateFlow<CrearTablaUiState> = _uiState
@@ -132,7 +132,7 @@ class CrearTablaViewModel(private val repository: TablaPersonalizadaRepository) 
         viewModelScope.launch {
             // guardar() devuelve false si no hay sesión; si la base falla, runCatching da false
             val ok = intentar("CrearTabla") {
-                repository.guardar(TablaPersonalizadaEntity(nombre = s.nombre.trim(), fases = s.fases))
+                repository.guardar(TablaPersonalizada(nombre = s.nombre.trim(), fases = s.fases))
             }.getOrDefault(false)
             _uiState.update {
                 if (ok) it.copy(guardando = false, guardadoOk = true)

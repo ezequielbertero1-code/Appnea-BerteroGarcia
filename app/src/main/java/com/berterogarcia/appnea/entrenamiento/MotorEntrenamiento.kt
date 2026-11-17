@@ -2,8 +2,8 @@ package com.berterogarcia.appnea.entrenamiento
 
 import android.os.SystemClock
 import com.berterogarcia.appnea.data.sonido.SonidoManager
-import com.berterogarcia.appnea.data.local.TablaApnea
-import com.berterogarcia.appnea.data.local.TipoFase
+import com.berterogarcia.appnea.dominio.modelo.TablaApnea
+import com.berterogarcia.appnea.dominio.modelo.TipoFase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

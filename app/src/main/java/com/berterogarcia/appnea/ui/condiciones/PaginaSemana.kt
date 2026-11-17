@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.condiciones.Condiciones
+import com.berterogarcia.appnea.dominio.modelo.Condiciones
 import com.berterogarcia.appnea.ui.components.descripcionClima
 import com.berterogarcia.appnea.ui.components.nombreFaseLunar
 import com.berterogarcia.appnea.ui.theme.TextoSuperficie

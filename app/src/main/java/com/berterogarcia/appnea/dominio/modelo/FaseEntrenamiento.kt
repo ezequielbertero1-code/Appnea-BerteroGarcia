@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.local
+package com.berterogarcia.appnea.dominio.modelo
 
 enum class TipoFase { PREPARACION, APNEA, DESCANSO }
 

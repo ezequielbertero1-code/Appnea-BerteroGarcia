@@ -1,7 +1,7 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
-import com.berterogarcia.appnea.data.local.TipoInmersion
-import com.berterogarcia.appnea.data.local.Visibilidad
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.Visibilidad
 import org.json.JSONArray
 import org.json.JSONObject
 

@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
 import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 import java.util.Locale
 
@@ -21,7 +21,7 @@ private val LOCALE_ES: Locale = Locale.forLanguageTag("es-AR")
  */
 @Composable
 fun FilaInmersion(
-    inmersion: InmersionEntity,
+    inmersion: Inmersion,
     indice: Int,
     total: Int,
     onClick: () -> Unit,
@@ -51,7 +51,7 @@ fun FilaInmersion(
  * Si la actividad empieza con el tipo ("Buceo recreativo") se saca la repetición.
  */
 @Composable
-private fun subtituloInmersion(i: InmersionEntity, conTemperaturaAgua: Boolean): String {
+private fun subtituloInmersion(i: Inmersion, conTemperaturaAgua: Boolean): String {
     val tipo = i.tipo.nombre()
     val actividad = i.actividad.lineSequence()
         .map { it.trim() }

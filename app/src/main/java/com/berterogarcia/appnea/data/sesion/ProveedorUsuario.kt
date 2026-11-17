@@ -1,21 +1,10 @@
 package com.berterogarcia.appnea.data.sesion
 
+import com.berterogarcia.appnea.dominio.ProveedorUsuario
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-
-/**
- * Quién está logueado ahora. Lo implementa [SessionManager].
- *
- * Los repositorios dependen de esta interfaz (y no de SessionManager directamente) para
- * poder testearlos con un usuario falso, sin Android ni SharedPreferences.
- */
-interface ProveedorUsuario {
-    /** Usuario logueado, o null si no hay sesión. Emite de nuevo al iniciar/cerrar sesión. */
-    val usuarioActual: StateFlow<String?>
-}
 
 /**
  * Ejecuta [consulta] para el usuario logueado y se re-suscribe sola cuando cambia la sesión

@@ -25,11 +25,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.condiciones.Aptitud
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.formatearDuracion
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado
-import com.berterogarcia.appnea.data.perfil.PuntoPerfil
+import com.berterogarcia.appnea.dominio.modelo.Aptitud
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.formatearDuracion
+import com.berterogarcia.appnea.dominio.PerfilSimulado
+import com.berterogarcia.appnea.dominio.PuntoPerfil
 import com.berterogarcia.appnea.ui.components.Chips
 import com.berterogarcia.appnea.ui.components.DatoChico
 import com.berterogarcia.appnea.ui.components.FilaMosaicos
@@ -52,7 +52,7 @@ import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 // Pestañas Gráfico, Equipo y Condiciones del detalle de una inmersión.
 
 @Composable
-internal fun PestanaGrafico(i: InmersionEntity, perfil: List<PuntoPerfil>) {
+internal fun PestanaGrafico(i: Inmersion, perfil: List<PuntoPerfil>) {
     // La curva se dibuja de izquierda a derecha cada vez que se entra a la pestaña
     val progreso = remember { Animatable(0f) }
     LaunchedEffect(perfil) {
@@ -90,7 +90,7 @@ internal fun PestanaGrafico(i: InmersionEntity, perfil: List<PuntoPerfil>) {
 }
 
 @Composable
-internal fun PestanaEquipo(i: InmersionEntity) {
+internal fun PestanaEquipo(i: Inmersion) {
     // Lastre y protección extra son opcionales: si no se usaron, no se muestra nada
     if (i.lastreKg != null || i.proteccionMm != null) {
         FilaMosaicos {
@@ -109,7 +109,7 @@ internal fun PestanaEquipo(i: InmersionEntity) {
 }
 
 @Composable
-internal fun PestanaCondiciones(i: InmersionEntity) {
+internal fun PestanaCondiciones(i: Inmersion) {
     val c = i.condiciones
 
     // ---- Clima grande (solo si se guardó con internet) ----

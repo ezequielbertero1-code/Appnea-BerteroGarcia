@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
+import com.berterogarcia.appnea.dominio.modelo.ContactoEmergencia
 import com.berterogarcia.appnea.ui.components.BotonContorno
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.BotonSecundario
@@ -117,7 +117,7 @@ fun ContactosScreen(
 
 @Composable
 private fun TarjetaContacto(
-    contacto: ContactoEmergenciaEntity,
+    contacto: ContactoEmergencia,
     indice: Int,
     total: Int,
     onEditar: () -> Unit,

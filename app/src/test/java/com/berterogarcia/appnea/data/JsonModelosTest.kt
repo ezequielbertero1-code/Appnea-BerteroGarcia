@@ -1,8 +1,8 @@
 package com.berterogarcia.appnea.data
 
-import com.berterogarcia.appnea.data.local.BajadaApnea
-import com.berterogarcia.appnea.data.local.CondicionesRegistro
-import com.berterogarcia.appnea.data.local.RegistroApnea
+import com.berterogarcia.appnea.dominio.modelo.BajadaApnea
+import com.berterogarcia.appnea.dominio.modelo.CondicionesRegistro
+import com.berterogarcia.appnea.dominio.modelo.RegistroApnea
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

@@ -4,9 +4,10 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.berterogarcia.appnea.data.local.AppDatabase
-import com.berterogarcia.appnea.data.local.CategoriaEquipo
+import com.berterogarcia.appnea.dominio.modelo.CategoriaEquipo
 import com.berterogarcia.appnea.data.local.EquipoEntity
-import com.berterogarcia.appnea.data.sesion.ProveedorUsuario
+import com.berterogarcia.appnea.dominio.modelo.Equipo
+import com.berterogarcia.appnea.dominio.ProveedorUsuario
 import com.berterogarcia.appnea.data.local.UsuarioEntity
 import com.berterogarcia.appnea.data.repository.PerfilRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,16 +51,25 @@ class AislamientoUsuariosTest {
     }
 
     @Test
-    fun elRepositorioRechazaOperacionesSobreOtroUsuario() = runBlocking {
-        val r = runCatching { repo.observarEquipamiento("beto") }
-        assertTrue(r.exceptionOrNull() is IllegalStateException)
-        val g = runCatching { repo.guardarEquipo(EquipoEntity(nombreUsuario = "beto", categoria = CategoriaEquipo.entries.first())) }
+    fun sinSesionElRepositorioNoEscribe() = runBlocking {
+        sesion.usuarioActual.value = null
+        val g = runCatching { repo.guardarEquipo(Equipo(categoria = CategoriaEquipo.entries.first())) }
         assertTrue(g.exceptionOrNull() is IllegalStateException)
+        assertEquals(0, db.equipoDao().observarTodos("ana").first().size)
+    }
+
+    @Test
+    fun elRepositorioNoLeeNiBorraLoDeOtro() = runBlocking {
+        val idBeto = db.equipoDao().insertar(EquipoEntity(nombreUsuario = "beto", categoria = CategoriaEquipo.entries.first(), marca = "Mares"))
+        // Ana está logueada: el id de Beto no le devuelve nada ni se lo deja borrar
+        assertEquals(null, repo.obtenerEquipo(idBeto))
+        assertFalse(repo.eliminarEquipo(idBeto))
+        assertEquals("Mares", db.equipoDao().obtener(idBeto, "beto")!!.marca)
     }
 
     @Test
     fun losFlujosActualesSiguenALaSesion() = runBlocking {
-        repo.guardarEquipo(EquipoEntity(nombreUsuario = "ana", categoria = CategoriaEquipo.entries.first(), marca = "De Ana"))
+        repo.guardarEquipo(Equipo(categoria = CategoriaEquipo.entries.first(), marca = "De Ana"))
         assertEquals(listOf("De Ana"), repo.equipamientoActual.first().map { it.marca })
         sesion.usuarioActual.value = "beto"
         assertEquals(emptyList<String>(), repo.equipamientoActual.first().map { it.marca })

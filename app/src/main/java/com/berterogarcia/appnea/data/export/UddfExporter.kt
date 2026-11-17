@@ -1,10 +1,10 @@
 package com.berterogarcia.appnea.data.export
 
 import android.util.Xml
-import com.berterogarcia.appnea.data.local.CategoriaEquipo
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.formatearDuracion
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado
+import com.berterogarcia.appnea.dominio.modelo.CategoriaEquipo
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.formatearDuracion
+import com.berterogarcia.appnea.dominio.PerfilSimulado
 import org.xmlpull.v1.XmlSerializer
 import java.io.StringWriter
 import java.time.LocalDateTime
@@ -18,7 +18,8 @@ object UddfExporter {
     private const val CERO_ABSOLUTO = 273.15
     private val ISO = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
-    fun generar(i: InmersionEntity): String {
+    /** @param autor nombre que va en <owner> (el usuario logueado). */
+    fun generar(i: Inmersion, autor: String = ""): String {
         val writer = StringWriter()
         val xml = Xml.newSerializer()
         xml.setOutput(writer)
@@ -39,7 +40,7 @@ object UddfExporter {
         val equipo = piezasDeEquipo(i)
         if (equipo.isNotEmpty()) xml.bloque("diver") {
             bloque("owner", "id" to "owner") {
-                bloque("personal") { dato("firstname", i.nombreUsuario.ifBlank { "Appnea" }) }
+                bloque("personal") { dato("firstname", autor.ifBlank { "Appnea" }) }
                 bloque("equipment") {
                     equipo.forEach { pieza ->
                         bloque(pieza.elemento, "id" to pieza.id) { dato("name", pieza.nombre) }
@@ -93,7 +94,7 @@ object UddfExporter {
     }
 
     // Datos que UDDF no tiene como campo propio van como líneas de <notes>
-    private fun notas(i: InmersionEntity): List<String> = buildList {
+    private fun notas(i: Inmersion): List<String> = buildList {
         if (i.actividad.isNotBlank()) add("Actividad: ${i.actividad}")
         if (i.apnea == null || i.tiempoFondo.inWholeSeconds > 0)
             add("Tiempo de fondo: ${formatearDuracion(i.tiempoFondo.inWholeSeconds.toInt())}")
@@ -142,7 +143,7 @@ object UddfExporter {
      * La categoría sale de lo que está antes del " · ". Las inmersiones viejas tienen texto
      * libre ("Semi seco", "Guantes"): ahí se adivina por palabras clave.
      */
-    private fun piezasDeEquipo(i: InmersionEntity): List<PiezaUddf> =
+    private fun piezasDeEquipo(i: Inmersion): List<PiezaUddf> =
         i.equipamiento.filter { it.isNotBlank() }.sorted().mapIndexed { n, etiqueta ->
             val prefijo = etiqueta.substringBefore(" · ").trim()
             val categoria = CategoriaEquipo.entries.firstOrNull { it.etiqueta.equals(prefijo, ignoreCase = true) }
@@ -173,7 +174,7 @@ object UddfExporter {
     }
 
     // Duración total en el agua = salida - entrada (si cruza la medianoche, suma 24 h)
-    private fun duracionSegundos(i: InmersionEntity): Long {
+    private fun duracionSegundos(i: Inmersion): Long {
         val s = java.time.Duration.between(i.horaEntrada, i.horaSalida).seconds
         return if (s >= 0) s else s + 24 * 3600
     }
@@ -214,7 +215,7 @@ object UddfExporter {
  *
  * ── Mapeo de campos ─────────────────────────────────────────────────────────────
  *
- *  InmersionEntity          UDDF                                        Unidad
+ *  Inmersion          UDDF                                        Unidad
  *  ───────────────────────  ──────────────────────────────────────────  ───────
  *  id                       <dive id="dive_{id}">                       —
  *                           <informationbeforedive>/<divenumber>        —

@@ -1,6 +1,6 @@
 package com.berterogarcia.appnea.data.sonido
 
-import com.berterogarcia.appnea.data.local.TipoFase
+import com.berterogarcia.appnea.dominio.modelo.TipoFase
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.SoundPool

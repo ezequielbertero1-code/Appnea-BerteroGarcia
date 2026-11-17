@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.data.remote
+package com.berterogarcia.appnea.dominio.modelo
 
 /** Convierte grados (0-360) a un punto cardinal en español, para viento y oleaje. */
 fun direccionCardinal(grados: Double): String {

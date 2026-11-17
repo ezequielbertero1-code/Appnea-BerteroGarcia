@@ -1,7 +1,7 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import java.time.LocalTime

@@ -1,5 +1,9 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.modelo.CondicionesRegistro
+import com.berterogarcia.appnea.dominio.modelo.RegistroApnea
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.Visibilidad
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index

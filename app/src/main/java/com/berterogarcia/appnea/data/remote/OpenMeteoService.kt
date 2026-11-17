@@ -2,9 +2,9 @@ package com.berterogarcia.appnea.data.remote
 
 import com.berterogarcia.appnea.util.intentar
 import com.berterogarcia.appnea.BuildConfig
-import com.berterogarcia.appnea.data.condiciones.DiaClima
-import com.berterogarcia.appnea.data.condiciones.HoraClima
-import com.berterogarcia.appnea.data.condiciones.HoraMar
+import com.berterogarcia.appnea.dominio.modelo.DiaClima
+import com.berterogarcia.appnea.dominio.modelo.HoraClima
+import com.berterogarcia.appnea.dominio.modelo.HoraMar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray

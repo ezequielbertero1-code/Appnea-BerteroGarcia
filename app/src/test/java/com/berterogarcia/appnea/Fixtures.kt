@@ -1,7 +1,7 @@
 package com.berterogarcia.appnea
 
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.time.Duration.Companion.minutes
@@ -14,7 +14,7 @@ fun inmersion(
     profundidad: Float = 18f,
     tipo: TipoInmersion = TipoInmersion.BUCEO,
     horaEntrada: LocalTime = LocalTime.of(10, 0)
-) = InmersionEntity(
+) = Inmersion(
     id = id,
     fecha = fecha,
     lugar = lugar,

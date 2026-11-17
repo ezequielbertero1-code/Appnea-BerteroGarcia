@@ -31,8 +31,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.condiciones.Aptitud
-import com.berterogarcia.appnea.data.condiciones.Condiciones
+import com.berterogarcia.appnea.dominio.modelo.Aptitud
+import com.berterogarcia.appnea.dominio.modelo.Condiciones
 import com.berterogarcia.appnea.ui.components.descripcionClima
 import com.berterogarcia.appnea.ui.components.nombre
 import com.berterogarcia.appnea.ui.components.texto

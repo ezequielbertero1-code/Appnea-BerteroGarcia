@@ -35,11 +35,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.InmersionEntity
-import com.berterogarcia.appnea.data.local.RegistroApnea
-import com.berterogarcia.appnea.data.ubicacion.Ubicacion
-import com.berterogarcia.appnea.data.local.formatearDuracion
-import com.berterogarcia.appnea.data.perfil.PerfilSimulado
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.RegistroApnea
+import com.berterogarcia.appnea.dominio.modelo.Ubicacion
+import com.berterogarcia.appnea.dominio.modelo.formatearDuracion
+import com.berterogarcia.appnea.dominio.PerfilSimulado
 import com.berterogarcia.appnea.ui.components.EncabezadoGrupo
 import com.berterogarcia.appnea.ui.components.FilaLista
 import com.berterogarcia.appnea.ui.components.FilaMosaicos
@@ -62,7 +62,7 @@ import java.util.Locale
 // Pestaña General del detalle de una inmersión.
 
 @Composable
-internal fun PestanaGeneral(i: InmersionEntity) {
+internal fun PestanaGeneral(i: Inmersion) {
     val apnea = PerfilSimulado.esApnea(i)
     val fondo = formatearDuracion(i.tiempoFondo.inWholeSeconds.toInt())
 
@@ -236,7 +236,7 @@ internal fun FilaValor(icono: Int, titulo: String, valor: String, indice: Int, t
 
 /** Mini mapa del lugar marcado. Las inmersiones sin coordenadas no muestran la sección. */
 @Composable
-internal fun TarjetaUbicacion(i: InmersionEntity) {
+internal fun TarjetaUbicacion(i: Inmersion) {
     val lat = i.latitud ?: return
     val lon = i.longitud ?: return
     val context = LocalContext.current

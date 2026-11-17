@@ -11,8 +11,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.berterogarcia.appnea.contenedor
-import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
-import com.berterogarcia.appnea.data.ubicacion.Ubicacion
+import com.berterogarcia.appnea.dominio.modelo.Ubicacion
 import com.berterogarcia.appnea.dominio.ProgramadorCondiciones
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
@@ -30,12 +29,13 @@ class CompletarCondicionesWorker(context: Context, params: WorkerParameters) : C
         val lon = inputData.getDouble(CLAVE_LON, Double.NaN)
         if (lat.isNaN() || lon.isNaN()) return Result.failure()
 
-        val registro = CondicionesRepository.registroPara(lat, lon, momento)
+        val app = applicationContext.contenedor()
+        val registro = app.condiciones.registroPara(lat, lon, momento)
         if (!registro.conDatosOnline) {
             // Sin datos (red caída a mitad de camino, error del servidor...): se reintenta unas veces
             return if (runAttemptCount < MAX_INTENTOS) Result.retry() else Result.success()
         }
-        val dao = applicationContext.contenedor().database.inmersionDao()
+        val dao = app.database.inmersionDao()
         dao.actualizarCondiciones(id, registro)
         return Result.success()
     }

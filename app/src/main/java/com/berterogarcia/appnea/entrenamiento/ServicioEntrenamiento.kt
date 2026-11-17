@@ -19,7 +19,7 @@ import androidx.core.content.ContextCompat
 import com.berterogarcia.appnea.MainActivity
 import com.berterogarcia.appnea.contenedor
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.TipoFase
+import com.berterogarcia.appnea.dominio.modelo.TipoFase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

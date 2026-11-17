@@ -1,7 +1,12 @@
 package com.berterogarcia.appnea.data.local
 
+import com.berterogarcia.appnea.dominio.modelo.BajadaApnea
+import com.berterogarcia.appnea.dominio.modelo.CondicionesRegistro
+import com.berterogarcia.appnea.dominio.modelo.RegistroApnea
+import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
+import com.berterogarcia.appnea.dominio.modelo.Visibilidad
 import com.berterogarcia.appnea.data.seguridad.SeguridadPassword
-import com.berterogarcia.appnea.dominio.FactorEntrenamiento
+import com.berterogarcia.appnea.dominio.modelo.FactorEntrenamiento
 import com.berterogarcia.appnea.util.intentar
 import android.content.Context
 import androidx.core.content.edit

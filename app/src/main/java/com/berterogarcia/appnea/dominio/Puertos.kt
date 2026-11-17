@@ -1,8 +1,9 @@
 package com.berterogarcia.appnea.dominio
 
-import com.berterogarcia.appnea.data.condiciones.Condiciones
-import com.berterogarcia.appnea.data.local.CondicionesRegistro
-import com.berterogarcia.appnea.data.ubicacion.Ubicacion
+import com.berterogarcia.appnea.dominio.modelo.Condiciones
+import com.berterogarcia.appnea.dominio.modelo.CondicionesRegistro
+import com.berterogarcia.appnea.dominio.modelo.Inmersion
+import com.berterogarcia.appnea.dominio.modelo.Ubicacion
 import java.time.LocalDateTime
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -31,4 +32,20 @@ interface FuenteCondiciones {
     suspend fun obtener(ubicacion: Ubicacion): Result<Condiciones>
     /** Foto de las condiciones de un momento, para guardar con una inmersión. */
     suspend fun registroPara(latitud: Double, longitud: Double, momento: LocalDateTime): CondicionesRegistro
+    /** Solo lo que se calcula sin internet (fase lunar): para guardar al instante. */
+    fun registroAstronomico(latitud: Double, longitud: Double, momento: LocalDateTime): CondicionesRegistro
+}
+
+/** Pide (más tarde, cuando haya internet) el clima y el mar de una inmersión ya guardada. */
+fun interface ProgramadorCondiciones {
+    fun programar(idInmersion: Long, ubicacion: Ubicacion, momento: LocalDateTime)
+}
+
+/** Exportar una inmersión a un archivo que eligió el usuario (UDDF, el formato de las computadoras de buceo). */
+interface ExportadorInmersiones {
+    /**
+     * @param destino dirección del archivo (la `Uri` que devolvió el selector de archivos, como texto).
+     * @return true si se escribió bien.
+     */
+    suspend fun exportar(inmersion: Inmersion, destino: String): Boolean
 }

@@ -1,8 +1,8 @@
 package com.berterogarcia.appnea.ui
 
-import com.berterogarcia.appnea.data.local.IntentoApneaEntity
-import com.berterogarcia.appnea.data.local.SesionApneaEntity
-import com.berterogarcia.appnea.dominio.FactorEntrenamiento
+import com.berterogarcia.appnea.dominio.modelo.IntentoLibre
+import com.berterogarcia.appnea.dominio.modelo.SesionApnea
+import com.berterogarcia.appnea.dominio.modelo.FactorEntrenamiento
 import com.berterogarcia.appnea.ui.estadisticas.PeriodoEstadisticas
 import com.berterogarcia.appnea.ui.estadisticas.resumirEntrenamiento
 import org.junit.Assert.assertEquals
@@ -18,14 +18,14 @@ class ResumenEntrenamientoTest {
 
     private fun sesion(
         id: Long, fecha: LocalDate, marca: Int, duracion: Int?, hora: LocalTime? = null, completada: Boolean = true
-    ) = SesionApneaEntity(
+    ) = SesionApnea(
         id = id, fecha = fecha, nombreTabla = "T", completada = completada, faseAlcanzada = 1, totalFases = 8,
         marcaSegundos = marca, factores = emptySet<FactorEntrenamiento>(), sensaciones = "",
         horaInicio = hora, duracionSegundos = duracion
     )
 
     private fun intento(fecha: LocalDate, ms: Long) =
-        IntentoApneaEntity(fecha = fecha, hora = LocalTime.NOON, duracionMs = ms)
+        IntentoLibre(fecha = fecha, hora = LocalTime.NOON, duracionMs = ms)
 
     @Test
     fun sumaElTiempoYCuentaLasSesionesSinApnea() {

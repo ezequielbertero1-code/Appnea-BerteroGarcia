@@ -3,8 +3,8 @@ package com.berterogarcia.appnea.ui.perfil.equipamiento
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.berterogarcia.appnea.data.local.EquipoEntity
-import com.berterogarcia.appnea.data.repository.PerfilRepository
+import com.berterogarcia.appnea.dominio.modelo.Equipo
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioPerfil
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.perfil.comun.EstadoLista
 import com.berterogarcia.appnea.ui.perfil.comun.MENSAJE_ERROR_ELIMINAR
@@ -16,19 +16,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class EquipamientoViewModel(
-    private val repository: PerfilRepository
+    private val repository: RepositorioPerfil
 ) : ViewModel() {
-    /** Usuario logueado al abrir la pantalla (de la sesión; el repositorio valida cada operación). */
-    private val usuario: String? = repository.usuarioActual
+    /** Si había sesión al abrir la pantalla (el repositorio trabaja siempre sobre el usuario logueado). */
+    private val haySesion: Boolean = repository.haySesion
 
     /** Orden: primero lo que está en uso, después por categoría (orden del enum) y marca. */
-    val estado: StateFlow<EstadoLista<EquipoEntity>> =
-        if (usuario == null) {
+    val estado: StateFlow<EstadoLista<Equipo>> =
+        if (!haySesion) {
             MutableStateFlow(EstadoLista(cargando = false, error = MENSAJE_SIN_SESION))
         } else {
-            repository.observarEquipamiento(usuario).comoEstadoLista(viewModelScope) { lista ->
+            repository.equipamientoActual.comoEstadoLista(viewModelScope) { lista ->
                 lista.sortedWith(
-                    compareByDescending<EquipoEntity> { it.enUso }
+                    compareByDescending<Equipo> { it.enUso }
                         .thenBy { it.categoria.ordinal }
                         .thenBy { it.marca.lowercase() }
                 )
@@ -40,9 +40,9 @@ class EquipamientoViewModel(
     val mensaje: StateFlow<TextoUi?> = _mensaje.asStateFlow()
 
     fun eliminar(id: Long) {
-        val u = usuario ?: return
+        if (!haySesion) return
         viewModelScope.launch {
-            intentar("EquipamientoViewModel") { repository.eliminarEquipo(id, u) }
+            intentar("EquipamientoViewModel") { repository.eliminarEquipo(id) }
                 .onFailure { _mensaje.value = MENSAJE_ERROR_ELIMINAR }
         }
     }

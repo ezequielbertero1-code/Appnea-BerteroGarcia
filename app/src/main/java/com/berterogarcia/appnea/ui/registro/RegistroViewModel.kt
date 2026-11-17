@@ -5,14 +5,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.auth.CuentaGoogle
-import com.berterogarcia.appnea.data.local.ContactoEmergenciaEntity
-import com.berterogarcia.appnea.data.local.PerfilUsuarioEntity
-import com.berterogarcia.appnea.data.sesion.SessionManager
-import com.berterogarcia.appnea.data.repository.CuentaGoogleRepository
-import com.berterogarcia.appnea.data.repository.NuevoRegistro
-import com.berterogarcia.appnea.data.repository.RegistroRepository
-import com.berterogarcia.appnea.data.repository.ResultadoRegistro
+import com.berterogarcia.appnea.dominio.modelo.CuentaGoogle
+import com.berterogarcia.appnea.dominio.modelo.ContactoEmergencia
+import com.berterogarcia.appnea.dominio.modelo.PerfilUsuario
+import com.berterogarcia.appnea.dominio.GestorSesion
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioCuentaGoogle
+import com.berterogarcia.appnea.dominio.repositorios.NuevoRegistro
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioRegistro
+import com.berterogarcia.appnea.dominio.repositorios.ResultadoRegistro
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.ui.perfil.comun.Validaciones
@@ -85,9 +85,9 @@ data class RegistroUiState(
  * Con [cuentaGoogle] (primer ingreso con Google) se saltea el paso de cuenta y se parte de los datos de Google.
  */
 class RegistroViewModel(
-    private val repository: RegistroRepository,
-    private val cuentaGoogleRepository: CuentaGoogleRepository,
-    private val sessionManager: SessionManager,
+    private val repository: RepositorioRegistro,
+    private val cuentaGoogleRepository: RepositorioCuentaGoogle,
+    private val sessionManager: GestorSesion,
     private val cuentaGoogle: CuentaGoogle? = null,
     /** Borrador del formulario por si Android mata la app en segundo plano (sin contraseñas). */
     private val estadoGuardado: SavedStateHandle = SavedStateHandle()
@@ -234,8 +234,7 @@ class RegistroViewModel(
     private fun armarRegistro(s: RegistroUiState) = NuevoRegistro(
         usuario = s.usuario,
         password = s.password,
-        perfil = PerfilUsuarioEntity(
-            nombreUsuario = s.usuario,
+        perfil = PerfilUsuario(
             nombre = s.nombre.trim(),
             apellido = s.apellido.trim(),
             email = s.email.trim(),
@@ -243,8 +242,7 @@ class RegistroViewModel(
             fechaNacimiento = s.fechaNacimiento,
             ciudad = s.ciudad.trim()
         ),
-        contacto = ContactoEmergenciaEntity(
-            nombreUsuario = s.usuario,
+        contacto = ContactoEmergencia(
             nombre = s.contactoNombre.trim(),
             relacion = s.contactoRelacion.trim(),
             telefono = s.contactoTelefono.trim(),

@@ -22,7 +22,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.condiciones.Condiciones
+import com.berterogarcia.appnea.dominio.modelo.Condiciones
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorBajamar
 import com.berterogarcia.appnea.ui.theme.ColorRegular

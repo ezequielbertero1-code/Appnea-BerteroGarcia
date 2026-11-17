@@ -4,8 +4,8 @@ import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
-import com.berterogarcia.appnea.data.local.IntentoApneaEntity
-import com.berterogarcia.appnea.data.repository.IntentoApneaRepository
+import com.berterogarcia.appnea.dominio.modelo.IntentoLibre
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioIntentos
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
 import com.berterogarcia.appnea.util.intentar
@@ -53,7 +53,7 @@ private data class Reloj(
  * en la base (así no se pierde al salir de la pantalla ni si Android cierra la app).
  */
 class CronometroViewModel(
-    private val repository: IntentoApneaRepository,
+    private val repository: RepositorioIntentos,
     private val reloj: () -> Long = SystemClock::elapsedRealtime,
     private val ahora: () -> LocalDateTime = LocalDateTime::now
 ) : ViewModel() {
@@ -97,7 +97,7 @@ class CronometroViewModel(
         local.update { it.copy(corriendo = false, transcurridoMs = total) }
         if (total < 1_000L) return
         val fin = ahora()
-        val intento = IntentoApneaEntity(
+        val intento = IntentoLibre(
             fecha = fin.toLocalDate(),
             hora = fin.toLocalTime().minusNanos(total * 1_000_000L).withNano(0), // hora de inicio
             duracionMs = total
