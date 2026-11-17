@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.dominio.modelo.CategoriaEquipo
 import com.berterogarcia.appnea.dominio.modelo.Equipo
 import com.berterogarcia.appnea.ui.components.formatoLargo
@@ -132,7 +133,7 @@ private fun TarjetaEquipo(equipo: Equipo, indice: Int, total: Int, onEditar: () 
 /** Ícono de Material Symbols para cada categoría (las que no tienen uno claro usan el de buceo). */
 @DrawableRes
 private fun iconoCategoria(categoria: CategoriaEquipo): Int = when (categoria) {
-    CategoriaEquipo.MASCARA -> R.drawable.ic_ms_visibility
+    CategoriaEquipo.MASCARA -> UiR.drawable.ic_ms_visibility
     CategoriaEquipo.SNORKEL -> R.drawable.ic_ms_air
     CategoriaEquipo.ALETAS -> R.drawable.ic_ms_footprint
     CategoriaEquipo.TRAJE -> R.drawable.ic_ms_checkroom

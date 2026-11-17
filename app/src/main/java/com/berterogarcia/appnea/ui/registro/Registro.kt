@@ -44,7 +44,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.berterogarcia.appnea.ui.components.FuerzaPassword
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.ui.components.BarraAccionesInferior
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.BotonContorno
@@ -155,7 +157,7 @@ fun RegistroScreen(
 
         BarraAccionesInferior {
             BotonContorno(
-                texto = stringResource(if (s.esPrimerPaso) R.string.accion_volver else R.string.nueva_anterior),
+                texto = stringResource(if (s.esPrimerPaso) UiR.string.accion_volver else R.string.nueva_anterior),
                 onClick = onAnterior,
                 enabled = !s.ocupado,
                 modifier = Modifier.weight(1f)

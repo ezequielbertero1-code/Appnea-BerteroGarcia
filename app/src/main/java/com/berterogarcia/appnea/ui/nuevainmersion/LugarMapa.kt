@@ -47,6 +47,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.dominio.ServicioUbicacion
 import com.berterogarcia.appnea.dominio.modelo.Ubicacion
 import com.berterogarcia.appnea.ui.components.BotonContorno
@@ -251,7 +252,7 @@ fun SelectorLugarMapa(
             IconButton(onClick = onCancelar) {
                 Icon(
                     Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = stringResource(R.string.accion_volver),
+                    contentDescription = stringResource(UiR.string.accion_volver),
                     tint = TextoSuperficie
                 )
             }
@@ -346,7 +347,7 @@ fun SelectorLugarMapa(
                     Modifier.fillMaxWidth().padding(top = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    BotonContorno(texto = stringResource(R.string.accion_cancelar), onClick = onCancelar, modifier = Modifier.weight(1f))
+                    BotonContorno(texto = stringResource(UiR.string.accion_cancelar), onClick = onCancelar, modifier = Modifier.weight(1f))
                     BotonPrincipal(
                         texto = stringResource(R.string.lugar_usar),
                         onClick = { onConfirmar(marcado.latitud, marcado.longitud, nombre) },

@@ -1,11 +1,10 @@
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
+    // SDK, Java y desugaring: build-logic/ (igual para todos los módulos)
+    alias(libs.plugins.appnea.android.application)
+    alias(libs.plugins.appnea.android.compose)
     alias(libs.plugins.kotlin.serialization) // rutas tipadas de Navigation (@Serializable)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.detekt)
 }
 
 // Client ID "web" de Google Cloud (se guarda en local.properties: client_web=...). Sin él, el botón de Google avisa que falta configurar.
@@ -15,21 +14,14 @@ val clientWebGoogle: String = Properties().apply {
 
 android {
     namespace = "com.berterogarcia.appnea"
-    compileSdk {
-        version = release(37)
-    }
 
     defaultConfig {
         applicationId = "com.berterogarcia.appnea"
-        minSdk = 24
-        targetSdk = 37
-        // Subir versionCode en cada APK que se distribuya (Android no instala uno menor encima)
-        versionCode = 2
-        versionName = "1.1.0"
+        // En gradle.properties (appnea.versionCode / appnea.versionName)
+        versionCode = providers.gradleProperty("appnea.versionCode").get().toInt()
+        versionName = providers.gradleProperty("appnea.versionName").get()
 
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$clientWebGoogle\"")
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -42,19 +34,6 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    testOptions {
-        // android.util.Log y similares devuelven valores por defecto en los tests de JVM (no fallan)
-        unitTests.isReturnDefaultValues = true
-    }
-    sourceSets {
-        // Los esquemas exportados de Room: los usa MigrationTestHelper en los tests instrumentados
-        getByName("androidTest").assets.directories.add("$projectDir/schemas")
-    }
     lint {
         // Los problemas que ya existían quedan en lint-baseline.xml: falla solo por problemas NUEVOS
         baseline = file("lint-baseline.xml")
@@ -64,14 +43,15 @@ android {
         disable += "MissingTranslation"
     }
     buildFeatures {
-        compose = true
         buildConfig = true
     }
 }
 
 dependencies {
-    coreLibraryDesugaring(libs.desugar.jdk.libs)
-    implementation(platform(libs.androidx.compose.bom))
+    implementation(project(":core:model"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:data"))
+    implementation(project(":core:ui"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
@@ -83,22 +63,15 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.compose.material.icons.core)
-    ksp(libs.androidx.room.compiler)
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(project(":core:testing"))
     testImplementation(libs.turbine)
     testImplementation(libs.org.json) // org.json real: el de android.jar en los tests de JVM es un stub
-    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.work.testing)
-    androidTestImplementation(libs.kotlinx.coroutines.test)
-    // Rutas tipadas. Va en 1.8.1 porque room-testing (MigrationTestHelper) lo necesita y el APK de
-    // test usa la versión de la app; Navigation trae 1.7.3 y 1.8 es compatible hacia atrás.
+    androidTestImplementation(project(":core:testing"))
+    // Rutas tipadas de Navigation (@Serializable)
     implementation(libs.kotlinx.serialization.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
@@ -108,18 +81,4 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.google.googleid)
-}
-
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-}
-
-// Análisis estático de Kotlin. Como con lint, lo que ya había queda en el baseline y
-// ./gradlew :app:detekt falla solo por problemas NUEVOS.
-// Regenerar el baseline: ./gradlew :app:detektBaseline
-detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    baseline = rootProject.file("config/detekt/baseline.xml")
-    source.setFrom("src/main/java", "src/test/java", "src/androidTest/java")
 }

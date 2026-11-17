@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.clima.SelectorUbicacion
 import com.berterogarcia.appnea.ui.components.BarraSuperior
@@ -111,7 +112,7 @@ fun CondicionesScreen(viewModel: ClimaViewModel, modifier: Modifier = Modifier, 
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    uiState.error?.resolver() ?: stringResource(R.string.detalle_sin_datos),
+                    uiState.error?.resolver() ?: stringResource(UiR.string.detalle_sin_datos),
                     color = TextoSuperficieVariante,
                     textAlign = TextAlign.Center
                 )

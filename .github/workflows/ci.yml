@@ -27,15 +27,16 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # testDebugUnitTest corre en :app, :core:data y :core:ui; los módulos Kotlin puro usan "test"
       - name: Tests unitarios
-        run: ./gradlew :app:testDebugUnitTest
+        run: ./gradlew testDebugUnitTest :core:model:test :core:domain:test
 
       - name: Lint
-        run: ./gradlew :app:lintDebug
+        run: ./gradlew lintDebug
 
-      # Análisis estático de Kotlin (config/detekt/). Falla solo por problemas nuevos.
+      # Análisis estático de Kotlin de todos los módulos (config/detekt/). Falla solo por problemas nuevos.
       - name: Detekt
-        run: ./gradlew :app:detekt
+        run: ./gradlew detekt
 
       - name: Reportes
         if: always()
@@ -44,6 +45,8 @@ jobs:
           name: reportes
           path: |
             app/build/reports/tests/
+            core/*/build/reports/tests/
             app/build/reports/lint-results-debug.html
-            app/build/reports/detekt/
+            core/*/build/reports/lint-results-debug.html
+            build/reports/detekt/
           if-no-files-found: ignore

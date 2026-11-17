@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.dominio.modelo.Aptitud
 import com.berterogarcia.appnea.dominio.modelo.Inmersion
 import com.berterogarcia.appnea.dominio.modelo.formatearDuracion
@@ -182,7 +183,7 @@ internal fun PestanaCondiciones(i: Inmersion) {
         FilaMosaicos {
             Mosaico(
                 stringResource(R.string.detalle_marea),
-                c.estadoMarea ?: stringResource(R.string.detalle_sin_datos),
+                c.estadoMarea ?: stringResource(UiR.string.detalle_sin_datos),
                 c.alturaMareaM?.let { num(it, 2, " m") } ?: ""
             )
             Mosaico(stringResource(R.string.detalle_luna), "${c.iluminacionLunaPorc}%", nombreFaseLunar(c.faseLunar))
@@ -190,7 +191,7 @@ internal fun PestanaCondiciones(i: Inmersion) {
         FilaMosaicos {
             Mosaico(
                 stringResource(R.string.detalle_corriente),
-                c.corrienteKmh?.let { num(it, 1, " km/h") } ?: stringResource(R.string.detalle_sin_datos),
+                c.corrienteKmh?.let { num(it, 1, " km/h") } ?: stringResource(UiR.string.detalle_sin_datos),
                 stringResource(R.string.detalle_al_entrar)
             )
             val escala = i.visibilidad?.nombre()

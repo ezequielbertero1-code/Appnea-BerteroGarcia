@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.ui.components.BotonPeligro
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.CampoPassword
@@ -167,7 +168,7 @@ private fun DialogoBorrarCuenta(s: SeguridadUiState, viewModel: SeguridadCuentaV
             ) { Text(stringResource(R.string.seguridad_borrar_confirmar)) }
         },
         dismissButton = {
-            TextButton(onClick = viewModel::cancelarBorrado, enabled = !s.borrando) { Text(stringResource(R.string.accion_cancelar)) }
+            TextButton(onClick = viewModel::cancelarBorrado, enabled = !s.borrando) { Text(stringResource(UiR.string.accion_cancelar)) }
         }
     )
 }

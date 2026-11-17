@@ -20,8 +20,8 @@ La firma **no** está en el repositorio (ni el keystore ni las contraseñas) y n
 
 ### Desde Android Studio (recomendado)
 
-1. Subir `versionCode` (y `versionName` si corresponde) en `app/build.gradle.kts`. Play rechaza
-   un `versionCode` repetido.
+1. Subir `appnea.versionCode` (y `appnea.versionName` si corresponde) en `gradle.properties`.
+   Play rechaza un `versionCode` repetido.
 2. *Build → Generate Signed App Bundle or APK… → Android App Bundle*.
 3. Elegir el keystore de subida (*upload key*) y la variante `release`.
 4. El archivo queda en `app/release/app-release.aab`.

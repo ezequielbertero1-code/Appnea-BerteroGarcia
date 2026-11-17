@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.dominio.modelo.Aptitud
 import com.berterogarcia.appnea.dominio.modelo.Condiciones
 import com.berterogarcia.appnea.ui.components.descripcionClima
@@ -68,7 +69,7 @@ internal fun PaginaResumen(c: Condiciones) {
                     listOfNotNull(
                         clima?.codigoClima?.let { descripcionClima(it) },
                         clima?.sensacionTermicaC?.let { stringResource(R.string.detalle_sensacion, num(it, unidad = "°")) }
-                    ).joinToString(" · ").ifBlank { stringResource(R.string.detalle_sin_datos) },
+                    ).joinToString(" · ").ifBlank { stringResource(UiR.string.detalle_sin_datos) },
                     style = MaterialTheme.typography.bodySmall,
                     color = TextoSuperficieVariante
                 )

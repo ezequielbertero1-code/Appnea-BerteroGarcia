@@ -221,7 +221,7 @@ internal fun BloqueApnea(uiState: NuevaInmersionUiState, onEvento: (EventoFormul
                             formatearDuracion(r.tiempoMejorBajadaSegundos ?: 0)
                         )
                     )
-                    Mosaico(stringResource(R.string.nueva_resumen_tiempo_total), formatearDuracion(r.tiempoTotalSegundos))
+                    Mosaico(stringResource(R.string.nueva_resumen_tiempo_total), formatearDuracion(r.tiempoTotalSegundos ?: 0))
                 }
                 FilaMosaicos {
                     Mosaico(stringResource(R.string.nueva_resumen_promedio), formatearDuracion(r.tiempoPromedioSegundos ?: 0))

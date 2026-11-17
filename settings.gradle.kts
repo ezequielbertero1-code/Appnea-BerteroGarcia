@@ -1,4 +1,6 @@
 pluginManagement {
+    // Plugins de convención (appnea.android.library, appnea.jvm.library...)
+    includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -24,3 +26,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "My Application"
 include(":app")
+include(":core:model")    // modelos, Kotlin puro
+include(":core:domain")   // interfaces y casos de uso, Kotlin puro
+include(":core:data")     // Room, repositorios, red, GPS
+include(":core:ui")       // tema y componentes de Compose
+include(":core:testing")  // fakes para los tests

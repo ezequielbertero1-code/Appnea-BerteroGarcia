@@ -24,6 +24,28 @@
     </issue>
 
     <issue
+        id="AndroidGradlePluginVersion"
+        message="A newer version of com.android.library than 9.3.1 is available: 9.5.1. (There is also a newer version of 9.3.𝑥 available, if upgrading to 9.5.1 is difficult: 9.3.3)"
+        errorLine1="agp = &quot;9.3.1&quot;"
+        errorLine2="      ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="2"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        message="A newer version of com.android.tools.build:gradle than 9.3.1 is available: 9.5.1. (There is also a newer version of 9.3.𝑥 available, if upgrading to 9.5.1 is difficult: 9.3.3)"
+        errorLine1="agp = &quot;9.3.1&quot;"
+        errorLine2="      ~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="2"
+            column="7"/>
+    </issue>
+
+    <issue
         id="GradleDependency"
         message="A newer version of com.google.android.libraries.identity.googleid:googleid than 1.1.1 is available: 1.2.1"
         errorLine1="googleid = &quot;1.1.1&quot;"
@@ -32,6 +54,17 @@
             file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
             line="16"
             column="12"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlin.jvm than 2.2.10 is available: 2.4.21"
+        errorLine1="kotlin = &quot;2.2.10&quot;"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="9"
+            column="10"/>
     </issue>
 
     <issue
@@ -58,12 +91,34 @@
 
     <issue
         id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-core than 1.10.2 is available: 1.11.0"
+        errorLine1="coroutines = &quot;1.10.2&quot;"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="17"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-test than 1.10.2 is available: 1.11.0"
+        errorLine1="coroutines = &quot;1.10.2&quot;"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
+            line="17"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
         message="A newer version of org.jetbrains.kotlinx:kotlinx-serialization-core than 1.8.1 is available: 1.13.0"
         errorLine1="kotlinx-serialization-core = { group = &quot;org.jetbrains.kotlinx&quot;, name = &quot;kotlinx-serialization-core&quot;, version = &quot;1.8.1&quot; }"
         errorLine2="                                                                                                               ~~~~~~~">
         <location
             file="$HOME/StudioProjects/Appnea-BerteroGarcia/gradle/libs.versions.toml"
-            line="24"
+            line="30"
             column="112"/>
     </issue>
 

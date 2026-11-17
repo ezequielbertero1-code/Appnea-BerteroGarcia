@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.ui.theme.AvisoAcento
 import com.berterogarcia.appnea.ui.theme.AvisoFondo
 import com.berterogarcia.appnea.ui.theme.AvisoTexto
@@ -45,7 +46,7 @@ import com.berterogarcia.appnea.ui.theme.AvisoTexto
 @Composable
 fun AvisoSeguridadApnea(modifier: Modifier = Modifier, separacionInferior: Dp = 16.dp) {
     var expandido by rememberSaveable { mutableStateOf(false) }
-    val accion = stringResource(if (expandido) R.string.accion_contraer else R.string.accion_expandir)
+    val accion = stringResource(if (expandido) UiR.string.accion_contraer else UiR.string.accion_expandir)
 
     Column(
         modifier = modifier

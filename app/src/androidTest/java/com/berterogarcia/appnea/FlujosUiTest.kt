@@ -1,5 +1,12 @@
 package com.berterogarcia.appnea
 
+import com.berterogarcia.appnea.fakes.FakeUbicacion
+import com.berterogarcia.appnea.fakes.FakeTablas
+import com.berterogarcia.appnea.fakes.FakeSesionesApnea
+import com.berterogarcia.appnea.fakes.FakePerfil
+import com.berterogarcia.appnea.fakes.FakeIntentos
+import com.berterogarcia.appnea.fakes.FakeInmersiones
+import com.berterogarcia.appnea.fakes.FakeCondiciones
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.hasText
@@ -50,13 +57,13 @@ class FlujosUiTest {
 
     @Test
     fun registrarUnaInmersion() {
-        val repo = InmersionesEnMemoria()
+        val repo = FakeInmersiones()
         var guardado = false
         // Las horas se eligen con el reloj de Material (difícil de manejar desde un test): el resto
         // del formulario viene de un borrador y en la pantalla se cambia el lugar y se recorren las etapas.
         val borrador = NuevaInmersionUiState().conInmersion(inmersionDePrueba()).aBorradorJson()
         val vm = NuevaInmersionViewModel(
-            repo, RegistrarInmersion(repo, CondicionesFijas(), { _, _, _ -> }), PerfilVacio(), SinGps(),
+            repo, RegistrarInmersion(repo, FakeCondiciones(), { _, _, _ -> }), FakePerfil(), FakeUbicacion(),
             idEditar = null, estadoGuardado = SavedStateHandle(mapOf("borrador_inmersion" to borrador))
         )
         compose.setContent {
@@ -73,10 +80,10 @@ class FlujosUiTest {
 
     @Test
     fun iniciarYAbortarUnaTablaYGuardarla() {
-        val sesiones = SesionesEnMemoria()
+        val sesiones = FakeSesionesApnea()
         val motor = MotorEntrenamiento(scopeMotor, sonido = null)
-        val entrenamiento = EntrenamientoApneaViewModel(TablasEnMemoria(), sesiones, motor, SavedStateHandle())
-        val cronometro = CronometroViewModel(IntentosEnMemoria())
+        val entrenamiento = EntrenamientoApneaViewModel(FakeTablas(), sesiones, motor, SavedStateHandle())
+        val cronometro = CronometroViewModel(FakeIntentos())
         val tabla = EntrenamientoUiState().tablasPredefinidas.first()
         compose.setContent {
             AppneaTheme {

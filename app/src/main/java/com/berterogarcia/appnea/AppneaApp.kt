@@ -1,6 +1,7 @@
 package com.berterogarcia.appnea
 
 import android.app.Application
+import com.berterogarcia.appnea.util.Registro
 import com.berterogarcia.appnea.data.local.SeedDatos
 import com.berterogarcia.appnea.util.intentar
 import kotlinx.coroutines.CoroutineScope
@@ -18,6 +19,7 @@ class AppneaApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        Registro.destino = RegistroAndroid()
         appScope.launch {
             // v8: se sacó pesca submarina → se borran las fotos de capturas que hayan quedado.
             // Si la carpeta no existe no hace nada; si falla, no afecta al resto de la app.

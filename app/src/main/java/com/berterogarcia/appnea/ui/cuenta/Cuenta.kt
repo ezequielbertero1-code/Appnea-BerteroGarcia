@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.ui.components.Avatar
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.FilaDeTarjetas
@@ -250,7 +251,7 @@ fun CuentaScreen(
                 }) { Text(stringResource(R.string.cuenta_cerrar_entrenando_confirmar), color = ColorError) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmarCierre = false }) { Text(stringResource(R.string.accion_cancelar)) }
+                TextButton(onClick = { confirmarCierre = false }) { Text(stringResource(UiR.string.accion_cancelar)) }
             }
         )
     }

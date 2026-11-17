@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea
 
+import com.berterogarcia.appnea.fakes.FakeCondiciones
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -23,7 +24,7 @@ import java.time.LocalDateTime
 class CompletarCondicionesWorkerTest {
 
     private val contexto: Context = ApplicationProvider.getApplicationContext()
-    private val condiciones = CondicionesFijas()
+    private val condiciones = FakeCondiciones()
     private val guardados = mutableListOf<Pair<Long, CondicionesRegistro>>()
 
     private val fabrica = object : WorkerFactory() {

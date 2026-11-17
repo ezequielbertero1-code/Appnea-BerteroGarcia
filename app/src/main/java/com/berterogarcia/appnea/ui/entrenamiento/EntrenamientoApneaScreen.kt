@@ -6,6 +6,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.BackHandler
+import com.berterogarcia.appnea.ui.components.nombre
 import com.berterogarcia.appnea.dominio.modelo.FactorEntrenamiento
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.dominio.modelo.TablaPersonalizada
 import com.berterogarcia.appnea.dominio.modelo.TipoFase
 import com.berterogarcia.appnea.ui.components.BarraAccionesInferior
@@ -187,7 +189,7 @@ fun SeleccionTablaScreen(
                     tablaABorrar = null
                 }) { Text(stringResource(R.string.accion_eliminar), color = ColorError) }
             },
-            dismissButton = { TextButton(onClick = { tablaABorrar = null }) { Text(stringResource(R.string.accion_cancelar)) } }
+            dismissButton = { TextButton(onClick = { tablaABorrar = null }) { Text(stringResource(UiR.string.accion_cancelar)) } }
         )
     }
 }
@@ -364,7 +366,7 @@ fun ResultadoEntrenamiento(
                 modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 8.dp)
             )
             // Los chips trabajan con texto: se traduce factor <-> etiqueta
-            val etiquetas = FactorEntrenamiento.entries.associateWith { stringResource(it.etiqueta) }
+            val etiquetas = FactorEntrenamiento.entries.associateWith { it.nombre() }
             ChipsSeleccionMultiple(
                 opciones = etiquetas.values.toList(),
                 seleccionadas = estado.factoresSeleccionados.mapNotNull { etiquetas[it] }.toSet(),
@@ -426,7 +428,7 @@ fun ResultadoEntrenamiento(
                     viewModel.onVolverASeleccion()
                 }) { Text(stringResource(R.string.entrenar_descartar), color = ColorError) }
             },
-            dismissButton = { TextButton(onClick = { confirmarDescartar = false }) { Text(stringResource(R.string.accion_cancelar)) } }
+            dismissButton = { TextButton(onClick = { confirmarDescartar = false }) { Text(stringResource(UiR.string.accion_cancelar)) } }
         )
     }
 }

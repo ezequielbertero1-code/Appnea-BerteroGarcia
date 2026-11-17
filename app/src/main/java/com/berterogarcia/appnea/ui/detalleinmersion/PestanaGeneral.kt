@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.dominio.modelo.Inmersion
 import com.berterogarcia.appnea.dominio.modelo.RegistroApnea
 import com.berterogarcia.appnea.dominio.modelo.Ubicacion
@@ -100,7 +101,7 @@ internal fun PestanaGeneral(i: Inmersion) {
     val filas = buildList {
         add(Triple(R.drawable.ic_ms_login, stringResource(R.string.detalle_entrada), i.horaEntrada.format(HH_MM)))
         add(Triple(R.drawable.ic_ms_logout, stringResource(R.string.detalle_salida), i.horaSalida.format(HH_MM)))
-        add(Triple(R.drawable.ic_ms_schedule, stringResource(R.string.detalle_en_el_agua), duracion(minutosEnAgua(i))))
+        add(Triple(UiR.drawable.ic_ms_schedule, stringResource(R.string.detalle_en_el_agua), duracion(minutosEnAgua(i))))
         // Apnea sin detalle de bajadas: no hay tiempo total (se guarda en 0), no se muestra "00:00"
         if (!apnea || i.tiempoFondo.inWholeSeconds > 0) {
             add(
@@ -182,7 +183,7 @@ internal fun TarjetaApnea(a: RegistroApnea) {
                     formatearDuracion(r.tiempoMejorBajadaSegundos ?: 0)
                 )
             )
-            Mosaico(stringResource(R.string.nueva_resumen_tiempo_total), formatearDuracion(r.tiempoTotalSegundos))
+            Mosaico(stringResource(R.string.nueva_resumen_tiempo_total), formatearDuracion(r.tiempoTotalSegundos ?: 0))
         }
         FilaMosaicos {
             Mosaico(stringResource(R.string.nueva_resumen_promedio), formatearDuracion(r.tiempoPromedioSegundos ?: 0))

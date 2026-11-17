@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.BotonFlotante
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
@@ -339,6 +340,6 @@ fun DialogoConfirmarEliminacion(
                 colors = ButtonDefaults.textButtonColors(contentColor = ColorError)
             ) { Text(stringResource(R.string.accion_eliminar)) }
         },
-        dismissButton = { TextButton(onClick = onCancelar) { Text(stringResource(R.string.accion_cancelar)) } }
+        dismissButton = { TextButton(onClick = onCancelar) { Text(stringResource(UiR.string.accion_cancelar)) } }
     )
 }

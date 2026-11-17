@@ -320,7 +320,7 @@ private fun PestaniaEntrenamiento(
             val promedio = r.porcentajeCompletas / 100f
             r.factores.forEach { f ->
                 BarraHorizontal(
-                    etiqueta = stringResource(f.factor.etiqueta),
+                    etiqueta = f.factor.nombre(),
                     valor = pluralStringResource(R.plurals.estadisticas_factor_valor, f.sesiones, f.porcentajeCompletas, f.sesiones),
                     fraccion = f.porcentajeCompletas / 100f,
                     marca = promedio,
@@ -330,7 +330,7 @@ private fun PestaniaEntrenamiento(
             }
             r.factorDestacado?.let { f ->
                 Text(
-                    stringResource(R.string.estadisticas_factor_destacado, stringResource(f.factor.etiqueta), f.porcentajeCompletas, r.porcentajeCompletas),
+                    stringResource(R.string.estadisticas_factor_destacado, f.factor.nombre(), f.porcentajeCompletas, r.porcentajeCompletas),
                     style = MaterialTheme.typography.bodySmall,
                     color = TextoSuperficie,
                     modifier = Modifier.padding(top = 10.dp)

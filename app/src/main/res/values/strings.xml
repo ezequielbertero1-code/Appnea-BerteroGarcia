@@ -2,11 +2,6 @@
     <string name="app_name">AppneaMe </string>
 
     <!-- ===========================COMUNES=================================== -->
-    <string name="accion_volver">Volver</string>
-    <string name="accion_cerrar">Cerrar</string>
-    <string name="accion_expandir">Expandir</string>
-    <string name="accion_contraer">Contraer</string>
-    <string name="progreso_paso_de">Paso %1$d de %2$d</string>
 
     <!-- ===========================BARRA DE NAVEGACIÓN=================================== -->
     <string name="nav_inicio">Inicio</string>
@@ -127,7 +122,6 @@
 
     <!-- =========================== COMUNES (acciones) =========================== -->
     <string name="accion_eliminar">Eliminar</string>
-    <string name="accion_cancelar">Cancelar</string>
     <string name="accion_guardar">Guardar</string>
     <string name="accion_guardando">Guardando…</string>
 
@@ -173,12 +167,6 @@
     <string name="entrenar_mejor">Mejor</string>
     <string name="fase_preparacion">Preparación</string>
     <string name="fase_apnea">Apnea</string>
-    <string name="factor_durmio_bien">Dormí bien</string>
-    <string name="factor_comio_liviano">Comí liviano</string>
-    <string name="factor_hidratacion">Buena hidratación</string>
-    <string name="factor_estres">Estrés / ansiedad</string>
-    <string name="factor_cansancio">Cansancio físico</string>
-    <string name="factor_acompanado">Entrené acompañado</string>
     <string name="notif_canal_entrenamiento">Entrenamiento en curso</string>
     <string name="notif_entrenamiento_en_curso">Entrenamiento en curso</string>
     <string name="notif_entrenamiento_fase">%1$s · fase %2$d de %3$d</string>
@@ -246,11 +234,6 @@
     <string name="aprender_tab_buceo">Buceo</string>
 
     <!-- =========================== CAMPOS DE FECHA Y HORA =========================== -->
-    <string name="accion_aceptar">Aceptar</string>
-    <string name="campo_elegir_fecha">Elegir fecha</string>
-    <string name="campo_elegir_hora">Elegir hora</string>
-    <string name="campo_borrar_fecha">Borrar fecha</string>
-    <string name="campo_formato_fecha">dd/mm/aaaa</string>
 
     <!-- =========================== NUEVA INMERSIÓN =========================== -->
     <string name="nueva_titulo">Nueva inmersión</string>
@@ -365,7 +348,6 @@
     <string name="detalle_para_entrar">Para entrar al agua:</string>
     <string name="detalle_marea">Marea</string>
     <string name="detalle_luna">Luna</string>
-    <string name="detalle_sin_datos">Sin datos</string>
     <string name="detalle_corriente">Corriente</string>
     <string name="detalle_al_entrar">al entrar</string>
     <string name="detalle_visibilidad">Visibilidad</string>
@@ -514,8 +496,6 @@
     <string name="clima_comodoro">Comodoro</string>
 
     <!-- =========================== ACCESO (login, registro, contraseña) =========================== -->
-    <string name="campo_mostrar_password">Mostrar contraseña</string>
-    <string name="campo_ocultar_password">Ocultar contraseña</string>
     <string name="login_ingresando">Ingresando…</string>
     <string name="login_espera">Esperá %1$d s</string>
     <string name="login_sin_cuenta">¿No tenés cuenta?</string>
@@ -610,64 +590,6 @@
     <string name="perfil_contacto_principal_ayuda">Es el que se muestra primero en tu cuenta.</string>
 
     <!-- =========================== ETIQUETAS DE DATOS =========================== -->
-    <string name="tipo_buceo">Buceo</string>
-    <string name="tipo_apnea">Apnea</string>
-    <string name="categoria_mascara">Máscara</string>
-    <string name="categoria_snorkel">Snorkel</string>
-    <string name="categoria_aletas">Aletas</string>
-    <string name="categoria_traje">Traje</string>
-    <string name="categoria_guantes">Guantes / escarpines</string>
-    <string name="categoria_lastre">Lastre / cinturón</string>
-    <string name="categoria_computadora">Computadora / reloj</string>
-    <string name="categoria_regulador">Regulador</string>
-    <string name="categoria_chaleco">Chaleco (BCD)</string>
-    <string name="categoria_tubo">Tubo</string>
-    <string name="categoria_boya">Boya</string>
-    <string name="categoria_cuchillo">Cuchillo</string>
-    <string name="categoria_linterna">Linterna</string>
-    <string name="categoria_otro">Otro</string>
-    <string name="certificado_buceo">Buceo</string>
-    <string name="certificado_apnea">Apnea</string>
-    <string name="certificado_primeros_auxilios">Primeros auxilios / RCP</string>
-    <string name="certificado_apto_medico">Apto médico</string>
-    <string name="certificado_otro">Otro</string>
-    <string name="aptitud_buena">Buenas</string>
-    <string name="aptitud_regular">Regulares</string>
-    <string name="aptitud_mala">Malas</string>
-    <string name="motivo_olas">Olas de %1$s m</string>
-    <string name="motivo_viento">Viento de %1$s km/h</string>
-    <string name="motivo_rafagas">Ráfagas de %1$s km/h</string>
-    <string name="motivo_tormenta">Tormenta eléctrica</string>
-    <string name="motivo_lluvia">Lluvia</string>
-    <string name="motivo_niebla">Poca visibilidad en superficie (niebla)</string>
-    <string name="motivo_corriente">Corriente de %1$s km/h</string>
-    <string name="motivo_tranquilo">Viento y mar tranquilos</string>
-    <string name="fuerza_debil">Débil</string>
-    <string name="fuerza_media">Media</string>
-    <string name="fuerza_fuerte">Fuerte</string>
-    <string name="fase_luna_nueva">Luna nueva</string>
-    <string name="fase_luna_creciente">Creciente</string>
-    <string name="fase_luna_cuarto_creciente">Cuarto creciente</string>
-    <string name="fase_luna_gibosa_creciente">Gibosa creciente</string>
-    <string name="fase_luna_llena">Luna llena</string>
-    <string name="fase_luna_gibosa_menguante">Gibosa menguante</string>
-    <string name="fase_luna_cuarto_menguante">Cuarto menguante</string>
-    <string name="fase_luna_menguante">Menguante</string>
-    <string name="clima_despejado">Despejado</string>
-    <string name="clima_mayormente_despejado">Mayormente despejado</string>
-    <string name="clima_parcialmente_nublado">Parcialmente nublado</string>
-    <string name="clima_nublado">Nublado</string>
-    <string name="clima_niebla">Niebla</string>
-    <string name="clima_llovizna">Llovizna</string>
-    <string name="clima_llovizna_helada">Llovizna helada</string>
-    <string name="clima_lluvia">Lluvia</string>
-    <string name="clima_lluvia_helada">Lluvia helada</string>
-    <string name="clima_nieve">Nieve</string>
-    <string name="clima_granizo_fino">Granizo fino</string>
-    <string name="clima_chubascos">Chubascos</string>
-    <string name="clima_chubascos_nieve">Chubascos de nieve</string>
-    <string name="clima_tormenta">Tormenta</string>
-    <string name="clima_tormenta_granizo">Tormenta con granizo</string>
     <string name="vencimiento_vencido">Vencido</string>
     <string name="vencimiento_hoy">Vence hoy</string>
     <string name="vencimiento_manana">Vence mañana</string>
@@ -869,11 +791,6 @@
     <string name="aprender_buceo_checklist_aviso_titulo_1">Antes de bucear</string>
     <string name="aprender_buceo_checklist_aviso_cuerpo_1">Buen estado físico y descanso, buena hidratación, sin alcohol ni esfuerzo físico excesivo previo. Planificá la inmersión con tu compañero/a (profundidad, tiempo y procedimientos de emergencia) y respetá siempre el límite de profundidad de tu certificación (18 m para Open Water).</string>
     <string name="nueva_visibilidad_escala">Visibilidad</string>
-    <string name="visibilidad_nula">Nula</string>
-    <string name="visibilidad_mala">Mala</string>
-    <string name="visibilidad_buena">Buena</string>
-    <string name="visibilidad_muy_buena">Muy buena</string>
-    <string name="visibilidad_excelente">Excelente</string>
     <string name="nueva_si">Sí</string>
     <string name="nueva_no">No</string>
     <string name="nueva_usaste_lastre">¿Usaste más lastre?</string>

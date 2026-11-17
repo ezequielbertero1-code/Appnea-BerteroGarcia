@@ -43,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.dominio.modelo.Inmersion
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.NavegacionBarra
@@ -214,7 +215,7 @@ fun DetalleInmersionScreen(
                 }) { Text(stringResource(R.string.accion_eliminar), color = ColorError) }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarDialogo = false }) { Text(stringResource(R.string.accion_cancelar)) }
+                TextButton(onClick = { mostrarDialogo = false }) { Text(stringResource(UiR.string.accion_cancelar)) }
             }
         )
     }

@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.registro
 
+import com.berterogarcia.appnea.ui.components.FuerzaPassword
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

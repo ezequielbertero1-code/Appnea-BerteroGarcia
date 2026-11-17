@@ -2,6 +2,25 @@
 
 > **Fecha:** 16/11/2026, sobre la rama `refactor/mejoras-analisis` con las fases 0 a 4 ya hechas (ver [`analisis-y-plan-de-mejoras.md`](analisis-y-plan-de-mejoras.md)).
 > Este documento sigue la numeración del anterior: el plan empieza en la **Fase 5**.
+>
+> **Estado (16/11/2026):** las fases 5 a 10 están hechas en la rama `refactor/mejoras-analisis-2`,
+> un commit por fase (la 9 al final, como se acordó). Quedan para más adelante: subir Kotlin, KSP
+> y AGP juntos (lo piden los 6 avisos que quedan en el baseline de lint, `googleid` 1.2.1 y
+> `kotlinx-serialization` 1.10+), registrar en Google Cloud el SHA-1 de Play App Signing y el
+> Baseline Profile (ver [`publicacion.md`](publicacion.md)).
+>
+> Módulos después de la fase 9:
+>
+> | Módulo | Qué tiene | Tipo |
+> |---|---|---|
+> | `:app` | pantallas, ViewModels, navegación, `AppContainer`, servicio de entrenamiento, worker, login con Google | Android app |
+> | `:core:ui` | tema, componentes compartidos, etiquetas de los datos y sus textos | Android lib + Compose |
+> | `:core:data` | Room (y sus esquemas), repositorios, Open-Meteo, GPS, sesión, exportación, contraseñas | Android lib |
+> | `:core:domain` | interfaces de repositorios, puertos, sesión, casos de uso | Kotlin puro |
+> | `:core:model` | modelos del dominio, `intentar` y `Registro` | Kotlin puro |
+> | `:core:testing` | fakes, datos de ejemplo, `ReglaDispatcherMain` | Kotlin puro (solo tests) |
+>
+> La configuración común (SDK, Java, desugaring, Compose) está en los plugins de `build-logic/`.
 
 ## Devolución resumida
 

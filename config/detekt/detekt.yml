@@ -17,13 +17,16 @@ complexity:
     ignoreAnnotated: ['Composable', 'Preview']
   TooManyFunctions:
     ignorePrivate: true
+    # Los fakes implementan interfaces completas
+    excludes: ['**/core/testing/**']
     ignoreAnnotatedFunctions: ['Preview']
 
 style:
   MagicNumber:
     # dp, colores, duraciones de animación... en la UI los números sueltos son lo normal
     ignoreAnnotated: ['Composable', 'Preview']
-    excludes: ['**/test/**', '**/androidTest/**', '**/ui/theme/**']
+    ignoreEnums: true
+    excludes: ['**/test/**', '**/androidTest/**', '**/core/testing/**', '**/ui/theme/**']
   UnusedPrivateFunction:
     ignoreAnnotated: ['Preview']
   MaxLineLength:

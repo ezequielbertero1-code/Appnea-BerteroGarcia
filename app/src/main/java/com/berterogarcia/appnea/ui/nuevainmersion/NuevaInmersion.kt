@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.core.ui.R as UiR
 import com.berterogarcia.appnea.ui.components.BarraAccionesInferior
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.BotonContorno
@@ -127,7 +128,7 @@ fun NuevaInmersionScreen(
             } else {
                 Text(uiState.errorCarga?.resolver().orEmpty(), color = TextoSuperficieVariante)
                 BotonSecundario(
-                    texto = stringResource(R.string.accion_volver),
+                    texto = stringResource(UiR.string.accion_volver),
                     onClick = onGuardado,
                     modifier = Modifier.padding(top = 12.dp)
                 )
