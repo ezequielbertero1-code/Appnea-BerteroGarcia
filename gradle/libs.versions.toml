@@ -1,22 +1,22 @@
 [versions]
 agp = "9.3.1"
-coreKtx = "1.10.1"
+coreKtx = "1.19.1"
 junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
-lifecycleRuntimeKtx = "2.6.1"
-activityCompose = "1.8.0"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+lifecycleRuntimeKtx = "2.11.0"
+activityCompose = "1.13.0"
 kotlin = "2.2.10"
-composeBom = "2025.12.00"
-navigationCompose = "2.8.9"
-room = "2.8.4"
+composeBom = "2026.09.00"
+navigationCompose = "2.10.2"
+room = "2.8.5"
 desugarJdkLibs = "2.1.5"
-maplibre = "13.6.1"
+maplibre = "13.7.1"
 credentials = "1.6.0"
 googleid = "1.1.1"
 coroutinesTest = "1.10.2"
-orgJson = "20240303"
-work = "2.10.1"
+orgJson = "20260814"
+work = "2.12.0"
 
 [libraries]
 turbine = { group = "app.cash.turbine", name = "turbine", version = "1.2.1" }
@@ -59,4 +59,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version = "2.2.10-2.0.2" }
+detekt = { id = "dev.detekt", version = "2.0.0-alpha.6" }
 

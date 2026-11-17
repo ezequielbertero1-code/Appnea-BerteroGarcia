@@ -90,7 +90,7 @@ class RegistroViewModel(
     private val sessionManager: GestorSesion,
     private val cuentaGoogle: CuentaGoogle? = null,
     /** Borrador del formulario por si Android mata la app en segundo plano (sin contraseñas). */
-    private val estadoGuardado: SavedStateHandle = SavedStateHandle()
+    private val estadoGuardado: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(

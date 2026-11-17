@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
     <string name="app_name">AppneaMe </string>
 
     <!-- ===========================COMUNES=================================== -->
@@ -116,7 +116,11 @@
         <item quantity="many">%1$d en uso · %2$d services pronto</item>
         <item quantity="other">%1$d en uso · %2$d services pronto</item>
     </plurals>
-    <string name="cuenta_estadisticas_resumen">Fondo %1$s · %2$d entrenamientos · mejor apnea %3$s</string>
+    <plurals name="cuenta_estadisticas_resumen">
+        <item quantity="one">Fondo %1$s · %2$d entrenamiento · mejor apnea %3$s</item>
+        <item quantity="many">Fondo %1$s · %2$d entrenamientos · mejor apnea %3$s</item>
+        <item quantity="other">Fondo %1$s · %2$d entrenamientos · mejor apnea %3$s</item>
+    </plurals>
     <string name="cuenta_contacto_emergencia">Contacto de emergencia</string>
     <string name="cuenta_contacto_vacio">Te recomendamos cargar uno</string>
     <string name="cuenta_requiere_atencion">Requiere atención</string>
@@ -179,10 +183,23 @@
     <string name="notif_entrenamiento_en_curso">Entrenamiento en curso</string>
     <string name="notif_entrenamiento_fase">%1$s · fase %2$d de %3$d</string>
     <string name="fase_descanso">Descanso</string>
-    <string name="tabla_resumen_fases">%1$d fases</string>
+    <plurals name="cantidad_apneas">
+        <item quantity="one">%1$d apnea</item>
+        <item quantity="many">%1$d apneas</item>
+        <item quantity="other">%1$d apneas</item>
+    </plurals>
+    <plurals name="tabla_resumen_fases">
+        <item quantity="one">%1$d fase</item>
+        <item quantity="many">%1$d fases</item>
+        <item quantity="other">%1$d fases</item>
+    </plurals>
     <string name="tabla_resumen_fijo">%1$d × %2$s apnea</string>
     <string name="tabla_resumen_fijo_descanso">%1$d × %2$s apnea / %3$s descanso</string>
-    <string name="tabla_resumen_variable">%1$d apneas · %2$s a %3$s</string>
+    <plurals name="tabla_resumen_variable">
+        <item quantity="one">%1$d apnea · %2$s a %3$s</item>
+        <item quantity="many">%1$d apneas · %2$s a %3$s</item>
+        <item quantity="other">%1$d apneas · %2$s a %3$s</item>
+    </plurals>
     <string name="tabla_fila_subtitulo">%1$s · %2$s</string>
     <string name="tabla_transcurrido">Transcurrido %1$s</string>
     <string name="tabla_total">Total %1$s</string>
@@ -192,16 +209,31 @@
     <string name="crear_tabla_titulo">Nueva tabla</string>
     <string name="crear_tabla_nombre">Nombre</string>
     <string name="crear_tabla_sin_fases">Todavía no agregaste fases. Empezá con una preparación.</string>
-    <string name="crear_tabla_resumen">%1$d fases · %2$d apneas</string>
     <string name="crear_tabla_ayuda_pasos">Los botones − / + suman o restan %1$d s.</string>
     <string name="crear_tabla_agregar_fase">Agregar fase</string>
     <string name="crear_tabla_agregar">Agregar fase</string>
     <string name="crear_tabla_repetir">Repetir última apnea + descanso</string>
-    <string name="crear_tabla_restar_nueva">Restar %1$d segundos a la fase nueva</string>
-    <string name="crear_tabla_sumar_nueva">Sumar %1$d segundos a la fase nueva</string>
+    <plurals name="crear_tabla_restar_nueva">
+        <item quantity="one">Restar %1$d segundo a la fase nueva</item>
+        <item quantity="many">Restar %1$d segundos a la fase nueva</item>
+        <item quantity="other">Restar %1$d segundos a la fase nueva</item>
+    </plurals>
+    <plurals name="crear_tabla_sumar_nueva">
+        <item quantity="one">Sumar %1$d segundo a la fase nueva</item>
+        <item quantity="many">Sumar %1$d segundos a la fase nueva</item>
+        <item quantity="other">Sumar %1$d segundos a la fase nueva</item>
+    </plurals>
     <string name="crear_tabla_fase_n">Fase %1$d</string>
-    <string name="crear_tabla_restar_fase">Restar %1$d segundos a la fase %2$d</string>
-    <string name="crear_tabla_sumar_fase">Sumar %1$d segundos a la fase %2$d</string>
+    <plurals name="crear_tabla_restar_fase">
+        <item quantity="one">Restar %1$d segundo a la fase %2$d</item>
+        <item quantity="many">Restar %1$d segundos a la fase %2$d</item>
+        <item quantity="other">Restar %1$d segundos a la fase %2$d</item>
+    </plurals>
+    <plurals name="crear_tabla_sumar_fase">
+        <item quantity="one">Sumar %1$d segundo a la fase %2$d</item>
+        <item quantity="many">Sumar %1$d segundos a la fase %2$d</item>
+        <item quantity="other">Sumar %1$d segundos a la fase %2$d</item>
+    </plurals>
     <string name="crear_tabla_quitar_fase">Quitar fase %1$d</string>
     <string name="crear_tabla_pista_nombre">Poné un nombre para la tabla.</string>
     <string name="crear_tabla_pista_apnea">Agregá al menos una apnea.</string>
@@ -239,7 +271,6 @@
     <string name="nueva_entrada">Entrada</string>
     <string name="nueva_salida">Salida</string>
     <string name="nueva_profundidad">Profundidad máxima (m)</string>
-    <string name="nueva_tiempo_apnea">Tiempo de apnea (mm:ss)</string>
     <string name="nueva_tiempo_fondo">Tiempo de fondo (mm:ss)</string>
     <string name="nueva_parada">Parada de seguridad (min)</string>
     <string name="nueva_elegi_una">elegí una</string>
@@ -362,14 +393,22 @@
     <string name="estadisticas_grafico_profundidad">Profundidad máxima por inmersión</string>
     <string name="estadisticas_grafico_profundidad_sub">metros · tocá un punto para ver la inmersión</string>
     <string name="estadisticas_por_mes">Inmersiones por mes</string>
-    <string name="estadisticas_ultimos_meses">últimos %1$d meses</string>
+    <plurals name="estadisticas_ultimos_meses">
+        <item quantity="one">último %1$d mes</item>
+        <item quantity="many">últimos %1$d meses</item>
+        <item quantity="other">últimos %1$d meses</item>
+    </plurals>
     <string name="estadisticas_lugares">Lugares más visitados</string>
     <string name="estadisticas_sin_entrenamientos_titulo">Todavía no hay entrenamientos</string>
     <string name="estadisticas_sin_entrenamientos_detalle">Hacé una tabla o usá el cronómetro libre en Entrenar para ver tu progreso.</string>
     <string name="estadisticas_ir_a_entrenar">Ir a Entrenar</string>
     <string name="estadisticas_sin_entrenamientos_periodo">No hay entrenamientos en este período.</string>
     <string name="estadisticas_sesiones">Sesiones</string>
-    <string name="estadisticas_completas">%1$d completas</string>
+    <plurals name="estadisticas_completas">
+        <item quantity="one">%1$d completa</item>
+        <item quantity="many">%1$d completas</item>
+        <item quantity="other">%1$d completas</item>
+    </plurals>
     <string name="estadisticas_completadas">Completadas</string>
     <string name="estadisticas_apnea_mas_larga">Apnea más larga</string>
     <string name="estadisticas_grafico_apnea">Apnea más larga por sesión</string>
@@ -379,13 +418,22 @@
     <string name="estadisticas_mejor_intento">Mejor intento</string>
     <plurals name="estadisticas_sin_apnea">
         <item quantity="one">%1$d sesión sin apnea (cortada en la preparación) no aparece en el gráfico.</item>
+        <item quantity="many">%1$d sesiones sin apnea (cortadas en la preparación) no aparecen en el gráfico.</item>
         <item quantity="other">%1$d sesiones sin apnea (cortadas en la preparación) no aparecen en el gráfico.</item>
     </plurals>
     <string name="estadisticas_minutos_segundos">minutos:segundos</string>
     <string name="estadisticas_factores">Qué influye en completar la tabla</string>
-    <string name="estadisticas_factores_sin_datos">Todavía no hay suficientes datos. Marcá los factores al terminar cada tabla: un factor aparece cuando lo marcaste en %1$d sesiones o más.</string>
+    <plurals name="estadisticas_factores_sin_datos">
+        <item quantity="one">Todavía no hay suficientes datos. Marcá los factores al terminar cada tabla: un factor aparece cuando lo marcaste en %1$d sesión o más.</item>
+        <item quantity="many">Todavía no hay suficientes datos. Marcá los factores al terminar cada tabla: un factor aparece cuando lo marcaste en %1$d sesiones o más.</item>
+        <item quantity="other">Todavía no hay suficientes datos. Marcá los factores al terminar cada tabla: un factor aparece cuando lo marcaste en %1$d sesiones o más.</item>
+    </plurals>
     <string name="estadisticas_factores_sub">%% de tablas completas cuando marcaste el factor · la rayita es tu promedio (%1$d %%)</string>
-    <string name="estadisticas_factor_valor">%1$d %% · %2$d ses.</string>
+    <plurals name="estadisticas_factor_valor">
+        <item quantity="one">%1$d %% · %2$d sesión</item>
+        <item quantity="many">%1$d %% · %2$d ses.</item>
+        <item quantity="other">%1$d %% · %2$d ses.</item>
+    </plurals>
     <string name="estadisticas_factor_destacado">Con «%1$s» completaste el %2$d %% de las tablas (tu promedio es %3$d %%).</string>
     <string name="estadisticas_ver_todo">Ver todo</string>
 
@@ -623,7 +671,11 @@
     <string name="vencimiento_vencido">Vencido</string>
     <string name="vencimiento_hoy">Vence hoy</string>
     <string name="vencimiento_manana">Vence mañana</string>
-    <string name="vencimiento_en_dias">Vence en %1$d días</string>
+    <plurals name="vencimiento_en_dias">
+        <item quantity="one">Vence en %1$d día</item>
+        <item quantity="many">Vence en %1$d días</item>
+        <item quantity="other">Vence en %1$d días</item>
+    </plurals>
     <string name="vencimiento_vigente">Vigente</string>
     <string name="service_atrasado">Service atrasado</string>
     <string name="service_pronto">Service pronto</string>
@@ -639,7 +691,11 @@
 
     <!-- =========================== MENSAJES Y VALIDACIONES =========================== -->
     <string name="val_ingresa">Ingresá %1$s.</string>
-    <string name="val_maximo_caracteres">Máximo %1$d caracteres.</string>
+    <plurals name="val_maximo_caracteres">
+        <item quantity="one">Máximo %1$d carácter.</item>
+        <item quantity="many">Máximo %1$d caracteres.</item>
+        <item quantity="other">Máximo %1$d caracteres.</item>
+    </plurals>
     <string name="val_email_invalido">El email no es válido.</string>
     <string name="val_telefono_obligatorio">Ingresá un teléfono.</string>
     <string name="val_telefono_caracteres">Solo números, espacios, +, - y paréntesis.</string>
@@ -649,7 +705,11 @@
     <string name="val_usuario_vacio">Elegí un nombre de usuario.</string>
     <string name="val_usuario_formato">De 3 a 20 caracteres: letras, números, punto, guion o guion bajo (sin espacios).</string>
     <string name="val_password_vacia">Elegí una contraseña.</string>
-    <string name="val_password_minimo">Tiene que tener al menos %1$d caracteres.</string>
+    <plurals name="val_password_minimo">
+        <item quantity="one">Tiene que tener al menos %1$d carácter.</item>
+        <item quantity="many">Tiene que tener al menos %1$d caracteres.</item>
+        <item quantity="other">Tiene que tener al menos %1$d caracteres.</item>
+    </plurals>
     <string name="val_password_letras_numeros">Tiene que tener letras y números.</string>
     <string name="val_confirmacion_vacia">Repetí la contraseña.</string>
     <string name="val_confirmacion_distinta">Las contraseñas no coinciden.</string>
@@ -730,7 +790,7 @@
     <string name="aprender_apnea_reflejo_titulo">El reflejo de inmersión de los mamíferos</string>
     <string name="aprender_apnea_reflejo_cuerpo">Al sumergirnos, el cuerpo activa una serie de respuestas fisiológicas que ayudan a ahorrar oxígeno: bradicardia (baja la frecuencia cardíaca), esplenocontracción (el bazo libera glóbulos rojos extra), vasoconstricción periférica (la sangre se retira de brazos y piernas) y el \"blood shift\" (la sangre se concentra en el pecho para proteger los pulmones de la presión). Este reflejo es más fuerte cuanto más frío el agua en contacto con la cara, y se entrena y mejora con la práctica.</string>
     <string name="aprender_apnea_respiracion_titulo">Respiración: antes y después de la apnea</string>
-    <string name="aprender_apnea_respiracion_cuerpo">La respiración previa debe ser lenta, relajada y consciente (por ejemplo: inhalar 4 segundos, exhalar 7–8 segundos), con 2 a 4 respiraciones completas antes de la última inhalación total. Al salir a superficie, la respiración de recuperación es clave: inhalar completo, sostener 2-3 segundos y exhalar en forma pasiva. Una buena recuperación ayuda a prevenir la samba (pérdida de control motor) y el síncope (desmayo por hipoxia).</string>
+    <string name="aprender_apnea_respiracion_cuerpo">La respiración previa debe ser lenta, relajada y consciente (por ejemplo: inhalar 4 segundos, exhalar 7–8 segundos), con 2 a 4 respiraciones completas antes de la última inhalación total. Al salir a superficie, la respiración de recuperación es clave: inhalar completo, sostener 2–3 segundos y exhalar en forma pasiva. Una buena recuperación ayuda a prevenir la samba (pérdida de control motor) y el síncope (desmayo por hipoxia).</string>
     <string name="aprender_apnea_respiracion_aviso_titulo_1">Nunca hiperventilar</string>
     <string name="aprender_apnea_respiracion_aviso_cuerpo_1">Respirar rápido y en exceso antes de sumergirse (hiperventilar) NO aumenta el oxígeno disponible: sólo baja el CO₂, que es la señal que nuestro cuerpo usa para avisarnos que hay que respirar. El resultado es que la necesidad de respirar aparece tarde, cuando el nivel de oxígeno ya puede ser peligrosamente bajo, aumentando el riesgo de desmayo bajo el agua. Señales de alerta: mareos, hormigueo en los labios, entumecimiento de las extremidades, problemas auditivos o pérdida del equilibrio.</string>
     <string name="aprender_apnea_seccion_2">Equipamiento básico</string>
@@ -822,10 +882,8 @@
     <string name="nueva_cantidad_bajadas">Cantidad de bajadas</string>
     <string name="nueva_cargar_cada_bajada">Cargar cada bajada</string>
     <string name="nueva_cargar_cada_bajada_ayuda">Opcional: con el detalle se calculan el tiempo total y el promedio.</string>
-    <string name="nueva_bajada_titulo">Bajada %1$d</string>
     <string name="nueva_bajada_profundidad">Prof. (m)</string>
     <string name="nueva_bajada_tiempo">Tiempo (mm:ss)</string>
-    <string name="nueva_bajada_quitar">Quitar bajada %1$d</string>
     <string name="nueva_agregar_bajada">Agregar bajada</string>
     <string name="nueva_sincope">¿Hubo síncope?</string>
     <string name="nueva_error_bajadas">Completá la profundidad y el tiempo (mm:ss) de cada bajada.</string>
@@ -842,6 +900,7 @@
     <string name="nueva_resumen_promedio">Promedio por bajada</string>
     <plurals name="apnea_bajadas">
         <item quantity="one">%d bajada</item>
+        <item quantity="many">%d bajadas</item>
         <item quantity="other">%d bajadas</item>
     </plurals>
     <string name="detalle_apnea_titulo">Bajadas de apnea</string>
@@ -851,5 +910,28 @@
     <string name="detalle_apnea_bajada">Bajada %1$d</string>
     <string name="estadisticas_bajadas">Bajadas de apnea</string>
     <string name="estadisticas_sincopes">Síncopes</string>
+    <string name="detalle_condiciones_aproximadas">Condiciones aproximadas: no marcaste el lugar en el mapa, se tomaron de dónde estaba el teléfono al guardar (o de Comodoro Rivadavia si no había ubicación).</string>
     <string name="detalle_temperaturas">Temperatura aire · agua</string>
+
+    <!-- Seguridad de la cuenta -->
+    <string name="seguridad_titulo">Contraseña y cuenta</string>
+    <string name="seguridad_subtitulo_local">Cambiar la contraseña o borrar la cuenta</string>
+    <string name="seguridad_subtitulo_google">Cuenta de Google · borrar la cuenta</string>
+    <string name="seguridad_cambiar_titulo">Cambiar contraseña</string>
+    <string name="seguridad_actual">Contraseña actual</string>
+    <string name="seguridad_nueva">Contraseña nueva</string>
+    <string name="seguridad_confirmar">Repetí la contraseña nueva</string>
+    <string name="seguridad_cambiar">Cambiar contraseña</string>
+    <string name="seguridad_cambiada">Listo, cambiaste la contraseña.</string>
+    <string name="seguridad_google">Entrás con Google: tu contraseña se administra en tu cuenta de Google, no en la app.</string>
+    <string name="seguridad_borrar_titulo">Borrar cuenta</string>
+    <string name="seguridad_borrar_texto">Se borran para siempre tus inmersiones, entrenamientos, perfil, equipo, certificaciones y contactos de este teléfono.</string>
+    <string name="seguridad_borrar">Borrar mi cuenta</string>
+    <string name="seguridad_borrar_confirmar_titulo">¿Borrar tu cuenta?</string>
+    <string name="seguridad_borrar_confirmar_texto">No se puede deshacer. Si no tenés una copia, perdés todos tus registros.</string>
+    <string name="seguridad_borrar_confirmar">Borrar</string>
+    <string name="seguridad_error_actual_vacia">Escribí tu contraseña actual.</string>
+    <string name="seguridad_error_actual_incorrecta">La contraseña no es correcta.</string>
+    <string name="seguridad_error_igual">La nueva tiene que ser distinta de la actual.</string>
+    <string name="seguridad_error_general">No se pudo completar. Probá de nuevo.</string>
 </resources>

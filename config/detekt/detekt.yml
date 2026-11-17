@@ -1,0 +1,31 @@
+# Se suma a la configuración por defecto de detekt (buildUponDefaultConfig = true):
+# acá solo van los ajustes para Jetpack Compose.
+
+naming:
+  FunctionNaming:
+    # Los @Composable se nombran en PascalCase
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9_]*'
+
+complexity:
+  LongParameterList:
+    # Las pantallas y componentes reciben estado + callbacks + modifier
+    ignoreAnnotated: ['Composable']
+    ignoreDefaultParameters: true
+  LongMethod:
+    ignoreAnnotated: ['Composable', 'Preview']
+  TooManyFunctions:
+    ignorePrivate: true
+    ignoreAnnotatedFunctions: ['Preview']
+
+style:
+  MagicNumber:
+    # dp, colores, duraciones de animación... en la UI los números sueltos son lo normal
+    ignoreAnnotated: ['Composable', 'Preview']
+    excludes: ['**/test/**', '**/androidTest/**', '**/ui/theme/**']
+  UnusedPrivateFunction:
+    ignoreAnnotated: ['Preview']
+  MaxLineLength:
+    # El proyecto usa líneas largas (filas de Compose con varios argumentos)
+    maxLineLength: 160

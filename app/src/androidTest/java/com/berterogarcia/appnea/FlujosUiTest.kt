@@ -75,7 +75,7 @@ class FlujosUiTest {
     fun iniciarYAbortarUnaTablaYGuardarla() {
         val sesiones = SesionesEnMemoria()
         val motor = MotorEntrenamiento(scopeMotor, sonido = null)
-        val entrenamiento = EntrenamientoApneaViewModel(TablasEnMemoria(), sesiones, motor)
+        val entrenamiento = EntrenamientoApneaViewModel(TablasEnMemoria(), sesiones, motor, SavedStateHandle())
         val cronometro = CronometroViewModel(IntentosEnMemoria())
         val tabla = EntrenamientoUiState().tablasPredefinidas.first()
         compose.setContent {

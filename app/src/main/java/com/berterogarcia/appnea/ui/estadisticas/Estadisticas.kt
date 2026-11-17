@@ -212,7 +212,7 @@ private fun PestaniaInmersiones(
 
     val progresoBarras = rememberProgresoDibujo(r.porMes)
     TarjetaCondicion(stringResource(R.string.estadisticas_por_mes)) {
-        Subtitulo(stringResource(R.string.estadisticas_ultimos_meses, estado.periodo.mesesGrafico))
+        Subtitulo(pluralStringResource(R.plurals.estadisticas_ultimos_meses, estado.periodo.mesesGrafico, estado.periodo.mesesGrafico))
         GraficoBarras(
             valores = r.porMes.map { it.second.toFloat() },
             etiquetas = r.porMes.map { it.first.format(FORMATO_MES).removeSuffix(".") },
@@ -264,7 +264,7 @@ private fun PestaniaEntrenamiento(
 
     if (r.sesiones > 0) {
         FilaMosaicos {
-            Mosaico(stringResource(R.string.estadisticas_sesiones), r.sesiones.toString(), detalle = stringResource(R.string.estadisticas_completas, r.completas))
+            Mosaico(stringResource(R.string.estadisticas_sesiones), r.sesiones.toString(), detalle = pluralStringResource(R.plurals.estadisticas_completas, r.completas, r.completas))
             Mosaico(stringResource(R.string.estadisticas_completadas), "${r.porcentajeCompletas} %")
             Mosaico(stringResource(R.string.estadisticas_apnea_mas_larga), minSeg(r.apneaMasLargaSegundos), colorValor = Acento)
         }
@@ -311,7 +311,7 @@ private fun PestaniaEntrenamiento(
     TarjetaCondicion(stringResource(R.string.estadisticas_factores)) {
         if (r.factores.isEmpty()) {
             Text(
-                stringResource(R.string.estadisticas_factores_sin_datos, MIN_SESIONES_FACTOR),
+                pluralStringResource(R.plurals.estadisticas_factores_sin_datos, MIN_SESIONES_FACTOR, MIN_SESIONES_FACTOR),
                 style = MaterialTheme.typography.bodySmall,
                 color = TextoSuperficieVariante
             )
@@ -321,7 +321,7 @@ private fun PestaniaEntrenamiento(
             r.factores.forEach { f ->
                 BarraHorizontal(
                     etiqueta = stringResource(f.factor.etiqueta),
-                    valor = stringResource(R.string.estadisticas_factor_valor, f.porcentajeCompletas, f.sesiones),
+                    valor = pluralStringResource(R.plurals.estadisticas_factor_valor, f.sesiones, f.porcentajeCompletas, f.sesiones),
                     fraccion = f.porcentajeCompletas / 100f,
                     marca = promedio,
                     // Por debajo del promedio: gris, para que resalten los que ayudan

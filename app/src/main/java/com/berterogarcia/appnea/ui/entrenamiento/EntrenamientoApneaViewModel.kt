@@ -74,7 +74,7 @@ class EntrenamientoApneaViewModel(
     private val sesionRepository: RepositorioSesionesApnea,
     private val motor: MotorEntrenamiento,
     /** Recuerda la tabla elegida (por nombre) si Android cierra la app en segundo plano. */
-    private val estadoGuardado: SavedStateHandle = SavedStateHandle()
+    private val estadoGuardado: SavedStateHandle
 ) : ViewModel() {
 
     /** Lo que es de la pantalla (elección, resultado a guardar). El timer vive en [motor]. */

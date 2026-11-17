@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.repository
 
+import com.berterogarcia.appnea.dominio.modelo.TipoCuenta
 import com.berterogarcia.appnea.dominio.modelo.PerfilUsuario
 import com.berterogarcia.appnea.dominio.modelo.ContactoEmergencia
 import com.berterogarcia.appnea.dominio.repositorios.RepositorioCuentaGoogle
@@ -26,17 +27,9 @@ class CuentaGoogleRepository(private val db: AppDatabase) : RepositorioCuentaGoo
     override suspend fun registrar(email: String, perfil: PerfilUsuario, contacto: ContactoEmergencia) {
         db.withTransaction {
             if (db.usuarioDao().existeUsuario(email)) return@withTransaction
-            db.usuarioDao().insertar(UsuarioEntity(email, PASSWORD_CUENTA_GOOGLE))
+            db.usuarioDao().insertar(UsuarioEntity(email, password = "", tipoCuenta = TipoCuenta.GOOGLE))
             db.perfilUsuarioDao().guardar(perfil.aEntidad(email))
             db.contactoEmergenciaDao().guardar(contacto.copy(esPrincipal = true).aEntidad(email))
         }
-    }
-
-    private companion object {
-        /**
-         * No tiene el formato de SeguridadPassword.hashear, así que verificar() siempre da false:
-         * a estas cuentas no se puede entrar escribiendo una contraseña.
-         */
-        const val PASSWORD_CUENTA_GOOGLE = "!google"
     }
 }

@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.data.repository
 
+import com.berterogarcia.appnea.dominio.modelo.TipoCuenta
 import com.berterogarcia.appnea.dominio.repositorios.RepositorioUsuarios
 import com.berterogarcia.appnea.util.intentar
 import com.berterogarcia.appnea.data.seguridad.SeguridadPassword
@@ -25,7 +26,8 @@ class UsuarioRepository(
      */
     override suspend fun validar(nombreUsuario: String, password: String): Boolean {
         val usuario = dao.obtenerPorUsuario(nombreUsuario)
-        if (usuario == null) {
+        // Las cuentas de Google no tienen contraseña: se responde igual que si no existiera
+        if (usuario == null || usuario.tipoCuenta != TipoCuenta.LOCAL) {
             withContext(cpu) { SeguridadPassword.verificar(password, hashFicticio) }
             return false
         }

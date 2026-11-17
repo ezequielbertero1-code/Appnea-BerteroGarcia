@@ -1,4 +1,4 @@
-# Corre los tests unitarios y lint en cada push y pull request.
+# Corre los tests unitarios, lint y detekt en cada push y pull request.
 # Si algo falla, GitHub marca el commit/PR con una cruz roja y se puede ver el reporte.
 name: CI
 
@@ -33,6 +33,10 @@ jobs:
       - name: Lint
         run: ./gradlew :app:lintDebug
 
+      # Análisis estático de Kotlin (config/detekt/). Falla solo por problemas nuevos.
+      - name: Detekt
+        run: ./gradlew :app:detekt
+
       - name: Reportes
         if: always()
         uses: actions/upload-artifact@v4
@@ -41,4 +45,5 @@ jobs:
           path: |
             app/build/reports/tests/
             app/build/reports/lint-results-debug.html
+            app/build/reports/detekt/
           if-no-files-found: ignore

@@ -13,6 +13,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -62,7 +64,8 @@ fun CuentaScreen(
     onVerEquipamiento: () -> Unit,
     onVerCertificados: () -> Unit,
     onVerContactos: () -> Unit,
-    onVerEstadisticas: () -> Unit = {}
+    onVerEstadisticas: () -> Unit = {},
+    onVerSeguridad: () -> Unit = {}
 ) {
     val resumen by viewModel.resumen.collectAsStateWithLifecycle()
     val stats by viewModel.estadisticas.collectAsStateWithLifecycle()
@@ -177,8 +180,8 @@ fun CuentaScreen(
                 )
                 FilaLista(
                     titulo = stringResource(R.string.accion_estadisticas),
-                    subtitulo = stringResource(
-                        R.string.cuenta_estadisticas_resumen,
+                    subtitulo = pluralStringResource(
+                        R.plurals.cuenta_estadisticas_resumen, stats.sesionesEntrenamiento,
                         stats.tiempoTotalFondo, stats.sesionesEntrenamiento, stats.mejorApnea
                     ),
                     indice = 3, total = filas,
@@ -203,8 +206,19 @@ fun CuentaScreen(
 
             GrupoLista(modifier = Modifier.padding(top = 12.dp)) {
                 FilaLista(
+                    titulo = stringResource(R.string.seguridad_titulo),
+                    // Las cuentas de Google tienen el email como usuario (las locales no pueden tener "@")
+                    subtitulo = stringResource(
+                        if (usuario.contains('@')) R.string.seguridad_subtitulo_google else R.string.seguridad_subtitulo_local
+                    ),
+                    indice = 0, total = 2,
+                    onClick = onVerSeguridad,
+                    inicio = { IconoCirculo(rememberVectorPainter(Icons.Rounded.Lock)) },
+                    fin = { Chevron() }
+                )
+                FilaLista(
                     titulo = stringResource(R.string.cuenta_cerrar_session),
-                    indice = 0, total = 1,
+                    indice = 1, total = 2,
                     onClick = {
                         if (entrenando) {
                             confirmarCierre = true

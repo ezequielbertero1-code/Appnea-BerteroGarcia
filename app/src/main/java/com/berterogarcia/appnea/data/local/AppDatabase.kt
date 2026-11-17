@@ -26,7 +26,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     // v10: lastre/protección/visibilidad opcionales, escala de visibilidad y datos de apnea
     // v11: factores de entrenamiento con clave estable
     // v12: hora y duración en las sesiones; intentos del cronómetro libre
-    version = 12,
+    // v13: tipo de cuenta (local o Google) en lugar de la contraseña "!google"
+    version = 13,
     // Room guarda el esquema de cada versión en app/schemas/ (configurado en app/build.gradle.kts).
     // Hace falta para escribir migraciones y para los tests de migración. Esa carpeta SE COMMITEA.
     exportSchema = true

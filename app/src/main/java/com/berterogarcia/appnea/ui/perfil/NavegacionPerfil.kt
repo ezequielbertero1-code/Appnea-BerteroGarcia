@@ -27,6 +27,8 @@ import com.berterogarcia.appnea.ui.perfil.equipamiento.EquipamientoScreen
 import com.berterogarcia.appnea.ui.perfil.equipamiento.EquipamientoViewModel
 import com.berterogarcia.appnea.ui.perfil.equipamiento.EquipoFormScreen
 import com.berterogarcia.appnea.ui.perfil.equipamiento.EquipoFormViewModel
+import com.berterogarcia.appnea.ui.perfil.seguridad.SeguridadCuentaScreen
+import com.berterogarcia.appnea.ui.perfil.seguridad.SeguridadCuentaViewModel
 import kotlinx.coroutines.flow.map
 
 /**
@@ -51,7 +53,17 @@ fun NavGraphBuilder.perfilGraph(navController: NavHostController, app: AppContai
             onVerEquipamiento = { navController.abrir(Ruta.Equipamiento) },
             onVerCertificados = { navController.abrir(Ruta.Certificados) },
             onVerContactos = { navController.abrir(Ruta.Contactos) },
-            onVerEstadisticas = { navController.abrir(Ruta.Estadisticas()) }
+            onVerEstadisticas = { navController.abrir(Ruta.Estadisticas()) },
+            onVerSeguridad = { navController.abrir(Ruta.Seguridad) }
+        )
+    }
+
+    composable<Ruta.Seguridad> { entrada ->
+        val viewModel: SeguridadCuentaViewModel = viewModel { SeguridadCuentaViewModel(app.cuentaRepository) }
+        SeguridadCuentaScreen(
+            viewModel = viewModel,
+            onVolver = { navController.volverDesde(entrada) },
+            onCuentaBorrada = { navController.irAlLoginSinEstadoGuardado() }
         )
     }
 

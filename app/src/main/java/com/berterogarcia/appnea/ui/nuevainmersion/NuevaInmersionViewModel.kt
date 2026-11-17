@@ -210,7 +210,7 @@ class NuevaInmersionViewModel(
     /** null = alta de una inmersión nueva; con id = edición de esa inmersión. */
     private val idEditar: Long? = null,
     /** Guarda el borrador del formulario por si Android mata la app en segundo plano. */
-    private val estadoGuardado: SavedStateHandle = SavedStateHandle(),
+    private val estadoGuardado: SavedStateHandle,
     private val reloj: Clock = Clock.systemDefaultZone()
 ) : ViewModel() {
 

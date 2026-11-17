@@ -46,7 +46,7 @@ class MigracionesTest {
             )
         }
 
-        val db = helper.runMigrationsAndValidate(nombreBase, 12, true, *todas)
+        val db = helper.runMigrationsAndValidate(nombreBase, 13, true, *todas)
 
         db.query("SELECT id, tipo, lastreKg, visibilidad, apnea, lugar FROM inmersiones ORDER BY id").use { c ->
             assertEquals(2, c.count)
@@ -122,5 +122,20 @@ class MigracionesTest {
         // La tabla de intentos existe y respeta la FK con usuarios
         db.execSQL("INSERT INTO intentos_apnea (fecha, hora, duracionMs, nombreUsuario) VALUES (20000, 36000, 95000, 'ana')")
         db.query("SELECT COUNT(*) FROM intentos_apnea").use { c -> c.moveToFirst(); assertEquals(1, c.getInt(0)) }
+    }
+
+    @Test
+    fun de12a13MarcaLasCuentasDeGoogle() {
+        helper.createDatabase(nombreBase, 12).use { db ->
+            db.execSQL("INSERT INTO usuarios (nombreUsuario, password) VALUES ('ana', 'pbkdf2-hash')")
+            db.execSQL("INSERT INTO usuarios (nombreUsuario, password) VALUES ('leo@gmail.com', '!google')")
+        }
+        val db = helper.runMigrationsAndValidate(nombreBase, 13, true, Migraciones.De12a13)
+        db.query("SELECT nombreUsuario, password, tipoCuenta FROM usuarios ORDER BY nombreUsuario").use { c ->
+            assertTrue(c.moveToFirst())
+            assertEquals(listOf("ana", "pbkdf2-hash", "LOCAL"), (0..2).map(c::getString))
+            assertTrue(c.moveToNext())
+            assertEquals(listOf("leo@gmail.com", "", "GOOGLE"), (0..2).map(c::getString))
+        }
     }
 }

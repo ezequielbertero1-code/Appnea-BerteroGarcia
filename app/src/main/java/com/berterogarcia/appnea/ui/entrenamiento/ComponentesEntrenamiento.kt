@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.entrenamiento
 
+import androidx.compose.ui.res.pluralStringResource
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -107,7 +108,7 @@ fun minSeg(segundos: Int): String {
 fun resumenTabla(tabla: TablaApnea): String {
     val apneas = tabla.fases.filter { it.tipo == TipoFase.APNEA }.map { it.duracionSegundos }
     val descansos = tabla.fases.filter { it.tipo == TipoFase.DESCANSO }.map { it.duracionSegundos }
-    if (apneas.isEmpty()) return stringResource(R.string.tabla_resumen_fases, tabla.fases.size)
+    if (apneas.isEmpty()) return pluralStringResource(R.plurals.tabla_resumen_fases, tabla.fases.size, tabla.fases.size)
     return if (apneas.distinct().size == 1) {
         if (descansos.isNotEmpty() && descansos.distinct().size == 1) {
             stringResource(R.string.tabla_resumen_fijo_descanso, apneas.size, minSeg(apneas.first()), minSeg(descansos.first()))
@@ -115,7 +116,7 @@ fun resumenTabla(tabla: TablaApnea): String {
             stringResource(R.string.tabla_resumen_fijo, apneas.size, minSeg(apneas.first()))
         }
     } else {
-        stringResource(R.string.tabla_resumen_variable, apneas.size, minSeg(apneas.min()), minSeg(apneas.max()))
+        pluralStringResource(R.plurals.tabla_resumen_variable, apneas.size, apneas.size, minSeg(apneas.min()), minSeg(apneas.max()))
     }
 }
 

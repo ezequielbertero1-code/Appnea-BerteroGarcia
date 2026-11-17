@@ -2,7 +2,7 @@ package com.berterogarcia.appnea.ui.clima
 
 import com.berterogarcia.appnea.dominio.FuenteCondiciones
 import com.berterogarcia.appnea.dominio.ServicioUbicacion
-import android.util.Log
+import com.berterogarcia.appnea.util.Registro
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
@@ -115,7 +115,7 @@ class ClimaViewModel(
             },
             onFailure = { error ->
                 // Sin esto el motivo real (red, JSON, cálculo de mareas…) se pierde: la UI solo dice "revisá tu conexión"
-                Log.e(TAG, "No se pudo cargar el clima de $ubicacion", error)
+                Registro.e(TAG, "No se pudo cargar el clima de $ubicacion", error)
                 _uiState.update {
                     it.copy(
                         cargando = false,

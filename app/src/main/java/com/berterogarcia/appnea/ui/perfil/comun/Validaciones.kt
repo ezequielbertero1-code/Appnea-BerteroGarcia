@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.perfil.comun
 
+import com.berterogarcia.appnea.ui.components.pluralUi
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
@@ -21,7 +22,7 @@ object Validaciones {
         if (valor.isBlank()) textoUi(R.string.val_ingresa, nombreCampo) else null
 
     fun largoMaximo(valor: String, maximo: Int): TextoUi? =
-        if (valor.trim().length > maximo) textoUi(R.string.val_maximo_caracteres, maximo) else null
+        if (valor.trim().length > maximo) pluralUi(R.plurals.val_maximo_caracteres, maximo, maximo) else null
 
     fun email(valor: String): TextoUi? {
         val v = valor.trim()

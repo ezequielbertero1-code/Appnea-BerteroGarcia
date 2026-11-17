@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.registro
 
+import com.berterogarcia.appnea.ui.components.pluralUi
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.ui.components.TextoUi
 import com.berterogarcia.appnea.ui.components.textoUi
@@ -30,8 +31,8 @@ object ReglasRegistro {
 
     fun password(valor: String): TextoUi? = when {
         valor.isEmpty() -> textoUi(R.string.val_password_vacia)
-        valor.length < PASSWORD_MIN -> textoUi(R.string.val_password_minimo, PASSWORD_MIN)
-        valor.length > PASSWORD_MAX -> textoUi(R.string.val_maximo_caracteres, PASSWORD_MAX)
+        valor.length < PASSWORD_MIN -> pluralUi(R.plurals.val_password_minimo, PASSWORD_MIN, PASSWORD_MIN)
+        valor.length > PASSWORD_MAX -> pluralUi(R.plurals.val_maximo_caracteres, PASSWORD_MAX, PASSWORD_MAX)
         !valor.any { it.isLetter() } || !valor.any { it.isDigit() } -> textoUi(R.string.val_password_letras_numeros)
         else -> null
     }

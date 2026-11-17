@@ -18,4 +18,8 @@ interface UsuarioDao {
     /** Para pasar el hash viejo (SHA-256) a PBKDF2 la próxima vez que el usuario entra. */
     @Query("UPDATE usuarios SET password = :hash WHERE nombreUsuario = :nombreUsuario")
     suspend fun actualizarPassword(nombreUsuario: String, hash: String): Int
+
+    /** Borra la cuenta. Las FK con ON DELETE CASCADE borran también todos sus datos. */
+    @Query("DELETE FROM usuarios WHERE nombreUsuario = :nombreUsuario")
+    suspend fun eliminar(nombreUsuario: String): Int
 }

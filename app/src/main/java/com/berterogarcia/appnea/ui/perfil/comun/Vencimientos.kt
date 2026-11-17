@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.perfil.comun
 
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -43,7 +44,7 @@ fun insigniaVencimiento(fecha: LocalDate?, hoy: LocalDate = LocalDate.now()): In
             val texto = when (dias) {
                 0L -> stringResource(R.string.vencimiento_hoy)
                 1L -> stringResource(R.string.vencimiento_manana)
-                else -> stringResource(R.string.vencimiento_en_dias, dias)
+                else -> pluralStringResource(R.plurals.vencimiento_en_dias, dias.toInt(), dias)
             }
             Insignia(texto, ColorAdvertencia)
         }

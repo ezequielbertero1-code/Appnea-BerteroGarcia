@@ -1,0 +1,225 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:Astronomia.kt:Astronomia$fun calcularDia: DiaAstro</ID>
+    <ID>CyclomaticComplexMethod:Cuenta.kt:@Composable fun CuentaScreen</ID>
+    <ID>CyclomaticComplexMethod:EtapaInmersion.kt:@Composable internal fun BloqueApnea</ID>
+    <ID>CyclomaticComplexMethod:Etiquetas.kt:@Composable fun CategoriaEquipo.nombre: String</ID>
+    <ID>CyclomaticComplexMethod:Etiquetas.kt:@Composable fun descripcionClima: String</ID>
+    <ID>CyclomaticComplexMethod:EvaluacionAgua.kt:fun evaluarAptitudAgua: AptitudAgua</ID>
+    <ID>CyclomaticComplexMethod:EventoFormulario.kt:internal fun reducir: NuevaInmersionUiState</ID>
+    <ID>CyclomaticComplexMethod:Graficos.kt:@Composable fun GraficoMarea</ID>
+    <ID>CyclomaticComplexMethod:GraficosEstadisticas.kt:@Composable fun GraficoLinea</ID>
+    <ID>CyclomaticComplexMethod:MotorEntrenamiento.kt:MotorEntrenamiento$private suspend fun correr</ID>
+    <ID>CyclomaticComplexMethod:NuevaInmersion.kt:@Composable fun NuevaInmersionScreen</ID>
+    <ID>CyclomaticComplexMethod:PaginaMareas.kt:@Composable internal fun PaginaMareas</ID>
+    <ID>CyclomaticComplexMethod:PaginaResumen.kt:@Composable internal fun PaginaResumen</ID>
+    <ID>CyclomaticComplexMethod:PestanasDetalle.kt:@Composable internal fun PestanaCondiciones</ID>
+    <ID>CyclomaticComplexMethod:RegistroViewModel.kt:RegistroViewModel$private fun validar: Map&lt;CampoRegistro, TextoUi&gt;</ID>
+    <ID>CyclomaticComplexMethod:UddfExporter.kt:UddfExporter$private fun elementoPorPalabra: String</ID>
+    <ID>CyclomaticComplexMethod:ValidadorInmersion.kt:internal fun validarInmersion: Map&lt;Campo, TextoUi&gt;</ID>
+    <ID>ExplicitItLambdaMultipleParameters:CertificadosScreen.kt:{ _, it -&gt; it.id }</ID>
+    <ID>ExplicitItLambdaMultipleParameters:ContactosScreen.kt:{ _, it -&gt; it.id }</ID>
+    <ID>ExplicitItLambdaMultipleParameters:EquipamientoScreen.kt:{ _, it -&gt; it.id }</ID>
+    <ID>ExplicitItLambdaMultipleParameters:Historial.kt:{ _, it -&gt; it.id }</ID>
+    <ID>LongMethod:EventoFormulario.kt:internal fun reducir: NuevaInmersionUiState</ID>
+    <ID>LongMethod:NavegacionPerfil.kt:fun NavGraphBuilder.perfilGraph</ID>
+    <ID>LongMethod:UddfExporter.kt:UddfExporter$fun generar: String</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.011</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.015</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.017</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.031</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.033</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.035</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.041</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.046</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.053</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.055</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.057</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.059</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.173</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.186</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$0.658</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$1.274</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$10</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$100</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$170</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$180.0</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$190</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$2440587.5</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$2451543.5</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$260</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$280</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$29</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$31</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$350</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$360</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$360.0</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$4</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$5</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$60</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$80</ID>
+    <ID>MagicNumber:Astronomia.kt:Astronomia$86400.0</ID>
+    <ID>MagicNumber:CertificadoFormViewModel.kt:CertificadoFormViewModel$300</ID>
+    <ID>MagicNumber:CertificadoFormViewModel.kt:CertificadoFormViewModel$40</ID>
+    <ID>MagicNumber:CertificadoFormViewModel.kt:CertificadoFormViewModel$80</ID>
+    <ID>MagicNumber:CertificadosViewModel.kt:3</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:3</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:45</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:48</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:51</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:57</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:60</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:61</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:67</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:71</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:77</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:80</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:82</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:85</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:86</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:95</ID>
+    <ID>MagicNumber:ComponentesCondiciones.kt:99</ID>
+    <ID>MagicNumber:ComponentesEntrenamiento.kt:60</ID>
+    <ID>MagicNumber:ContactoFormViewModel.kt:ContactoFormViewModel$300</ID>
+    <ID>MagicNumber:ContactoFormViewModel.kt:ContactoFormViewModel$40</ID>
+    <ID>MagicNumber:ContactoFormViewModel.kt:ContactoFormViewModel$60</ID>
+    <ID>MagicNumber:CronometroViewModel.kt:CronometroViewModel$1_000L</ID>
+    <ID>MagicNumber:DatosPersonalesViewModel.kt:DatosPersonalesViewModel$60</ID>
+    <ID>MagicNumber:DatosPersonalesViewModel.kt:DatosPersonalesViewModel$80</ID>
+    <ID>MagicNumber:DetalleInmersion.kt:24</ID>
+    <ID>MagicNumber:DetalleInmersion.kt:60</ID>
+    <ID>MagicNumber:EquipoFormViewModel.kt:EquipoFormViewModel$30</ID>
+    <ID>MagicNumber:EquipoFormViewModel.kt:EquipoFormViewModel$300</ID>
+    <ID>MagicNumber:EquipoFormViewModel.kt:EquipoFormViewModel$40</ID>
+    <ID>MagicNumber:EquipoFormViewModel.kt:EquipoFormViewModel$60</ID>
+    <ID>MagicNumber:Estadisticas.kt:60</ID>
+    <ID>MagicNumber:EstadisticasViewModel.kt:1000L</ID>
+    <ID>MagicNumber:EstadisticasViewModel.kt:100f</ID>
+    <ID>MagicNumber:EstadisticasViewModel.kt:PeriodoEstadisticas.TRES_MESES$3</ID>
+    <ID>MagicNumber:EstadisticasViewModel.kt:PeriodoEstadisticas.UN_ANIO$12</ID>
+    <ID>MagicNumber:EstadosPerfil.kt:5_000</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:0.8</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:1.5</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:1000</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:2.5</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:20</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:30</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:35</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:50</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:61</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:67</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:80</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:82</ID>
+    <ID>MagicNumber:EvaluacionAgua.kt:95</ID>
+    <ID>MagicNumber:EventoFormulario.kt:4</ID>
+    <ID>MagicNumber:EventoFormulario.kt:5</ID>
+    <ID>MagicNumber:EventoFormulario.kt:6</ID>
+    <ID>MagicNumber:HistorialViewModel.kt:PeriodoFiltro$3</ID>
+    <ID>MagicNumber:HistorialViewModel.kt:PeriodoFiltro$7</ID>
+    <ID>MagicNumber:Login.kt:60</ID>
+    <ID>MagicNumber:Mareas.kt:Mareas$3</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De10a11$10</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De10a11$11</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De11a12$11</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De11a12$12</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De12a13$12</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De12a13$13</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De6a7$6</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De6a7$7</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De7a8$7</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De7a8$8</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De8a9$8</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De8a9$9</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De9a10$10</ID>
+    <ID>MagicNumber:Migraciones.kt:Migraciones.De9a10$9</ID>
+    <ID>MagicNumber:MotorEntrenamiento.kt:MotorEntrenamiento$1000L</ID>
+    <ID>MagicNumber:MotorEntrenamiento.kt:MotorEntrenamiento$15</ID>
+    <ID>MagicNumber:MotorEntrenamiento.kt:MotorEntrenamiento$20</ID>
+    <ID>MagicNumber:MotorEntrenamiento.kt:MotorEntrenamiento$3</ID>
+    <ID>MagicNumber:MotorEntrenamiento.kt:MotorEntrenamiento$6</ID>
+    <ID>MagicNumber:MotorEntrenamiento.kt:MotorEntrenamiento$999L</ID>
+    <ID>MagicNumber:NuevaInmersionViewModel.kt:4</ID>
+    <ID>MagicNumber:NuevaInmersionViewModel.kt:60</ID>
+    <ID>MagicNumber:OpenMeteoService.kt:OpenMeteoService$200</ID>
+    <ID>MagicNumber:OpenMeteoService.kt:OpenMeteoService$299</ID>
+    <ID>MagicNumber:OpenMeteoService.kt:OpenMeteoService$500</ID>
+    <ID>MagicNumber:PerfilSimulado.kt:PerfilSimulado$100</ID>
+    <ID>MagicNumber:PerfilSimulado.kt:PerfilSimulado$100.0</ID>
+    <ID>MagicNumber:RegistroViewModel.kt:RegistroViewModel$40</ID>
+    <ID>MagicNumber:RegistroViewModel.kt:RegistroViewModel$60</ID>
+    <ID>MagicNumber:RegistroViewModel.kt:RegistroViewModel$80</ID>
+    <ID>MagicNumber:ReglasRegistro.kt:FuerzaPassword.FUERTE$3</ID>
+    <ID>MagicNumber:ReglasRegistro.kt:ReglasRegistro$12</ID>
+    <ID>MagicNumber:ReglasRegistro.kt:ReglasRegistro$3</ID>
+    <ID>MagicNumber:SeguridadPassword.kt:SeguridadPassword$16</ID>
+    <ID>MagicNumber:SeguridadPassword.kt:SeguridadPassword$5</ID>
+    <ID>MagicNumber:ServicioEntrenamiento.kt:ServicioEntrenamiento$60_000L</ID>
+    <ID>MagicNumber:SonidoManager.kt:SonidoManager$250</ID>
+    <ID>MagicNumber:TablaApnea.kt:TablasPredefinidas$120</ID>
+    <ID>MagicNumber:TablaApnea.kt:TablasPredefinidas$180</ID>
+    <ID>MagicNumber:TablaApnea.kt:TablasPredefinidas$60</ID>
+    <ID>MagicNumber:Tarjetas.kt:TipoInsignia.ADVERTENCIA$0.16f</ID>
+    <ID>MagicNumber:Tarjetas.kt:TipoInsignia.BUENA$0.16f</ID>
+    <ID>MagicNumber:Tarjetas.kt:TipoInsignia.INFO$0.12f</ID>
+    <ID>MagicNumber:Tarjetas.kt:TipoInsignia.MALA$0.16f</ID>
+    <ID>MagicNumber:UddfExporter.kt:UddfExporter$24</ID>
+    <ID>MagicNumber:UddfExporter.kt:UddfExporter$3600</ID>
+    <ID>MagicNumber:ValidadorInmersion.kt:3f</ID>
+    <ID>MagicNumber:VistasPreviasInmersion.kt:10</ID>
+    <ID>MagicNumber:VistasPreviasInmersion.kt:11</ID>
+    <ID>MagicNumber:VistasPreviasInmersion.kt:15</ID>
+    <ID>MagicNumber:VistasPreviasInmersion.kt:2026</ID>
+    <ID>MagicNumber:VistasPreviasInmersion.kt:24</ID>
+    <ID>MagicNumber:VistasPreviasInmersion.kt:30</ID>
+    <ID>MatchingDeclarationName:BarrasSuperiores.kt:NavegacionBarra</ID>
+    <ID>MatchingDeclarationName:PreferenciasLogin.kt:PreferenciasLoginAndroid : PreferenciasLogin</ID>
+    <ID>MaxLineLength:AislamientoUsuariosTest.kt:AislamientoUsuariosTest$assertFalse(db.equipoDao().actualizarSiEsDe(EquipoEntity(id = idBeto, nombreUsuario = "ana", categoria = CategoriaEquipo.entries.first(), marca = "Robado")))</ID>
+    <ID>MaxLineLength:CuentaViewModelTest.kt:CuentaViewModelTest$SesionApnea(fecha = LocalDate.now(), nombreTabla = "CO2", completada = true, faseAlcanzada = 8, totalFases = 8, marcaSegundos = 95, factores = emptySet(), sensaciones = "")</ID>
+    <ID>MaxLineLength:CuentaViewModelTest.kt:CuentaViewModelTest$SesionApnea(fecha = LocalDate.now(), nombreTabla = "O2", completada = false, faseAlcanzada = 2, totalFases = 8, marcaSegundos = 40, factores = emptySet(), sensaciones = "")</ID>
+    <ID>MaxLineLength:Estadisticas.kt:Mosaico(stringResource(R.string.estadisticas_sesiones), r.sesiones.toString(), detalle = pluralStringResource(R.plurals.estadisticas_completas, r.completas, r.completas))</ID>
+    <ID>MaxLineLength:Migraciones.kt:Migraciones.De6a7$crearTabla = "CREATE TABLE IF NOT EXISTS `inmersiones_nueva` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha` INTEGER NOT NULL, `lugar` TEXT NOT NULL, `profundidadMetros` REAL NOT NULL, `paradaSeguridadMin` REAL NOT NULL, `tiempoFondo` INTEGER NOT NULL, `horaEntrada` INTEGER NOT NULL, `horaSalida` INTEGER NOT NULL, `caracteristicasAgua` TEXT NOT NULL, `lastreKg` REAL NOT NULL, `proteccionMm` REAL NOT NULL, `equipamiento` TEXT NOT NULL, `temperaturaAireC` REAL NOT NULL, `temperaturaAguaC` REAL NOT NULL, `visibilidadMetros` REAL NOT NULL, `actividad` TEXT NOT NULL, `comentarios` TEXT NOT NULL, `condiciones` TEXT, `nombreUsuario` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )"</ID>
+    <ID>MaxLineLength:Migraciones.kt:Migraciones.De6a7$crearTabla = "CREATE TABLE IF NOT EXISTS `salidas_pesca_nueva` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha` INTEGER NOT NULL, `lugar` TEXT NOT NULL, `latitud` REAL, `longitud` REAL, `capturas` TEXT NOT NULL, `fotoPath` TEXT, `comentario` TEXT NOT NULL, `condiciones` TEXT, `nombreUsuario` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )"</ID>
+    <ID>MaxLineLength:Migraciones.kt:Migraciones.De6a7$crearTabla = "CREATE TABLE IF NOT EXISTS `sesiones_apnea_nueva` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha` INTEGER NOT NULL, `nombreTabla` TEXT NOT NULL, `completada` INTEGER NOT NULL, `faseAlcanzada` INTEGER NOT NULL, `totalFases` INTEGER NOT NULL, `marcaSegundos` INTEGER NOT NULL, `factores` TEXT NOT NULL, `sensaciones` TEXT NOT NULL, `nombreUsuario` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )"</ID>
+    <ID>MaxLineLength:Migraciones.kt:Migraciones.De6a7$crearTabla = "CREATE TABLE IF NOT EXISTS `tablas_personalizadas_nueva` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombre` TEXT NOT NULL, `fases` TEXT NOT NULL, `nombreUsuario` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )"</ID>
+    <ID>MaxLineLength:Migraciones.kt:Migraciones.De9a10$"CREATE TABLE IF NOT EXISTS `inmersiones_nueva` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha` INTEGER NOT NULL, `lugar` TEXT NOT NULL, `profundidadMetros` REAL NOT NULL, `paradaSeguridadMin` REAL NOT NULL, `tiempoFondo` INTEGER NOT NULL, `horaEntrada` INTEGER NOT NULL, `horaSalida` INTEGER NOT NULL, `caracteristicasAgua` TEXT NOT NULL, `lastreKg` REAL, `proteccionMm` REAL, `equipamiento` TEXT NOT NULL, `temperaturaAireC` REAL NOT NULL, `temperaturaAguaC` REAL NOT NULL, `visibilidad` TEXT, `visibilidadMetros` REAL, `actividad` TEXT NOT NULL, `comentarios` TEXT NOT NULL, `condiciones` TEXT, `nombreUsuario` TEXT NOT NULL, `tipo` TEXT NOT NULL, `latitud` REAL, `longitud` REAL, `apnea` TEXT, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) ON UPDATE CASCADE ON DELETE CASCADE )"</ID>
+    <ID>MaxLineLength:NuevaInmersionViewModel.kt:Campo</ID>
+    <ID>MaxLineLength:PaginaResumen.kt:FilaDato(stringResource(R.string.condiciones_direccion), "${direccion(clima?.direccionVientoGrados)} (${num(clima?.direccionVientoGrados, unidad = "°")})")</ID>
+    <ID>MaxLineLength:PaginaResumen.kt:FilaDato(stringResource(R.string.condiciones_mar_fondo), "${num(mar.marDeFondoM, 1, " m")} ${direccion(mar.direccionMarDeFondoGrados)} · ${num(mar.periodoMarDeFondoS, unidad = " s")}")</ID>
+    <ID>MaxLineLength:PaginaResumen.kt:FilaDato(stringResource(R.string.detalle_visibilidad), clima?.visibilidadM?.let { if (it &gt;= 1000) "${(it / 1000).roundToInt()} km" else "${it.roundToInt()} m" } ?: "-")</ID>
+    <ID>MaxLineLength:PaginaSemana.kt:FilaDato(stringResource(R.string.condiciones_viento_rafagas), "${num(d.vientoMaxKmh)} / ${num(d.rafagasMaxKmh)} km/h ${direccion(d.direccionVientoGrados)}")</ID>
+    <ID>MaxLineLength:PestanasDetalle.kt:Box(Modifier.weight(1f)) { DatoChico(stringResource(R.string.detalle_viento), c.vientoKmh?.let { "${num(it)} ${direccion(c.direccionVientoGrados)}" } ?: "-") }</ID>
+    <ID>MaxLineLength:ValidadorInmersion.kt:else</ID>
+    <ID>MaxLineLength:ValidadorInmersion.kt:if</ID>
+    <ID>RethrowCaughtException:GoogleAuth.kt:GoogleAuth$throw e</ID>
+    <ID>ReturnCount:CompletarCondicionesWorker.kt:CompletarCondicionesWorker$override suspend fun doWork: Result</ID>
+    <ID>ReturnCount:CuentaRepository.kt:CuentaRepository$override suspend fun borrarCuenta: ResultadoCuenta</ID>
+    <ID>ReturnCount:CuentaRepository.kt:CuentaRepository$override suspend fun cambiarPassword: ResultadoCuenta</ID>
+    <ID>ReturnCount:EntrenamientoApneaViewModel.kt:EntrenamientoApneaViewModel$fun onGuardarSesion</ID>
+    <ID>ReturnCount:Estadisticas.kt:@Composable private fun PestaniaEntrenamiento</ID>
+    <ID>ReturnCount:Mareas.kt:Mareas$fun alturaEn: Double?</ID>
+    <ID>ReturnCount:NuevaInmersionViewModel.kt:private fun BajadaForm.aBajadaApnea: BajadaApnea?</ID>
+    <ID>ReturnCount:OpenMeteoService.kt:OpenMeteoService$private fun JSONObject.num: Double?</ID>
+    <ID>ReturnCount:PerfilSimulado.kt:PerfilSimulado$private fun muestrear: List&lt;PuntoPerfil&gt;</ID>
+    <ID>ReturnCount:SeguridadPassword.kt:SeguridadPassword$fun necesitaActualizar: Boolean</ID>
+    <ID>ReturnCount:SesionRepository.kt:SesionRepository$override suspend fun usuarioConSesionValida: String?</ID>
+    <ID>ReturnCount:UbicacionHelper.kt:UbicacionHelper$@SuppressLint("MissingPermission") // el permiso se verifica con tienePermiso() suspend fun obtenerUbicacionActual: Ubicacion?</ID>
+    <ID>ReturnCount:UbicacionHelper.kt:UbicacionHelper$@SuppressLint("MissingPermission") fun obtenerUltimaUbicacion: Ubicacion?</ID>
+    <ID>SwallowedException:GoogleAuth.kt:GoogleAuth$e: GetCredentialCancellationException</ID>
+    <ID>SwallowedException:GoogleAuth.kt:GoogleAuth$e: GetCredentialException</ID>
+    <ID>SwallowedException:GoogleAuth.kt:GoogleAuth$e: GoogleIdTokenParsingException</ID>
+    <ID>SwallowedException:GoogleAuth.kt:GoogleAuth$e: NoCredentialException</ID>
+    <ID>TooGenericExceptionCaught:Errores.kt:e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RegistroRepository.kt:RegistroRepository$e: Exception</ID>
+    <ID>TooGenericExceptionThrown:OpenMeteoService.kt:OpenMeteoService$throw RuntimeException("Open-Meteo respondió con código $codigo: ${detalle?.take(500)} | URL: $urlStr")</ID>
+    <ID>TooManyFunctions:ComponentesCondiciones.kt:com.berterogarcia.appnea.ui.condiciones.ComponentesCondiciones.kt</ID>
+    <ID>TooManyFunctions:ContactoEmergenciaDao.kt:ContactoEmergenciaDao</ID>
+    <ID>TooManyFunctions:Converters.kt:Converters</ID>
+    <ID>TooManyFunctions:Mapeos.kt:com.berterogarcia.appnea.data.local.Mapeos.kt</ID>
+    <ID>TooManyFunctions:PerfilRepository.kt:PerfilRepository : RepositorioPerfil</ID>
+    <ID>TooManyFunctions:RegistroViewModel.kt:RegistroViewModel : ViewModel</ID>
+    <ID>TooManyFunctions:Repositorios.kt:RepositorioPerfil</ID>
+    <ID>UnusedParameter:FakesInstrumentados.kt:usuario: String = "ana"</ID>
+  </CurrentIssues>
+</SmellBaseline>

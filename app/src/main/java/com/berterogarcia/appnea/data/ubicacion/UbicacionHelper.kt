@@ -8,7 +8,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
-import android.util.Log
+import com.berterogarcia.appnea.util.Registro
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.os.CancellationSignal
@@ -61,7 +61,7 @@ object UbicacionHelper {
         val activados = intentar("UbicacionHelper") { lm.getProviders(true) }.getOrDefault(emptyList())
         // "passive" no genera ubicaciones propias, solo escucha las de otras apps
         val candidatos = activados.filter { it != LocationManager.PASSIVE_PROVIDER }
-        Log.d(TAG, "activados=$activados → pide a $candidatos")
+        Registro.d(TAG) { "activados=$activados → pide a $candidatos" }
 
         val actual: Location? = if (candidatos.isEmpty()) null else withTimeoutOrNull(timeout) {
             channelFlow {
@@ -70,7 +70,7 @@ object UbicacionHelper {
                 }
             }.filterNotNull().firstOrNull()   // al llegar la primera, se cancelan los demás pedidos
         }
-        Log.d(TAG, "actual=$actual")
+        Registro.d(TAG) { "actual=$actual" }
 
         return actual?.let { Ubicacion(latitud = it.latitude, longitud = it.longitude) }
             ?: obtenerUltimaUbicacion(context)
@@ -90,11 +90,11 @@ object UbicacionHelper {
                 LocationManagerCompat.getCurrentLocation(
                     lm, proveedor, cancelar, ContextCompat.getMainExecutor(context)
                 ) { location ->
-                    Log.d(TAG, "$proveedor respondió: $location")
+                    Registro.d(TAG) { "$proveedor respondió: $location" }
                     if (cont.isActive) cont.resume(location)
                 }
             }.onFailure {
-                Log.d(TAG, "$proveedor falló: ${it.message}")
+                Registro.d(TAG) { "$proveedor falló: ${it.message}" }
                 if (cont.isActive) cont.resume(null)
             }
         }
@@ -117,7 +117,7 @@ object UbicacionHelper {
             .mapNotNull { intentar("UbicacionHelper") { lm.getLastKnownLocation(it) }.getOrNull() }
             .maxByOrNull { it.time }   // la más reciente
 
-        Log.d(TAG, "ultima=$mejor")
+        Registro.d(TAG) { "ultima=$mejor" }
         return mejor?.let { Ubicacion(latitud = it.latitude, longitud = it.longitude) }
     }
 }

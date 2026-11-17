@@ -1,5 +1,7 @@
 package com.berterogarcia.appnea
 
+import com.berterogarcia.appnea.dominio.repositorios.RepositorioCuenta
+import com.berterogarcia.appnea.data.repository.CuentaRepository
 import com.berterogarcia.appnea.data.condiciones.CondicionesRepository
 import com.berterogarcia.appnea.dominio.FuenteCondiciones
 import com.berterogarcia.appnea.data.export.ExportadorUddf
@@ -55,6 +57,7 @@ class AppContainer(context: Context) {
     val sonidoManager by lazy { SonidoManager(contexto) }
     val usuarioRepository: RepositorioUsuarios by lazy { UsuarioRepository(database.usuarioDao()) }
     val cuentaGoogleRepository: RepositorioCuentaGoogle by lazy { CuentaGoogleRepository(database) }
+    val cuentaRepository: RepositorioCuenta by lazy { CuentaRepository(database.usuarioDao(), sessionManager, preferenciasLogin) }
     // Estos repositorios reciben la sesión: trabajan siempre sobre el usuario logueado.
     val preferenciasLogin: PreferenciasLogin by lazy { PreferenciasLoginAndroid(contexto) }
     val inmersionRepository: RepositorioInmersiones by lazy { InmersionRepository(database.inmersionDao(), sessionManager) }

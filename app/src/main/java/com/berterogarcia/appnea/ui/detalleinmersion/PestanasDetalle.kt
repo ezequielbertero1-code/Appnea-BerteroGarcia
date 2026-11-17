@@ -167,6 +167,16 @@ internal fun PestanaCondiciones(i: Inmersion) {
         )
     }
 
+    // ---- Sin lugar marcado, las condiciones son de la ubicación del teléfono o de Comodoro ----
+    if (c != null && i.latitud == null) {
+        Text(
+            stringResource(R.string.detalle_condiciones_aproximadas),
+            style = MaterialTheme.typography.bodySmall,
+            color = TextoSuperficieVariante,
+            modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
+        )
+    }
+
     // ---- Mosaicos: marea, luna, corriente, visibilidad ----
     if (c != null) {
         FilaMosaicos {

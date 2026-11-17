@@ -27,7 +27,8 @@ object Migraciones {
         De8a9,
         De9a10,
         De10a11,
-        De11a12
+        De11a12,
+        De12a13
     )
 
     /**
@@ -226,6 +227,17 @@ object Migraciones {
                     "ON UPDATE CASCADE ON DELETE CASCADE )"
             )
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_intentos_apnea_nombreUsuario` ON `intentos_apnea` (`nombreUsuario`)")
+        }
+    }
+
+    /**
+     * v12 → v13: columna `tipoCuenta` en `usuarios`. Las cuentas de Google tenían la contraseña
+     * "!google" como marca: pasan a GOOGLE y la contraseña queda vacía.
+     */
+    object De12a13 : Migration(12, 13) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `usuarios` ADD COLUMN `tipoCuenta` TEXT NOT NULL DEFAULT 'LOCAL'")
+            db.execSQL("UPDATE `usuarios` SET `tipoCuenta` = 'GOOGLE', `password` = '' WHERE `password` = '!google'")
         }
     }
 }

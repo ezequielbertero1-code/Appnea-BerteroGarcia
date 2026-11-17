@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization) // rutas tipadas de Navigation (@Serializable)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.detekt)
 }
 
 // Client ID "web" de Google Cloud (se guarda en local.properties: client_web=...). Sin él, el botón de Google avisa que falta configurar.
@@ -111,4 +112,14 @@ dependencies {
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+// Análisis estático de Kotlin. Como con lint, lo que ya había queda en el baseline y
+// ./gradlew :app:detekt falla solo por problemas NUEVOS.
+// Regenerar el baseline: ./gradlew :app:detektBaseline
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    baseline = rootProject.file("config/detekt/baseline.xml")
+    source.setFrom("src/main/java", "src/test/java", "src/androidTest/java")
 }

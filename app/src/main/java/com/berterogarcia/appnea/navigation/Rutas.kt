@@ -42,6 +42,8 @@ sealed interface Ruta {
     @Serializable data class FormCertificado(val id: Long = 0) : Ruta
     @Serializable data object Contactos : Ruta
     @Serializable data class FormContacto(val id: Long = 0) : Ruta
+    /** Cambiar la contraseña y borrar la cuenta. */
+    @Serializable data object Seguridad : Ruta
 }
 
 /** id de un formulario de perfil: null si es un alta. */
@@ -74,7 +76,8 @@ private val RUTAS_SIN_BARRA = listOf(
     Ruta.DatosPersonales::class,
     Ruta.FormEquipo::class,
     Ruta.FormCertificado::class,
-    Ruta.FormContacto::class
+    Ruta.FormContacto::class,
+    Ruta.Seguridad::class
 )
 
 private val RUTAS_DE_ACCESO = listOf(Ruta.Login::class, Ruta.Registro::class, Ruta.RegistroGoogle::class)

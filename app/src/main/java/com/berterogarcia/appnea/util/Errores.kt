@@ -1,6 +1,5 @@
 package com.berterogarcia.appnea.util
 
-import android.util.Log
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -21,6 +20,6 @@ inline fun <T> intentar(tag: String, bloque: () -> T): Result<T> =
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        Log.w(tag, "Operación fallida: ${e.message}", e)
+        Registro.w(tag, "Operación fallida: ${e.message}", e)
         Result.failure(e)
     }

@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.dominio.repositorios
 
+import com.berterogarcia.appnea.dominio.modelo.TipoCuenta
 import com.berterogarcia.appnea.dominio.modelo.Certificado
 import com.berterogarcia.appnea.dominio.modelo.ContactoEmergencia
 import com.berterogarcia.appnea.dominio.modelo.Equipo
@@ -119,4 +120,23 @@ interface RepositorioCuentaGoogle {
 interface RepositorioSesion {
     /** @return el usuario logueado si la sesión es válida, o null si hay que ir al login. */
     suspend fun usuarioConSesionValida(): String?
+}
+
+sealed interface ResultadoCuenta {
+    data object Ok : ResultadoCuenta
+    data object PasswordIncorrecta : ResultadoCuenta
+    data object SinSesion : ResultadoCuenta
+}
+
+/** Seguridad de la cuenta logueada: cambiar la contraseña y borrar la cuenta. */
+interface RepositorioCuenta {
+    /** null si no hay sesión. */
+    suspend fun tipoActual(): TipoCuenta?
+    /** Solo cuentas locales: pide la contraseña actual. */
+    suspend fun cambiarPassword(actual: String, nueva: String): ResultadoCuenta
+    /**
+     * Borra la cuenta y TODOS sus datos, y cierra la sesión.
+     * @param password la actual (cuentas locales); en las de Google se ignora.
+     */
+    suspend fun borrarCuenta(password: String?): ResultadoCuenta
 }

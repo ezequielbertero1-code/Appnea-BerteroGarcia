@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.entrenamiento
 
+import androidx.compose.ui.res.pluralStringResource
 import com.berterogarcia.appnea.util.intentar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -197,11 +198,10 @@ fun CrearTablaScreen(
             } else {
                 Row(Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, bottom = 8.dp)) {
                     Text(
-                        stringResource(
-                            R.string.crear_tabla_resumen,
-                            s.fases.size,
-                            s.fases.count { it.tipo == TipoFase.APNEA }
-                        ),
+                        s.fases.count { it.tipo == TipoFase.APNEA }.let { apneas ->
+                            pluralStringResource(R.plurals.tabla_resumen_fases, s.fases.size, s.fases.size) + " · " +
+                                pluralStringResource(R.plurals.cantidad_apneas, apneas, apneas)
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = TextoSuperficieVariante,
                         modifier = Modifier.weight(1f)
@@ -256,8 +256,8 @@ fun CrearTablaScreen(
                     valor = minSeg(s.duracionNueva),
                     onMenos = { viewModel.onDuracionNuevaPaso(-PASO_SEG) },
                     onMas = { viewModel.onDuracionNuevaPaso(PASO_SEG) },
-                    descripcionMenos = stringResource(R.string.crear_tabla_restar_nueva, PASO_SEG),
-                    descripcionMas = stringResource(R.string.crear_tabla_sumar_nueva, PASO_SEG)
+                    descripcionMenos = pluralStringResource(R.plurals.crear_tabla_restar_nueva, PASO_SEG, PASO_SEG),
+                    descripcionMas = pluralStringResource(R.plurals.crear_tabla_sumar_nueva, PASO_SEG, PASO_SEG)
                 )
                 BotonContorno(
                     texto = stringResource(R.string.crear_tabla_agregar),
@@ -334,8 +334,8 @@ private fun FilaFaseEditable(
                     valor = minSeg(fase.duracionSegundos),
                     onMenos = onMenos,
                     onMas = onMas,
-                    descripcionMenos = stringResource(R.string.crear_tabla_restar_fase, PASO_SEG, numero),
-                    descripcionMas = stringResource(R.string.crear_tabla_sumar_fase, PASO_SEG, numero)
+                    descripcionMenos = pluralStringResource(R.plurals.crear_tabla_restar_fase, PASO_SEG, PASO_SEG, numero),
+                    descripcionMas = pluralStringResource(R.plurals.crear_tabla_sumar_fase, PASO_SEG, PASO_SEG, numero)
                 )
                 IconButton(onClick = onQuitar) {
                     Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.crear_tabla_quitar_fase, numero))
