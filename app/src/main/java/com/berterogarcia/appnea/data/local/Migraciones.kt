@@ -26,7 +26,8 @@ object Migraciones {
         De7a8,
         De8a9,
         De9a10,
-        De10a11
+        De10a11,
+        De11a12
     )
 
     /**
@@ -206,6 +207,25 @@ object Migraciones {
             }
             // Saca las comas de los extremos (",A,B," -> "A,B"; ",," -> "")
             db.execSQL("UPDATE `sesiones_apnea` SET `factores` = TRIM(`factores`, ',')")
+        }
+    }
+
+    /**
+     * v11 → v12:
+     *  - `sesiones_apnea` gana `horaInicio` y `duracionSegundos` (null en las sesiones viejas: no se sabe).
+     *  - Tabla nueva `intentos_apnea` para los intentos del cronómetro libre.
+     */
+    object De11a12 : Migration(11, 12) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `sesiones_apnea` ADD COLUMN `horaInicio` INTEGER")
+            db.execSQL("ALTER TABLE `sesiones_apnea` ADD COLUMN `duracionSegundos` INTEGER")
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `intentos_apnea` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`fecha` INTEGER NOT NULL, `hora` INTEGER NOT NULL, `duracionMs` INTEGER NOT NULL, " +
+                    "`nombreUsuario` TEXT NOT NULL, FOREIGN KEY(`nombreUsuario`) REFERENCES `usuarios`(`nombreUsuario`) " +
+                    "ON UPDATE CASCADE ON DELETE CASCADE )"
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_intentos_apnea_nombreUsuario` ON `intentos_apnea` (`nombreUsuario`)")
         }
     }
 }

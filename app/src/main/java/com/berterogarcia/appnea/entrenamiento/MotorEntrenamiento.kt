@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.milliseconds
 
 /** Cómo terminó una tabla: lo que después se guarda como sesión. */
@@ -19,7 +20,9 @@ data class ResultadoTabla(
     val completada: Boolean,
     val faseAlcanzada: Int,
     val marcaSegundos: Int,
-    val duracionSegundos: Int
+    val duracionSegundos: Int,
+    /** Fecha y hora (del teléfono) en que arrancó la tabla. */
+    val inicio: LocalDateTime
 )
 
 data class EstadoMotor(
@@ -47,6 +50,8 @@ class MotorEntrenamiento(
     private val scope: CoroutineScope,
     private val sonido: SonidoManager?,
     private val reloj: () -> Long = SystemClock::elapsedRealtime,
+    /** Fecha y hora "de pared" (para guardar cuándo se entrenó; el timer usa [reloj]). */
+    private val ahora: () -> LocalDateTime = LocalDateTime::now,
     private val alCambiarActividad: (corriendo: Boolean) -> Unit = {}
 ) {
     private val _estado = MutableStateFlow(EstadoMotor())
@@ -58,6 +63,7 @@ class MotorEntrenamiento(
     fun iniciar(tabla: TablaApnea) {
         if (_estado.value.corriendo || tabla.fases.isEmpty()) return
         val inicioMs = reloj()
+        val inicio = ahora()
         momentoAbortoMs = null
         _estado.value = EstadoMotor(
             tabla = tabla,
@@ -67,7 +73,7 @@ class MotorEntrenamiento(
         )
         alCambiarActividad(true)
         job?.cancel()
-        job = scope.launch { correr(tabla, inicioMs) }
+        job = scope.launch { correr(tabla, inicioMs, inicio) }
     }
 
     /** Corta la tabla: se mide hasta el momento exacto del toque. */
@@ -85,7 +91,7 @@ class MotorEntrenamiento(
         if (estabaCorriendo) alCambiarActividad(false)
     }
 
-    private suspend fun correr(tabla: TablaApnea, inicioMs: Long) {
+    private suspend fun correr(tabla: TablaApnea, inicioMs: Long, inicio: LocalDateTime) {
         // Cada fase termina en un instante FIJO calculado desde el inicio de la tabla:
         // lo que tarden los sonidos o la UI en cada vuelta no se acumula.
         var mejorApnea = 0
@@ -122,13 +128,13 @@ class MotorEntrenamiento(
                 val hasta = momentoAbortoMs ?: reloj()
                 val transcurridos = ((hasta - inicioFaseMs) / 1000L).toInt().coerceIn(0, fase.duracionSegundos)
                 if (fase.tipo == TipoFase.APNEA) mejorApnea = maxOf(mejorApnea, transcurridos)
-                terminar(ResultadoTabla(false, indice + 1, mejorApnea, duracion(inicioMs, hasta)))
+                terminar(ResultadoTabla(false, indice + 1, mejorApnea, duracion(inicioMs, hasta), inicio))
                 return
             }
             if (fase.tipo == TipoFase.APNEA) mejorApnea = maxOf(mejorApnea, fase.duracionSegundos)
         }
         sonido?.avisarFinTabla()
-        terminar(ResultadoTabla(true, tabla.fases.size, mejorApnea, duracion(inicioMs, finFaseMs)))
+        terminar(ResultadoTabla(true, tabla.fases.size, mejorApnea, duracion(inicioMs, finFaseMs), inicio))
     }
 
     private fun terminar(resultado: ResultadoTabla) {

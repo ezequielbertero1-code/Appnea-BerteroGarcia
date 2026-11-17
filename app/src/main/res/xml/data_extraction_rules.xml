@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Qué se respalda en Android 12+ (copia en la nube y pasar a un teléfono nuevo).
+    Solo la base de datos: inmersiones, entrenamientos, perfil, equipo, etc.
+    NO se respaldan las SharedPreferences:
+      - sesion.xml: al restaurar en otro teléfono hay que volver a iniciar sesión;
+      - login.xml: los intentos fallidos y el bloqueo son de este teléfono;
+      - seed.xml (solo debug): marca de los datos de ejemplo.
+    Con <include>, todo lo que no está incluido queda afuera (también cachés como la del mapa).
+    Ver https://developer.android.com/identity/data/autobackup
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <include domain="database" path="." />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <include domain="database" path="." />
     </device-transfer>
-    -->
 </data-extraction-rules>

@@ -3,13 +3,24 @@ package com.berterogarcia.appnea.ui.entrenamiento
 import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.berterogarcia.appnea.R
+import com.berterogarcia.appnea.data.local.IntentoApneaEntity
+import com.berterogarcia.appnea.data.repository.IntentoApneaRepository
+import com.berterogarcia.appnea.ui.components.TextoUi
+import com.berterogarcia.appnea.ui.components.textoUi
+import com.berterogarcia.appnea.util.intentar
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -23,56 +34,83 @@ data class IntentoApnea(
 data class CronometroUiState(
     val transcurridoMs: Long = 0L,
     val corriendo: Boolean = false,
-    /** Intentos de esta sesión, el más nuevo primero. Por ahora solo en memoria. */
-    val intentos: List<IntentoApnea> = emptyList()
+    /** Intentos de hoy (guardados en la base), el más nuevo primero. */
+    val intentos: List<IntentoApnea> = emptyList(),
+    val errorGuardado: TextoUi? = null
 ) {
     val mejorMs: Long? get() = intentos.maxOfOrNull { it.duracionMs }
 }
 
+/** Lo que vive solo en la pantalla: el reloj del intento en curso. */
+private data class Reloj(
+    val transcurridoMs: Long = 0L,
+    val corriendo: Boolean = false,
+    val errorGuardado: TextoUi? = null
+)
+
 /**
- * Cronómetro libre para apnea estática. Cada Iniciar → Parar es un intento.
- * Los intentos quedan en memoria; cuando exista la pantalla de Estadísticas se pueden
- * guardar en la base (la pantalla ya recibe un onGuardarIntentos opcional para eso).
+ * Cronómetro libre para apnea estática. Cada Iniciar → Parar es un intento y se guarda solo
+ * en la base (así no se pierde al salir de la pantalla ni si Android cierra la app).
  */
-class CronometroViewModel : ViewModel() {
+class CronometroViewModel(
+    private val repository: IntentoApneaRepository,
+    private val reloj: () -> Long = SystemClock::elapsedRealtime,
+    private val ahora: () -> LocalDateTime = LocalDateTime::now
+) : ViewModel() {
 
     private var inicioMs = 0L      // reloj monotónico: no lo afectan cambios de hora del teléfono
     private var job: Job? = null
 
-    private val _uiState = MutableStateFlow(CronometroUiState())
-    val uiState: StateFlow<CronometroUiState> = _uiState
+    private val local = MutableStateFlow(Reloj())
+
+    val uiState: StateFlow<CronometroUiState> = combine(
+        local,
+        repository.delDia(ahora().toLocalDate()).catch { emit(emptyList()) }
+    ) { r, guardados ->
+        CronometroUiState(
+            transcurridoMs = r.transcurridoMs,
+            corriendo = r.corriendo,
+            intentos = guardados.mapIndexed { i, g -> IntentoApnea(guardados.size - i, g.hora, g.duracionMs) },
+            errorGuardado = r.errorGuardado
+        )
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, CronometroUiState())
 
     /** Arranca un intento NUEVO desde 0. */
     fun onIniciar() {
-        if (_uiState.value.corriendo) return
-        inicioMs = SystemClock.elapsedRealtime()
-        _uiState.update { it.copy(corriendo = true, transcurridoMs = 0L) }
-
+        if (local.value.corriendo) return
+        inicioMs = reloj()
+        local.update { it.copy(corriendo = true, transcurridoMs = 0L, errorGuardado = null) }
         job?.cancel() // nunca dos loops a la vez (Parar + Iniciar muy rápido)
         job = viewModelScope.launch {
             while (isActive) {
                 delay(30.milliseconds)
-                _uiState.update { it.copy(transcurridoMs = SystemClock.elapsedRealtime() - inicioMs) }
+                local.update { it.copy(transcurridoMs = reloj() - inicioMs) }
             }
         }
     }
 
-    /** Termina el intento y lo agrega a la lista (si duró al menos 1 s, para ignorar toques sin querer). */
+    /** Termina el intento y lo guarda (si duró al menos 1 s, para ignorar toques sin querer). */
     fun onParar() {
-        if (!_uiState.value.corriendo) return
+        if (!local.value.corriendo) return
         job?.cancel()
-        val total = SystemClock.elapsedRealtime() - inicioMs // valor exacto al tocar, no el del último tick
-        _uiState.update {
-            val intentos = if (total >= 1_000L) {
-                listOf(IntentoApnea(numero = it.intentos.size + 1, hora = LocalTime.now(), duracionMs = total)) + it.intentos
-            } else it.intentos
-            it.copy(corriendo = false, transcurridoMs = total, intentos = intentos)
+        val total = reloj() - inicioMs // valor exacto al tocar, no el del último tick
+        local.update { it.copy(corriendo = false, transcurridoMs = total) }
+        if (total < 1_000L) return
+        val fin = ahora()
+        val intento = IntentoApneaEntity(
+            fecha = fin.toLocalDate(),
+            hora = fin.toLocalTime().minusNanos(total * 1_000_000L).withNano(0), // hora de inicio
+            duracionMs = total
+        )
+        viewModelScope.launch {
+            val ok = intentar("CronometroViewModel") { repository.guardar(intento) }.getOrDefault(false)
+            if (!ok) local.update { it.copy(errorGuardado = textoUi(R.string.entrenar_error_guardar)) }
         }
     }
 
     /** Vuelve el reloj a 0. Si estaba corriendo, ese intento se descarta. */
     fun onReiniciar() {
         job?.cancel()
-        _uiState.update { it.copy(corriendo = false, transcurridoMs = 0L) }
+        local.update { it.copy(corriendo = false, transcurridoMs = 0L) }
     }
 }

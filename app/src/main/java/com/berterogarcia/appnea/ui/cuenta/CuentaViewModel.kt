@@ -15,6 +15,7 @@ import com.berterogarcia.appnea.ui.perfil.certificados.ordenarCertificados
 import com.berterogarcia.appnea.ui.perfil.comun.EstadoVencimiento
 import com.berterogarcia.appnea.ui.perfil.comun.estadoVencimiento
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -65,8 +66,12 @@ class CuentaViewModel(
     private val sessionManager: SessionManager,
     perfilRepository: PerfilRepository,
     inmersionRepository: InmersionRepository,
-    sesionApneaRepository: SesionApneaRepository
+    sesionApneaRepository: SesionApneaRepository,
+    entrenando: Flow<Boolean> = flowOf(false)
 ) : ViewModel() {
+    /** true mientras corre una tabla: al cerrar sesión se corta, así que se pide confirmación. */
+    val entrenamientoEnCurso: StateFlow<Boolean> = entrenando.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     /** Se actualiza solo si cambia la sesión (no es una foto del momento en que se abrió). */
     val usuario: StateFlow<String?> = sessionManager.usuarioActual
 

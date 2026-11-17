@@ -13,6 +13,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +68,8 @@ fun CuentaScreen(
     val resumen by viewModel.resumen.collectAsStateWithLifecycle()
     val stats by viewModel.estadisticas.collectAsStateWithLifecycle()
     val usuario = viewModel.usuario.collectAsStateWithLifecycle().value.orEmpty()
+    val entrenando by viewModel.entrenamientoEnCurso.collectAsStateWithLifecycle()
+    var confirmarCierre by remember { mutableStateOf(false) }
     val perfil = resumen.perfil
     val cargando = stringResource(R.string.cuenta_cargando)
 
@@ -200,8 +207,12 @@ fun CuentaScreen(
                     titulo = stringResource(R.string.cuenta_cerrar_session),
                     indice = 0, total = 1,
                     onClick = {
-                        viewModel.cerrarSesion()
-                        onCerrarSesion()
+                        if (entrenando) {
+                            confirmarCierre = true
+                        } else {
+                            viewModel.cerrarSesion()
+                            onCerrarSesion()
+                        }
                     },
                     inicio = {
                         Icon(painterResource(R.drawable.ic_ms_logout), contentDescription = null, tint = ColorError)
@@ -210,6 +221,25 @@ fun CuentaScreen(
                 )
             }
         }
+    }
+
+    if (confirmarCierre) {
+        AlertDialog(
+            onDismissRequest = { confirmarCierre = false },
+            icon = { Icon(painterResource(R.drawable.ic_ms_timer), contentDescription = null, tint = ColorAdvertencia) },
+            title = { Text(stringResource(R.string.cuenta_cerrar_entrenando_titulo)) },
+            text = { Text(stringResource(R.string.cuenta_cerrar_entrenando_texto)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmarCierre = false
+                    viewModel.cerrarSesion()
+                    onCerrarSesion()
+                }) { Text(stringResource(R.string.cuenta_cerrar_entrenando_confirmar), color = ColorError) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmarCierre = false }) { Text(stringResource(R.string.accion_cancelar)) }
+            }
+        )
     }
 }
 

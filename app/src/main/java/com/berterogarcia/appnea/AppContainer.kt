@@ -11,6 +11,7 @@ import com.berterogarcia.appnea.data.repository.InmersionRepository
 import com.berterogarcia.appnea.data.repository.PerfilRepository
 import com.berterogarcia.appnea.data.repository.RegistroRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
+import com.berterogarcia.appnea.data.repository.IntentoApneaRepository
 import com.berterogarcia.appnea.data.repository.SesionRepository
 import com.berterogarcia.appnea.data.repository.TablaPersonalizadaRepository
 import com.berterogarcia.appnea.data.repository.UsuarioRepository
@@ -47,6 +48,7 @@ class AppContainer(context: Context) {
         TablaPersonalizadaRepository(database.tablaPersonalizadaDao(), sessionManager)
     }
     val sesionApneaRepository by lazy { SesionApneaRepository(database.sesionApneaDao(), sessionManager) }
+    val intentoApneaRepository by lazy { IntentoApneaRepository(database.intentoApneaDao(), sessionManager) }
     val registroRepository by lazy { RegistroRepository(database) }
     // GPS + geocoder detrás de una interfaz (los ViewModels no usan Context)
     val ubicacion: ServicioUbicacion by lazy { UbicacionAndroid(contexto) }

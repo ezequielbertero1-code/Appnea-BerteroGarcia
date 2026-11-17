@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.data.local.InmersionEntity
+import com.berterogarcia.appnea.data.local.IntentoApneaEntity
 import com.berterogarcia.appnea.data.local.SesionApneaEntity
 import com.berterogarcia.appnea.data.local.TipoInmersion
 import com.berterogarcia.appnea.data.repository.InmersionRepository
+import com.berterogarcia.appnea.data.repository.IntentoApneaRepository
 import com.berterogarcia.appnea.data.repository.SesionApneaRepository
 import com.berterogarcia.appnea.dominio.FactorEntrenamiento
 import kotlinx.coroutines.Dispatchers
@@ -65,8 +67,18 @@ data class ResumenEntrenamiento(
     val apneaMasLargaSegundos: Int = 0,
     /** Sesiones con marca > 0, de la más vieja a la más nueva (para la línea). */
     val serie: List<SesionApneaEntity> = emptyList(),
-    val factores: List<InfluenciaFactor> = emptyList()
+    /** Sesiones cortadas antes de la primera apnea (marca 0): no entran en la línea. */
+    val sinApnea: Int = 0,
+    val factores: List<InfluenciaFactor> = emptyList(),
+    /** Tablas + cronómetro libre. Las sesiones guardadas antes de la v12 no tienen duración. */
+    val tiempoEntrenadoSegundos: Int = 0,
+    val intentosCronometro: Int = 0,
+    val mejorIntentoSegundos: Int = 0,
+    /** Mejor intento de cada día con cronómetro, del más viejo al más nuevo. */
+    val serieCronometro: List<Pair<LocalDate, Int>> = emptyList()
 ) {
+    val vacio: Boolean get() = sesiones == 0 && intentosCronometro == 0
+
     /** El factor que más se aleja del promedio (para la frase destacada). */
     val factorDestacado: InfluenciaFactor?
         get() = factores.maxByOrNull { abs(it.porcentajeCompletas - porcentajeCompletas) }
@@ -79,14 +91,15 @@ data class EstadisticasUiState(
     val periodo: PeriodoEstadisticas = PeriodoEstadisticas.TRES_MESES,
     val tipo: TipoInmersion? = null,          // null = todas (solo afecta a Inmersiones)
     val totalInmersiones: Int = 0,            // sin filtros: para saber si hay algo cargado
-    val totalSesiones: Int = 0,
+    val totalSesiones: Int = 0,               // tablas + intentos del cronómetro
     val inmersiones: ResumenInmersiones = ResumenInmersiones(),
     val entrenamiento: ResumenEntrenamiento = ResumenEntrenamiento()
 )
 
 class EstadisticasViewModel(
     inmersionRepository: InmersionRepository,
-    sesionRepository: SesionApneaRepository
+    sesionRepository: SesionApneaRepository,
+    intentoRepository: IntentoApneaRepository
 ) : ViewModel() {
 
     private val _periodo = MutableStateFlow(PeriodoEstadisticas.TRES_MESES)
@@ -96,18 +109,19 @@ class EstadisticasViewModel(
     val uiState: StateFlow<EstadisticasUiState> = combine(
         inmersionRepository.todasLasInmersiones,
         sesionRepository.todasLasSesiones,
+        intentoRepository.todosLosIntentos,
         _periodo,
         _tipo
-    ) { inmersiones, sesiones, periodo, tipo ->
+    ) { inmersiones, sesiones, intentos, periodo, tipo ->
         val hoy = LocalDate.now()
         EstadisticasUiState(
             cargando = false,
             periodo = periodo,
             tipo = tipo,
             totalInmersiones = inmersiones.size,
-            totalSesiones = sesiones.size,
+            totalSesiones = sesiones.size + intentos.size,
             inmersiones = resumirInmersiones(inmersiones, periodo, tipo, hoy),
-            entrenamiento = resumirEntrenamiento(sesiones, periodo, hoy)
+            entrenamiento = resumirEntrenamiento(sesiones, periodo, hoy, intentos)
         )
     }
         .flowOn(Dispatchers.Default) // calcular fuera del hilo principal (no traba la pantalla)
@@ -173,12 +187,14 @@ internal fun resumirInmersiones(
 internal fun resumirEntrenamiento(
     todas: List<SesionApneaEntity>,
     periodo: PeriodoEstadisticas,
-    hoy: LocalDate
+    hoy: LocalDate,
+    intentos: List<IntentoApneaEntity> = emptyList()
 ): ResumenEntrenamiento {
     val desde = periodo.desde(hoy)
+    val intentosPeriodo = intentos.filter { desde == null || !it.fecha.isBefore(desde) }
     val filtradas = todas
         .filter { desde == null || !it.fecha.isBefore(desde) }
-        .sortedWith(compareBy<SesionApneaEntity> { it.fecha }.thenBy { it.id })
+        .sortedWith(compareBy<SesionApneaEntity> { it.fecha }.thenBy { it.horaInicio }.thenBy { it.id })
 
     fun porcentaje(lista: List<SesionApneaEntity>): Int =
         if (lista.isEmpty()) 0 else (lista.count { it.completada } * 100f / lista.size).roundToInt()
@@ -195,6 +211,15 @@ internal fun resumirEntrenamiento(
         porcentajeCompletas = porcentaje(filtradas),
         apneaMasLargaSegundos = filtradas.maxOfOrNull { it.marcaSegundos } ?: 0,
         serie = filtradas.filter { it.marcaSegundos > 0 },
-        factores = factores
+        sinApnea = filtradas.count { it.marcaSegundos == 0 },
+        factores = factores,
+        tiempoEntrenadoSegundos = filtradas.sumOf { it.duracionSegundos ?: 0 } +
+            (intentosPeriodo.sumOf { it.duracionMs } / 1000L).toInt(),
+        intentosCronometro = intentosPeriodo.size,
+        mejorIntentoSegundos = ((intentosPeriodo.maxOfOrNull { it.duracionMs } ?: 0L) / 1000L).toInt(),
+        serieCronometro = intentosPeriodo
+            .groupBy { it.fecha }
+            .map { (dia, delDia) -> dia to (delDia.maxOf { it.duracionMs } / 1000L).toInt() }
+            .sortedBy { it.first }
     )
 }

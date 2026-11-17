@@ -17,16 +17,18 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PerfilUsuarioEntity::class,
         EquipoEntity::class,
         CertificadoEntity::class,
-        ContactoEmergenciaEntity::class
+        ContactoEmergenciaEntity::class,
+        IntentoApneaEntity::class
     ],
     // v5: condiciones guardadas en inmersiones y salidas de pesca
     // v6: perfil, equipamiento, certificados y contactos de emergencia
     // v7: inmersiones, sesiones, salidas de pesca y tablas pasan a ser de cada usuario
     // v10: lastre/protección/visibilidad opcionales, escala de visibilidad y datos de apnea
-    version = 11,
-    // [CAMBIO] Room guarda el esquema de cada versión en app/schemas/ (configurado en
-    // app/build.gradle.kts). Hace falta para escribir migraciones y para usar AutoMigration.
-    // Esa carpeta SE COMMITEA.
+    // v11: factores de entrenamiento con clave estable
+    // v12: hora y duración en las sesiones; intentos del cronómetro libre
+    version = 12,
+    // Room guarda el esquema de cada versión en app/schemas/ (configurado en app/build.gradle.kts).
+    // Hace falta para escribir migraciones y para los tests de migración. Esa carpeta SE COMMITEA.
     exportSchema = true
 )
 @TypeConverters(Converters::class, PerfilConverters::class)
@@ -39,6 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun equipoDao(): EquipoDao
     abstract fun certificadoDao(): CertificadoDao
     abstract fun contactoEmergenciaDao(): ContactoEmergenciaDao
+    abstract fun intentoApneaDao(): IntentoApneaDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -62,7 +65,7 @@ abstract class AppDatabase : RoomDatabase() {
             return INSTANCE ?: synchronized(this) {
                 val appContext = context.applicationContext
                 INSTANCE ?: Room.databaseBuilder(appContext, AppDatabase::class.java, "app_database")
-                    // [CAMBIO] Actualizar ya NO borra los datos:
+                    // Actualizar NO borra los datos:
                     //  - v6 → v7 (y las que vengan) usan las migraciones de Migraciones.kt.
                     //  - Solo las versiones 1 a 5 (anteriores a las migraciones) se recrean de cero.
                     //  - Si alguien sube la versión y se olvida la migración, la app falla al abrir

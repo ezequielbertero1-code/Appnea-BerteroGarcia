@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.createSavedStateHandle
+import kotlinx.coroutines.flow.map
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
@@ -31,6 +32,7 @@ import com.berterogarcia.appnea.ui.detalleinmersion.DetalleInmersionViewModel
 import com.berterogarcia.appnea.ui.entrenamiento.CrearTablaScreen
 import com.berterogarcia.appnea.ui.entrenamiento.CrearTablaViewModel
 import com.berterogarcia.appnea.ui.entrenamiento.CronometroScreen
+import com.berterogarcia.appnea.ui.entrenamiento.CronometroViewModel
 import com.berterogarcia.appnea.ui.entrenamiento.EntrenamientoApneaViewModel
 import com.berterogarcia.appnea.ui.estadisticas.EstadisticasScreen
 import com.berterogarcia.appnea.ui.estadisticas.EstadisticasViewModel
@@ -262,16 +264,18 @@ fun AppNavHost(
                 EntrenamientoApneaViewModel(
                     app.tablaPersonalizadaRepository,
                     app.sesionApneaRepository,
-                    app.motorEntrenamiento
+                    app.motorEntrenamiento,
+                    createSavedStateHandle()
                 )
             }
+            val cronometroViewModel: CronometroViewModel = viewModel { CronometroViewModel(app.intentoApneaRepository) }
             CronometroScreen(
                 entrenamientoViewModel = entrenamientoViewModel,
+                cronometroViewModel = cronometroViewModel,
                 onCrearTabla = { navController.navigate(RUTA_CREAR_TABLA) { launchSingleTop = true } },
                 onVerEstadisticas = {
                     navController.navigate(rutaEstadisticas(PESTANIA_ENTRENAMIENTO)) { launchSingleTop = true }
                 }
-                // onGuardarIntentos: se conecta cuando se guarden los intentos del modo Libre
             )
         }
         composable(RUTA_CREAR_TABLA) { entrada ->
@@ -363,7 +367,8 @@ fun AppNavHost(
             val estadisticasViewModel: EstadisticasViewModel = viewModel {
                 EstadisticasViewModel(
                     app.inmersionRepository,
-                    app.sesionApneaRepository
+                    app.sesionApneaRepository,
+                    app.intentoApneaRepository
                 )
             }
             EstadisticasScreen(
@@ -388,7 +393,8 @@ fun AppNavHost(
                     app.sessionManager,
                     app.perfilRepository,
                     app.inmersionRepository,
-                    app.sesionApneaRepository
+                    app.sesionApneaRepository,
+                    app.motorEntrenamiento.estado.map { it.corriendo }
                 )
             }
             CuentaScreen(

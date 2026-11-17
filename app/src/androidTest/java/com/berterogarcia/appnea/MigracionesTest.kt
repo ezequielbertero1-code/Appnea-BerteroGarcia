@@ -46,7 +46,7 @@ class MigracionesTest {
             )
         }
 
-        val db = helper.runMigrationsAndValidate(nombreBase, 11, true, *todas)
+        val db = helper.runMigrationsAndValidate(nombreBase, 12, true, *todas)
 
         db.query("SELECT id, tipo, lastreKg, visibilidad, apnea, lugar FROM inmersiones ORDER BY id").use { c ->
             assertEquals(2, c.count)
@@ -99,5 +99,28 @@ class MigracionesTest {
             val leidos = buildList { while (c.moveToNext()) add(c.getString(0)) }
             assertEquals(esperado, leidos)
         }
+    }
+
+    @Test
+    fun de11a12AgregaHoraYDuracionEIntentos() {
+        helper.createDatabase(nombreBase, 11).use { db ->
+            db.execSQL("INSERT INTO usuarios (nombreUsuario, password) VALUES ('ana', 'x')")
+            db.execSQL(
+                "INSERT INTO sesiones_apnea (id, fecha, nombreTabla, completada, faseAlcanzada, totalFases, " +
+                    "marcaSegundos, factores, sensaciones, nombreUsuario) VALUES (7, 20000, 'T', 1, 3, 3, 60, 'ESTRES', 'bien', 'ana')"
+            )
+        }
+        val db = helper.runMigrationsAndValidate(nombreBase, 12, true, Migraciones.De11a12)
+        // La sesión vieja se conserva, sin hora ni duración (no se sabían)
+        db.query("SELECT nombreTabla, factores, horaInicio, duracionSegundos FROM sesiones_apnea WHERE id = 7").use { c ->
+            assertTrue(c.moveToFirst())
+            assertEquals("T", c.getString(0))
+            assertEquals("ESTRES", c.getString(1))
+            assertTrue(c.isNull(2))
+            assertTrue(c.isNull(3))
+        }
+        // La tabla de intentos existe y respeta la FK con usuarios
+        db.execSQL("INSERT INTO intentos_apnea (fecha, hora, duracionMs, nombreUsuario) VALUES (20000, 36000, 95000, 'ana')")
+        db.query("SELECT COUNT(*) FROM intentos_apnea").use { c -> c.moveToFirst(); assertEquals(1, c.getInt(0)) }
     }
 }

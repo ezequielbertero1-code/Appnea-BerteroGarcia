@@ -54,6 +54,9 @@
     <!-- ==========================CUENTA=================================== -->
     <string name="cuenta_titulo">Cuenta</string>
     <string name="cuenta_cerrar_session">Cerrar sesión</string>
+    <string name="cuenta_cerrar_entrenando_titulo">Hay un entrenamiento en curso</string>
+    <string name="cuenta_cerrar_entrenando_texto">Si cerrás sesión, la tabla se corta y no se guarda.</string>
+    <string name="cuenta_cerrar_entrenando_confirmar">Cortar y salir</string>
 
     <!-- =========================== COMUNES (formatos) =========================== -->
     <string name="formato_metros">%1$.1f m</string>
@@ -362,7 +365,7 @@
     <string name="estadisticas_ultimos_meses">últimos %1$d meses</string>
     <string name="estadisticas_lugares">Lugares más visitados</string>
     <string name="estadisticas_sin_entrenamientos_titulo">Todavía no hay entrenamientos</string>
-    <string name="estadisticas_sin_entrenamientos_detalle">Completá una tabla en Entrenar y guardala para ver tu progreso.</string>
+    <string name="estadisticas_sin_entrenamientos_detalle">Hacé una tabla o usá el cronómetro libre en Entrenar para ver tu progreso.</string>
     <string name="estadisticas_ir_a_entrenar">Ir a Entrenar</string>
     <string name="estadisticas_sin_entrenamientos_periodo">No hay entrenamientos en este período.</string>
     <string name="estadisticas_sesiones">Sesiones</string>
@@ -370,6 +373,14 @@
     <string name="estadisticas_completadas">Completadas</string>
     <string name="estadisticas_apnea_mas_larga">Apnea más larga</string>
     <string name="estadisticas_grafico_apnea">Apnea más larga por sesión</string>
+    <string name="estadisticas_grafico_cronometro">Mejor intento por día (cronómetro libre)</string>
+    <string name="estadisticas_tiempo_entrenado">Tiempo entrenado</string>
+    <string name="estadisticas_intentos_libres">Intentos libres</string>
+    <string name="estadisticas_mejor_intento">Mejor intento</string>
+    <plurals name="estadisticas_sin_apnea">
+        <item quantity="one">%1$d sesión sin apnea (cortada en la preparación) no aparece en el gráfico.</item>
+        <item quantity="other">%1$d sesiones sin apnea (cortadas en la preparación) no aparecen en el gráfico.</item>
+    </plurals>
     <string name="estadisticas_minutos_segundos">minutos:segundos</string>
     <string name="estadisticas_factores">Qué influye en completar la tabla</string>
     <string name="estadisticas_factores_sin_datos">Todavía no hay suficientes datos. Marcá los factores al terminar cada tabla: un factor aparece cuando lo marcaste en %1$d sesiones o más.</string>

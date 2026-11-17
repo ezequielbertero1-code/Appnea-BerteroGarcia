@@ -29,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
@@ -41,6 +40,8 @@ import com.berterogarcia.appnea.ui.components.Insignia
 import com.berterogarcia.appnea.ui.components.MantenerPantallaEncendida
 import com.berterogarcia.appnea.ui.components.SelectorSegmentado
 import com.berterogarcia.appnea.ui.components.TipoInsignia
+import com.berterogarcia.appnea.ui.components.resolver
+import com.berterogarcia.appnea.ui.theme.ColorError
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
@@ -57,16 +58,15 @@ private enum class ModoEntrenar { TABLAS, LIBRE }
  * - Elegir tabla / Libre: barra superior + botones segmentados (y se puede deslizar entre los dos).
  * - En curso y Resultado: a pantalla completa (sin barra de navegación), para no salir sin querer.
  *
- * [onVerEstadisticas] y [onGuardarIntentos] son opcionales: mientras sean null no se muestran.
+ * [onVerEstadisticas] es opcional: mientras sea null no se muestra.
  */
 @Composable
 fun CronometroScreen(
     entrenamientoViewModel: EntrenamientoApneaViewModel,
     onCrearTabla: () -> Unit,
     modifier: Modifier = Modifier,
-    cronometroViewModel: CronometroViewModel = viewModel(),
-    onVerEstadisticas: (() -> Unit)? = null,
-    onGuardarIntentos: ((List<IntentoApnea>) -> Unit)? = null
+    cronometroViewModel: CronometroViewModel,
+    onVerEstadisticas: (() -> Unit)? = null
 ) {
     val estado by entrenamientoViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -80,7 +80,6 @@ fun CronometroScreen(
             entrenamientoViewModel = entrenamientoViewModel,
             cronometroViewModel = cronometroViewModel,
             onCrearTabla = onCrearTabla,
-            onGuardarIntentos = onGuardarIntentos,
             onVerEstadisticas = onVerEstadisticas,
             modifier = modifier
         )
@@ -93,7 +92,6 @@ private fun PestaniasEntrenar(
     entrenamientoViewModel: EntrenamientoApneaViewModel,
     cronometroViewModel: CronometroViewModel,
     onCrearTabla: () -> Unit,
-    onGuardarIntentos: ((List<IntentoApnea>) -> Unit)?,
     onVerEstadisticas: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
@@ -136,7 +134,6 @@ private fun PestaniasEntrenar(
                 )
                 ModoEntrenar.LIBRE -> CronometroLibre(
                     viewModel = cronometroViewModel,
-                    onGuardarIntentos = onGuardarIntentos,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -150,7 +147,6 @@ private fun PestaniasEntrenar(
 @Composable
 private fun CronometroLibre(
     viewModel: CronometroViewModel,
-    onGuardarIntentos: ((List<IntentoApnea>) -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
@@ -239,13 +235,12 @@ private fun CronometroLibre(
             }
         }
 
+        estado.errorGuardado?.let {
+            Text(it.resolver(), style = MaterialTheme.typography.bodySmall, color = ColorError, modifier = Modifier.padding(top = 8.dp))
+        }
+
         if (estado.intentos.isNotEmpty() && mejor != null) {
-            EncabezadoGrupo(
-                titulo = stringResource(R.string.entrenar_intentos_hoy),
-                // Aparece cuando se conecte onGuardarIntentos
-                accion = if (onGuardarIntentos != null) stringResource(R.string.accion_guardar) else null,
-                onAccion = { onGuardarIntentos?.invoke(estado.intentos) }
-            )
+            EncabezadoGrupo(titulo = stringResource(R.string.entrenar_intentos_hoy))
             GrupoLista {
                 estado.intentos.forEachIndexed { i, intento ->
                     FilaIntento(intento = intento, mejorMs = mejor, indice = i, total = estado.intentos.size)

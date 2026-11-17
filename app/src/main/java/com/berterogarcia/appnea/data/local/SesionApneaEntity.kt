@@ -7,8 +7,9 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import java.time.LocalDate
+import java.time.LocalTime
 
-// [CAMBIO v7] Cada sesión de entrenamiento pertenece a un usuario.
+/** Una tabla de entrenamiento hecha (completa o cortada). Pertenece a un usuario. */
 @Entity(
     tableName = "sesiones_apnea",
     foreignKeys = [
@@ -33,6 +34,10 @@ data class SesionApneaEntity(
     val marcaSegundos: Int,      // mejor tiempo de apnea sostenido durante la sesión
     val factores: Set<FactorEntrenamiento>,   // checklist: descanso, alimentación, estrés, etc.
     val sensaciones: String,     // descripción libre de cómo se sintió
-    // [NUEVO v7] Dueño, lo completa SesionApneaRepository.
-    val nombreUsuario: String = ""
+    // Dueño, lo completa SesionApneaRepository.
+    val nombreUsuario: String = "",
+    /** Hora en que arrancó la tabla (v12). null en las sesiones guardadas antes. */
+    val horaInicio: LocalTime? = null,
+    /** Cuánto duró, de Iniciar a terminar o abortar (v12). null en las sesiones guardadas antes. */
+    val duracionSegundos: Int? = null
 )

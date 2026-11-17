@@ -13,9 +13,14 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MotorEntrenamientoTest {
+
+    private companion object {
+        val INICIO: LocalDateTime = LocalDateTime.of(2026, 11, 16, 9, 30, 15)
+    }
 
     private val tabla = TablaApnea(
         "Prueba",
@@ -27,6 +32,7 @@ class MotorEntrenamientoTest {
             scope = backgroundScope,
             sonido = null,
             reloj = { testScheduler.currentTime },
+            ahora = { INICIO },
             alCambiarActividad = { actividad += it }
         )
 
@@ -41,6 +47,7 @@ class MotorEntrenamientoTest {
         assertEquals(3, r.faseAlcanzada)
         assertEquals(30, r.marcaSegundos)
         assertEquals(60, r.duracionSegundos)
+        assertEquals(INICIO, r.inicio)
         assertFalse(m.estado.value.corriendo)
         assertEquals(listOf(true, false), actividad)
     }
@@ -59,6 +66,7 @@ class MotorEntrenamientoTest {
         assertEquals(2, r.faseAlcanzada)
         assertEquals(12, r.marcaSegundos)
         assertEquals(22, r.duracionSegundos)
+        assertEquals(INICIO, r.inicio)
     }
 
     @Test

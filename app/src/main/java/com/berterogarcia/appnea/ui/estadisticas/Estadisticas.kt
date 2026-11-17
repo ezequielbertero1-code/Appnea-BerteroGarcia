@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,6 +59,7 @@ import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 private val LOCALE_ES: Locale = Locale.forLanguageTag("es-AR")
 private val FORMATO_DIA_MES: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM", LOCALE_ES)
@@ -254,15 +256,24 @@ private fun PestaniaEntrenamiento(
     FiltroPeriodo(estado.periodo, viewModel::onPeriodoChange, Modifier.padding(bottom = 12.dp))
 
     val r = estado.entrenamiento
-    if (r.sesiones == 0) {
+    if (r.vacio) {
         SinResultados(stringResource(R.string.estadisticas_sin_entrenamientos_periodo)) { viewModel.onPeriodoChange(PeriodoEstadisticas.TODO) }
         return
     }
 
+    if (r.sesiones > 0) {
+        FilaMosaicos {
+            Mosaico(stringResource(R.string.estadisticas_sesiones), r.sesiones.toString(), detalle = stringResource(R.string.estadisticas_completas, r.completas))
+            Mosaico(stringResource(R.string.estadisticas_completadas), "${r.porcentajeCompletas} %")
+            Mosaico(stringResource(R.string.estadisticas_apnea_mas_larga), minSeg(r.apneaMasLargaSegundos), colorValor = Acento)
+        }
+    }
     FilaMosaicos {
-        Mosaico(stringResource(R.string.estadisticas_sesiones), r.sesiones.toString(), detalle = stringResource(R.string.estadisticas_completas, r.completas))
-        Mosaico(stringResource(R.string.estadisticas_completadas), "${r.porcentajeCompletas} %")
-        Mosaico(stringResource(R.string.estadisticas_apnea_mas_larga), minSeg(r.apneaMasLargaSegundos), colorValor = Acento)
+        Mosaico(stringResource(R.string.estadisticas_tiempo_entrenado), tiempoEntrenado(r.tiempoEntrenadoSegundos))
+        if (r.intentosCronometro > 0) {
+            Mosaico(stringResource(R.string.estadisticas_intentos_libres), r.intentosCronometro.toString())
+            Mosaico(stringResource(R.string.estadisticas_mejor_intento), minSeg(r.mejorIntentoSegundos), colorValor = Acento)
+        }
     }
 
     if (r.serie.isNotEmpty()) {
@@ -275,8 +286,26 @@ private fun PestaniaEntrenamiento(
                 formato = { minSeg(it.toInt()) },
                 progreso = progreso
             )
+            AvisoSinApnea(r.sinApnea)
+        }
+    } else if (r.sinApnea > 0) {
+        AvisoSinApnea(r.sinApnea)
+    }
+
+    if (r.serieCronometro.isNotEmpty()) {
+        val progreso = rememberProgresoDibujo(r.serieCronometro)
+        TarjetaCondicion(stringResource(R.string.estadisticas_grafico_cronometro), modifier = Modifier.padding(top = 4.dp)) {
+            Subtitulo(stringResource(R.string.estadisticas_minutos_segundos))
+            GraficoLinea(
+                valores = r.serieCronometro.map { it.second.toFloat() },
+                etiquetasX = r.serieCronometro.map { it.first.format(FORMATO_DIA_MES) },
+                formato = { minSeg(it.toInt()) },
+                progreso = progreso
+            )
         }
     }
+
+    if (r.sesiones == 0) return
 
     TarjetaCondicion(stringResource(R.string.estadisticas_factores)) {
         if (r.factores.isEmpty()) {
@@ -300,7 +329,7 @@ private fun PestaniaEntrenamiento(
             }
             r.factorDestacado?.let { f ->
                 Text(
-                    stringResource(R.string.estadisticas_factor_destacado, f.factor, f.porcentajeCompletas, r.porcentajeCompletas),
+                    stringResource(R.string.estadisticas_factor_destacado, stringResource(f.factor.etiqueta), f.porcentajeCompletas, r.porcentajeCompletas),
                     style = MaterialTheme.typography.bodySmall,
                     color = TextoSuperficie,
                     modifier = Modifier.padding(top = 10.dp)
@@ -309,6 +338,22 @@ private fun PestaniaEntrenamiento(
         }
     }
 }
+
+/** Las sesiones cortadas en la preparación no tienen marca: se avisa para que no parezca que faltan. */
+@Composable
+private fun AvisoSinApnea(cantidad: Int) {
+    if (cantidad == 0) return
+    Text(
+        pluralStringResource(R.plurals.estadisticas_sin_apnea, cantidad, cantidad),
+        style = MaterialTheme.typography.bodySmall,
+        color = TextoSuperficieVariante,
+        modifier = Modifier.padding(top = 8.dp)
+    )
+}
+
+/** 45 → "45 s"; 750 → "12 min"; 4000 → "1 h 6 min" */
+private fun tiempoEntrenado(segundos: Int): String =
+    if (segundos < 60) "$segundos s" else duracionLarga(segundos.toLong().seconds)
 
 // ================================ Piezas comunes ================================
 
