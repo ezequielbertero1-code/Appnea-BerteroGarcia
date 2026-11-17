@@ -63,7 +63,7 @@ import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.BotonFlotante
 import com.berterogarcia.appnea.ui.components.ChipFiltro
-import com.berterogarcia.appnea.ui.components.FilaInmersion
+import com.berterogarcia.appnea.ui.inmersion.FilaInmersion
 import com.berterogarcia.appnea.ui.components.nombre
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ContenedorSecundario

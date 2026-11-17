@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.stateIn
 import java.util.Locale
 import kotlin.time.Duration
 
-// [CAMBIO] Se eliminó PerfilSimulado / perfilDeEjemplo: ahora los datos salen de la base.
 
 /**
  * Resumen del perfil para la pantalla Cuenta (datos reales de la base).

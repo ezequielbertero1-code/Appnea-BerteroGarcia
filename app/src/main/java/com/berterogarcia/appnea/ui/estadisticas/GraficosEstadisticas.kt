@@ -1,5 +1,6 @@
-package com.berterogarcia.appnea.ui.components
+package com.berterogarcia.appnea.ui.estadisticas
 
+import com.berterogarcia.appnea.ui.components.texto
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween

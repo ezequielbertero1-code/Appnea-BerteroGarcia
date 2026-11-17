@@ -26,7 +26,7 @@ import com.berterogarcia.appnea.ui.components.resolver
 @Composable
 internal fun EtapaGeneral(
     uiState: NuevaInmersionUiState,
-    viewModel: NuevaInmersionViewModel,
+    onEvento: (EventoFormulario) -> Unit,
     onAbrirMapa: () -> Unit
 ) {
     val tipos = TipoInmersion.entries.associateWith { it.nombre() }
@@ -35,16 +35,16 @@ internal fun EtapaGeneral(
         opciones = TipoInmersion.entries,
         seleccionada = uiState.tipo,
         etiqueta = { tipos.getValue(it) },
-        onSeleccion = { tipo -> tipo?.let(viewModel::onTipoChange) },
+        onSeleccion = { tipo -> tipo?.let { onEvento(EventoFormulario.Tipo(it)) } },
         modifier = Modifier.padding(bottom = 12.dp)
     )
     DatePickerField(
-        label = stringResource(R.string.nueva_fecha), valor = uiState.fecha, onValorChange = viewModel::onFechaChange,
+        label = stringResource(R.string.nueva_fecha), valor = uiState.fecha, onValorChange = { onEvento(EventoFormulario.Fecha(it)) },
         isError = uiState.errores.containsKey(Campo.FECHA), mensajeError = uiState.errores[Campo.FECHA]?.resolver(),
         modifier = Modifier.fillMaxWidth()
     )
     CampoTexto(
-        valor = uiState.lugar, onValorChange = viewModel::onLugarChange, etiqueta = stringResource(R.string.nueva_lugar),
+        valor = uiState.lugar, onValorChange = { onEvento(EventoFormulario.Lugar(it)) }, etiqueta = stringResource(R.string.nueva_lugar),
         esError = uiState.errores.containsKey(Campo.LUGAR), mensajeError = uiState.errores[Campo.LUGAR]?.resolver() ?: "",
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
@@ -55,20 +55,20 @@ internal fun EtapaGeneral(
         buscando = uiState.buscandoUbicacion,
         aviso = uiState.avisoUbicacion?.resolver(),
         onAbrirMapa = onAbrirMapa,
-        onMiUbicacion = viewModel::usarMiUbicacion,
-        onPermisoDenegado = viewModel::permisoUbicacionDenegado,
-        onQuitar = viewModel::quitarUbicacion
+        onMiUbicacion = { onEvento(EventoFormulario.UsarMiUbicacion) },
+        onPermisoDenegado = { onEvento(EventoFormulario.PermisoUbicacionDenegado) },
+        onQuitar = { onEvento(EventoFormulario.QuitarUbicacion) }
     )
     Row(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         TimePickerField(
             label = stringResource(R.string.nueva_entrada), valor = uiState.horaEntrada,
-            onValorChange = viewModel::onHoraEntradaChange,
+            onValorChange = { onEvento(EventoFormulario.HoraEntrada(it)) },
             isError = uiState.errores.containsKey(Campo.HORA_ENTRADA), mensajeError = uiState.errores[Campo.HORA_ENTRADA]?.resolver(),
             modifier = Modifier.weight(1f)
         )
         TimePickerField(
             label = stringResource(R.string.nueva_salida), valor = uiState.horaSalida,
-            onValorChange = viewModel::onHoraSalidaChange,
+            onValorChange = { onEvento(EventoFormulario.HoraSalida(it)) },
             isError = uiState.errores.containsKey(Campo.HORA_SALIDA), mensajeError = uiState.errores[Campo.HORA_SALIDA]?.resolver(),
             modifier = Modifier.weight(1f)
         )

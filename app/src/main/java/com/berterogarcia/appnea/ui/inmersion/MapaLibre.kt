@@ -1,4 +1,4 @@
-package com.berterogarcia.appnea.ui.components
+package com.berterogarcia.appnea.ui.inmersion
 
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult

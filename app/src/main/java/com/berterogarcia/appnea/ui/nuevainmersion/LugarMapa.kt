@@ -1,5 +1,7 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
+import com.berterogarcia.appnea.ui.components.nombre
+import com.berterogarcia.appnea.ui.components.texto
 import com.berterogarcia.appnea.util.intentar
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -52,10 +54,10 @@ import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.BotonSecundario
 import com.berterogarcia.appnea.ui.components.CampoTexto
 import com.berterogarcia.appnea.ui.components.IconoCirculo
-import com.berterogarcia.appnea.ui.components.MapaLibre
-import com.berterogarcia.appnea.ui.components.PinMapa
-import com.berterogarcia.appnea.ui.components.formatoCoordenadas
-import com.berterogarcia.appnea.ui.components.rememberPedirUbicacion
+import com.berterogarcia.appnea.ui.inmersion.MapaLibre
+import com.berterogarcia.appnea.ui.inmersion.PinMapa
+import com.berterogarcia.appnea.ui.inmersion.formatoCoordenadas
+import com.berterogarcia.appnea.ui.inmersion.rememberPedirUbicacion
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.ColorAdvertencia
 import com.berterogarcia.appnea.ui.theme.ContornoFuerte

@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
+import com.berterogarcia.appnea.ui.components.nombre
 import java.time.Clock
 import com.berterogarcia.appnea.util.intentar
 import androidx.lifecycle.SavedStateHandle
@@ -309,28 +310,21 @@ class NuevaInmersionViewModel(
         }
     }
 
-    fun siguiente() {
-        val s = _uiState.value
-        val erroresEtapa = validarInmersion(s).filterKeys { it in s.etapa.campos }
-        if (erroresEtapa.isNotEmpty()) {
-            _uiState.update { it.copy(errores = it.errores - s.etapa.campos + erroresEtapa) }
-            return
+    /** Único punto de entrada de la pantalla. Los cambios de estado están en [reducir]. */
+    fun onEvento(e: EventoFormulario) {
+        when (e) {
+            EventoFormulario.Guardar -> guardar()
+            EventoFormulario.UsarMiUbicacion -> usarMiUbicacion()
+            else -> {
+                // Desde que el usuario toca algún equipo no se pre-marca nada solo
+                if (e is EventoFormulario.EquipoMarcado) equipoTocado = true
+                _uiState.update { reducir(it, e) }
+                // Al cambiar el tipo se recalcula el equipo (ej. el regulador no va en apnea)
+                if (e is EventoFormulario.Tipo) preseleccionarEquipo()
+            }
         }
-        val sig = Etapa.entries.getOrNull(s.etapa.ordinal + 1) ?: return
-        _uiState.update { it.copy(etapa = sig, errores = it.errores - s.etapa.campos) }
     }
 
-    fun anterior() {
-        val ant = Etapa.entries.getOrNull(_uiState.value.etapa.ordinal - 1) ?: return
-        _uiState.update { it.copy(etapa = ant) }
-    }
-
-    fun irA(etapa: Etapa) {
-        if (etapa.ordinal < _uiState.value.etapa.ordinal) _uiState.update { it.copy(etapa = etapa) }
-    }
-
-    fun onFechaChange(v: String) = _uiState.update { it.copy(fecha = v) }
-    fun onLugarChange(v: String) = _uiState.update { it.copy(lugar = v) }
     /** Centro con el que abre el mapa: lo ya marcado → última ubicación del teléfono → Comodoro. */
     fun centroInicialMapa(): Ubicacion {
         val s = _uiState.value
@@ -338,19 +332,8 @@ class NuevaInmersionViewModel(
         else ubicacionTelefono.ultima() ?: UBICACION_COMODORO_RIVADAVIA
     }
 
-    /** Viene del mapa. Si el nombre quedó vacío, se mantiene el que ya estaba escrito. */
-    fun onUbicacionElegida(latitud: Double, longitud: Double, nombre: String) = _uiState.update {
-        val nuevoLugar = nombre.trim().ifBlank { it.lugar }
-        it.copy(
-            latitud = latitud, longitud = longitud, lugar = nuevoLugar, avisoUbicacion = null,
-            errores = if (nuevoLugar.isBlank()) it.errores else it.errores - Campo.LUGAR
-        )
-    }
-
-    fun quitarUbicacion() = _uiState.update { it.copy(latitud = null, longitud = null) }
-
     /** Botón "Mi ubicación" de la tarjeta (la pantalla ya pidió el permiso). */
-    fun usarMiUbicacion() {
+    private fun usarMiUbicacion() {
         if (_uiState.value.buscandoUbicacion) return
         _uiState.update { it.copy(buscandoUbicacion = true, avisoUbicacion = null) }
         viewModelScope.launch {
@@ -375,132 +358,7 @@ class NuevaInmersionViewModel(
         }
     }
 
-    fun permisoUbicacionDenegado() = _uiState.update {
-        it.copy(avisoUbicacion = textoUi(R.string.nueva_aviso_sin_permiso))
-    }
-    fun onProfundidadChange(v: String) = _uiState.update { it.copy(profundidadMetros = v) }
-    fun onParadaChange(v: String) = _uiState.update { it.copy(paradaSeguridadMin = v.filter { c -> c.isDigit() || c == '.'}) }
-    fun onTiempoFondoChange(v: String) = _uiState.update { it.copy(tiempoFondo = v.filter { c -> c.isDigit() }.take(4)) }
-    fun onHoraEntradaChange(v: String) = _uiState.update { it.copy(horaEntrada = v) }
-    fun onHoraSalidaChange(v: String) = _uiState.update { it.copy(horaSalida = v) }
-    fun onUsoLastreChange(v: Boolean) = _uiState.update {
-        it.copy(usoLastre = v, lastreKg = if (v) it.lastreKg else "", errores = it.errores - Campo.LASTRE)
-    }
-    fun onUsoProteccionChange(v: Boolean) = _uiState.update {
-        it.copy(usoProteccion = v, proteccionMm = if (v) it.proteccionMm else "", errores = it.errores - Campo.PROTECCION)
-    }
-    fun onLastreChange(v: String) = _uiState.update { it.copy(lastreKg = v.filter { c -> c.isDigit() }) }
-    fun onProteccionMmChange(v: String) = _uiState.update { it.copy(proteccionMm = v.filter { c -> c.isDigit() }) }
-
-    // ---- Apnea ----
-    /** Agrega bajadas vacías hasta tener [n]; nunca recorta (lo que sobra queda guardado, oculto). */
-    private fun ajustarBajadas(lista: List<BajadaForm>, n: Int): List<BajadaForm> =
-        if (n <= lista.size) lista else lista + List(n - lista.size) { BajadaForm() }
-
-    fun onCantidadBajadasChange(v: String) = _uiState.update {
-        val cantidad = v.filter { c -> c.isDigit() }.take(2)
-        val n = cantidad.toIntOrNull()
-        it.copy(
-            cantidadBajadas = cantidad,
-            // Con el detalle activo la lista acompaña a la cantidad (si está vacía no se toca)
-            bajadas = if (it.cargarDetalleBajadas && n != null && n >= 1) ajustarBajadas(it.bajadas, n) else it.bajadas,
-            errores = it.errores - Campo.CANTIDAD_BAJADAS
-        )
-    }
-
-    /**
-     * Activar el detalle pre-genera una fila por cada bajada de la cantidad ya ingresada.
-     * Al desactivarlo, la profundidad máxima queda con la de la bajada más profunda cargada.
-     */
-    fun onCargarDetalleBajadasChange(v: Boolean) = _uiState.update {
-        val cantidad = it.cantidadBajadas.toIntOrNull()?.coerceAtLeast(1) ?: it.bajadas.size.coerceAtLeast(1)
-        val maxima = it.bajadasActivas.mapNotNull { b -> b.profundidad.toFloatOrNull() }.maxOrNull()
-        it.copy(
-            cargarDetalleBajadas = v,
-            cantidadBajadas = if (v) cantidad.toString() else it.cantidadBajadas,
-            bajadas = if (v) ajustarBajadas(it.bajadas, cantidad) else it.bajadas,
-            profundidadMetros = if (!v && maxima != null && maxima > 0f) numeroEditable(maxima) else it.profundidadMetros,
-            errores = it.errores - Campo.BAJADAS - Campo.CANTIDAD_BAJADAS - Campo.PROFUNDIDAD
-        )
-    }
-    fun onAgregarBajada() = _uiState.update {
-        val nuevas = it.bajadasActivas + BajadaForm()
-        it.copy(bajadas = nuevas, cantidadBajadas = nuevas.size.toString(), errores = it.errores - Campo.CANTIDAD_BAJADAS)
-    }
-    fun onQuitarBajada(indice: Int) = _uiState.update {
-        val nuevas = it.bajadas.filterIndexed { i, _ -> i != indice }
-        it.copy(bajadas = nuevas, cantidadBajadas = (it.bajadasActivas.size - 1).toString())
-    }
-    fun onBajadaProfundidadChange(indice: Int, v: String) = actualizarBajada(indice) {
-        it.copy(profundidad = v.replace(',', '.').filter { c -> c.isDigit() || c == '.' }.take(5))
-    }
-    fun onBajadaTiempoChange(indice: Int, v: String) = actualizarBajada(indice) {
-        it.copy(tiempo = v.filter { c -> c.isDigit() }.take(4))
-    }
-    private fun actualizarBajada(indice: Int, cambio: (BajadaForm) -> BajadaForm) = _uiState.update {
-        it.copy(
-            bajadas = it.bajadas.mapIndexed { i, b -> if (i == indice) cambio(b) else b },
-            errores = it.errores - Campo.BAJADAS
-        )
-    }
-    fun onSincopeChange(v: Boolean) = _uiState.update { it.copy(sincope = v) }
-    fun onVisibilidadElegida(v: Visibilidad?) = _uiState.update { it.copy(visibilidad = v) }
-
-    // Normaliza lo que escribe el usuario:
-    // - acepta "," o "." como decimal (el teclado en español suele mostrar ",")
-    // - un solo "-" y solo al principio (por si el teclado sí lo tiene, o se pega texto)
-    // - un solo separador decimal y como mucho 6 caracteres ("-12.55")
-    private fun filtrarTemperatura(v: String): String {
-        val normalizado = v.replace(',', '.')
-        val signo = if (normalizado.startsWith("-")) "-" else ""
-        val cuerpo = normalizado.filter { it.isDigit() || it == '.' }
-        val punto = cuerpo.indexOf('.')
-        val numero = if (punto == -1) cuerpo
-        else cuerpo.substring(0, punto + 1) + cuerpo.substring(punto + 1).replace(".", "")
-        return (signo + numero).take(6)
-    }
-
-    // Pone o saca el "-" adelante, sin importar qué muestre el teclado
-    private fun alternarSigno(v: String): String = if (v.startsWith("-")) v.drop(1) else "-$v"
-
-    fun onTempAireChange(v: String) = _uiState.update { it.copy(temperaturaAireC = filtrarTemperatura(v)) }
-    fun onTempAguaChange(v: String) = _uiState.update { it.copy(temperaturaAguaC = filtrarTemperatura(v)) }
-    fun onAlternarSignoAire() = _uiState.update { it.copy(temperaturaAireC = alternarSigno(it.temperaturaAireC)) }
-    fun onAlternarSignoAgua() = _uiState.update { it.copy(temperaturaAguaC = alternarSigno(it.temperaturaAguaC)) }
-
-    fun onVisibilidadChange(v: String) = _uiState.update { it.copy(visibilidadMetros = v.filter { c -> c.isDigit() }) }
-    fun onActividadChange(v: String) = _uiState.update { it.copy(actividad = v) }
-    fun onComentariosChange(v: String) = _uiState.update { it.copy(comentarios = v) }
-
-    fun onAguaToggle(opcion: String, marcado: Boolean) = _uiState.update {
-        it.copy(
-            caracteristicasAgua = if (marcado) it.caracteristicasAgua + opcion
-            else it.caracteristicasAgua - opcion
-        )
-    }
-
-    /** Cambiar a Apnea borra el error de parada (en apnea no se pide) y recalcula el equipo. */
-    fun onTipoChange(tipo: TipoInmersion) {
-        _uiState.update { it.copy(tipo = tipo, errores = it.errores - Campo.PARADA) }
-        preseleccionarEquipo()
-    }
-
-    /**
-     * Grupos de una sola opción (Dulce/Salada, Orilla/Bote): saca todas las opciones del
-     * [grupo] y pone la elegida. [opcion] null = ninguna.
-     */
-    fun onAguaUnica(grupo: List<String>, opcion: String?) = _uiState.update {
-        it.copy(caracteristicasAgua = it.caracteristicasAgua - grupo.toSet() + listOfNotNull(opcion))
-    }
-
-    fun onEquipamientoToggle(etiqueta: String, marcado: Boolean) {
-        equipoTocado = true
-        _uiState.update {
-            it.copy(equipamiento = if (marcado) it.equipamiento + etiqueta else it.equipamiento - etiqueta)
-        }
-    }
-
-    fun guardar() {
+    private fun guardar() {
         val s = _uiState.value
         val errores = validarInmersion(s)
         if (errores.isNotEmpty()) {

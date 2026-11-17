@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
+import com.berterogarcia.appnea.ui.components.texto
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.dominio.modelo.Visibilidad
 import com.berterogarcia.appnea.ui.components.CampoTexto
-import com.berterogarcia.appnea.ui.components.CheckboxGroup
+import com.berterogarcia.appnea.ui.nuevainmersion.CheckboxGroup
 import com.berterogarcia.appnea.ui.components.ChipFiltro
 import com.berterogarcia.appnea.ui.components.SelectorSegmentado
 import com.berterogarcia.appnea.ui.components.nombre
@@ -28,14 +29,14 @@ import com.berterogarcia.appnea.ui.theme.TextoSuperficie
 // Paso 3: agua, temperaturas y visibilidad.
 
 @Composable
-internal fun EtapaCondiciones(uiState: NuevaInmersionUiState, viewModel: NuevaInmersionViewModel) {
+internal fun EtapaCondiciones(uiState: NuevaInmersionUiState, onEvento: (EventoFormulario) -> Unit) {
     val una = stringResource(R.string.nueva_elegi_una)
     SelectorSegmentado(
         titulo = stringResource(R.string.nueva_tipo_agua), ayuda = una,
         opciones = AGUA_TIPO,
         seleccionada = AGUA_TIPO.firstOrNull { it in uiState.caracteristicasAgua },
         etiqueta = { it },
-        onSeleccion = { viewModel.onAguaUnica(AGUA_TIPO, it) },
+        onSeleccion = { onEvento(EventoFormulario.AguaUnica(AGUA_TIPO, it)) },
         permitirNinguna = true
     )
     SelectorSegmentado(
@@ -43,28 +44,28 @@ internal fun EtapaCondiciones(uiState: NuevaInmersionUiState, viewModel: NuevaIn
         opciones = AGUA_ENTRADA,
         seleccionada = AGUA_ENTRADA.firstOrNull { it in uiState.caracteristicasAgua },
         etiqueta = { it },
-        onSeleccion = { viewModel.onAguaUnica(AGUA_ENTRADA, it) },
+        onSeleccion = { onEvento(EventoFormulario.AguaUnica(AGUA_ENTRADA, it)) },
         permitirNinguna = true,
         modifier = Modifier.padding(top = 16.dp)
     )
     CheckboxGroup(
         titulo = stringResource(R.string.nueva_estado_mar), opciones = AGUA_MAR,
-        seleccionadas = uiState.caracteristicasAgua, onCambio = viewModel::onAguaToggle
+        seleccionadas = uiState.caracteristicasAgua, onCambio = { opcion, marcado -> onEvento(EventoFormulario.AguaMarcada(opcion, marcado)) }
     )
     CampoTexto(
-        valor = uiState.temperaturaAireC, onValorChange = viewModel::onTempAireChange,
+        valor = uiState.temperaturaAireC, onValorChange = { onEvento(EventoFormulario.TemperaturaAire(it)) },
         etiqueta = stringResource(R.string.nueva_temp_aire),
         esError = uiState.errores.containsKey(Campo.TEMP_AIRE), mensajeError = uiState.errores[Campo.TEMP_AIRE]?.resolver() ?: "",
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
-        trailingIcon = { BotonSigno(onClick = viewModel::onAlternarSignoAire) },
+        trailingIcon = { BotonSigno(onClick = { onEvento(EventoFormulario.AlternarSignoAire) }) },
         modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
     )
     CampoTexto(
-        valor = uiState.temperaturaAguaC, onValorChange = viewModel::onTempAguaChange,
+        valor = uiState.temperaturaAguaC, onValorChange = { onEvento(EventoFormulario.TemperaturaAgua(it)) },
         etiqueta = stringResource(R.string.nueva_temp_agua),
         esError = uiState.errores.containsKey(Campo.TEMP_AGUA), mensajeError = uiState.errores[Campo.TEMP_AGUA]?.resolver() ?: "",
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
-        trailingIcon = { BotonSigno(onClick = viewModel::onAlternarSignoAgua) },
+        trailingIcon = { BotonSigno(onClick = { onEvento(EventoFormulario.AlternarSignoAgua) }) },
         modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
     )
     Text(
@@ -76,11 +77,11 @@ internal fun EtapaCondiciones(uiState: NuevaInmersionUiState, viewModel: NuevaIn
         Visibilidad.entries.forEach { v ->
             val elegida = uiState.visibilidad == v
             // Tocar la elegida la desmarca: es opcional
-            ChipFiltro(texto = v.nombre(), elegido = elegida, onClick = { viewModel.onVisibilidadElegida(if (elegida) null else v) })
+            ChipFiltro(texto = v.nombre(), elegido = elegida, onClick = { onEvento(EventoFormulario.VisibilidadElegida(if (elegida) null else v)) })
         }
     }
     CampoTexto(
-        valor = uiState.visibilidadMetros, onValorChange = viewModel::onVisibilidadChange,
+        valor = uiState.visibilidadMetros, onValorChange = { onEvento(EventoFormulario.VisibilidadMetros(it)) },
         etiqueta = stringResource(R.string.nueva_visibilidad),
         esError = uiState.errores.containsKey(Campo.VISIBILIDAD), mensajeError = uiState.errores[Campo.VISIBILIDAD]?.resolver() ?: "",
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),

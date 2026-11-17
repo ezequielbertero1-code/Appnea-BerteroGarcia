@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
+import com.berterogarcia.appnea.ui.components.texto
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,7 +53,7 @@ import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 @Composable
 internal fun EtapaEquipo(
     uiState: NuevaInmersionUiState,
-    viewModel: NuevaInmersionViewModel,
+    onEvento: (EventoFormulario) -> Unit,
     onCargarEquipo: () -> Unit
 ) {
     Row(Modifier.padding(start = 4.dp)) {
@@ -85,7 +86,7 @@ internal fun EtapaEquipo(
                             FilaEquipo(
                                 equipo = equipo,
                                 marcado = etiqueta in uiState.equipamiento,
-                                onCambio = { viewModel.onEquipamientoToggle(etiqueta, it) },
+                                onCambio = { onEvento(EventoFormulario.EquipoMarcado(etiqueta, it)) },
                                 indice = i,
                                 total = equipos.size
                             )
@@ -100,15 +101,15 @@ internal fun EtapaEquipo(
     }
     PreguntaExtra(
         pregunta = stringResource(R.string.nueva_usaste_lastre),
-        usado = uiState.usoLastre, onUsadoChange = viewModel::onUsoLastreChange,
-        valor = uiState.lastreKg, onValorChange = viewModel::onLastreChange,
+        usado = uiState.usoLastre, onUsadoChange = { onEvento(EventoFormulario.UsoLastre(it)) },
+        valor = uiState.lastreKg, onValorChange = { onEvento(EventoFormulario.Lastre(it)) },
         etiqueta = stringResource(R.string.nueva_lastre),
         error = uiState.errores[Campo.LASTRE]?.resolver()
     )
     PreguntaExtra(
         pregunta = stringResource(R.string.nueva_usaste_proteccion),
-        usado = uiState.usoProteccion, onUsadoChange = viewModel::onUsoProteccionChange,
-        valor = uiState.proteccionMm, onValorChange = viewModel::onProteccionMmChange,
+        usado = uiState.usoProteccion, onUsadoChange = { onEvento(EventoFormulario.UsoProteccion(it)) },
+        valor = uiState.proteccionMm, onValorChange = { onEvento(EventoFormulario.ProteccionMm(it)) },
         etiqueta = stringResource(R.string.nueva_proteccion),
         error = uiState.errores[Campo.PROTECCION]?.resolver()
     )

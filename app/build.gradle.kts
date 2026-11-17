@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization) // rutas tipadas de Navigation (@Serializable)
     alias(libs.plugins.ksp)
 }
 
@@ -90,11 +91,9 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.org.json) // org.json real: el de android.jar en los tests de JVM es un stub
     androidTestImplementation(libs.androidx.room.testing)
-    constraints {
-        // room-testing (MigrationTestHelper) necesita 1.8.1; Navigation trae 1.7.3 y el APK de test
-        // usa la versión de la app. 1.8 es compatible hacia atrás con 1.7.
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1")
-    }
+    // Rutas tipadas. Va en 1.8.1 porque room-testing (MigrationTestHelper) lo necesita y el APK de
+    // test usa la versión de la app; Navigation trae 1.7.3 y 1.8 es compatible hacia atrás.
+    implementation(libs.kotlinx.serialization.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

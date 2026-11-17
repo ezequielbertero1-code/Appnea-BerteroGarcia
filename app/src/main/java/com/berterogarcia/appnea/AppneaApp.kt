@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 /** Punto de entrada del proceso: crea el [AppContainer] y lanza las tareas de arranque. */
-class MyApplication : Application() {
+class AppneaApp : Application() {
 
     val container by lazy { AppContainer(this) }
 
@@ -21,7 +21,7 @@ class MyApplication : Application() {
         appScope.launch {
             // v8: se sacó pesca submarina → se borran las fotos de capturas que hayan quedado.
             // Si la carpeta no existe no hace nada; si falla, no afecta al resto de la app.
-            intentar("MyApplication") { java.io.File(filesDir, "capturas_pesca").deleteRecursively() }
+            intentar("AppneaApp") { java.io.File(filesDir, "capturas_pesca").deleteRecursively() }
         }
         // Al cambiar de cuenta, una tabla en curso o sin guardar no puede pasar a la cuenta nueva
         appScope.launch {
@@ -29,7 +29,7 @@ class MyApplication : Application() {
         }
         // Datos de ejemplo (Franco y Demo) solo en debug; en release SeedDatos no hace nada.
         appScope.launch {
-            intentar("MyApplication") { SeedDatos.sembrarSiHaceFalta(this@MyApplication, container.database) }
+            intentar("AppneaApp") { SeedDatos.sembrarSiHaceFalta(this@AppneaApp, container.database) }
         }
     }
 }

@@ -1,5 +1,6 @@
-package com.berterogarcia.appnea.ui.components
+package com.berterogarcia.appnea.ui.nuevainmersion
 
+import com.berterogarcia.appnea.ui.components.ChipsSeleccionMultiple
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text

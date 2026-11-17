@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.estadisticas
 
+import com.berterogarcia.appnea.ui.components.texto
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,18 +36,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.dominio.modelo.TipoInmersion
-import com.berterogarcia.appnea.ui.components.BarraHorizontal
+import com.berterogarcia.appnea.ui.estadisticas.BarraHorizontal
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.BotonPrincipal
 import com.berterogarcia.appnea.ui.components.ChipsSeleccionUnica
 import com.berterogarcia.appnea.ui.components.FilaMosaicos
-import com.berterogarcia.appnea.ui.components.GraficoBarras
-import com.berterogarcia.appnea.ui.components.GraficoLinea
+import com.berterogarcia.appnea.ui.estadisticas.GraficoBarras
+import com.berterogarcia.appnea.ui.estadisticas.GraficoLinea
 import com.berterogarcia.appnea.ui.components.IconoCirculo
 import com.berterogarcia.appnea.ui.components.Mosaico
 import com.berterogarcia.appnea.ui.components.NavegacionBarra
 import com.berterogarcia.appnea.ui.components.nombre
-import com.berterogarcia.appnea.ui.components.rememberProgresoDibujo
+import com.berterogarcia.appnea.ui.estadisticas.rememberProgresoDibujo
 import com.berterogarcia.appnea.ui.condiciones.TarjetaCondicion
 import com.berterogarcia.appnea.ui.entrenamiento.minSeg
 import com.berterogarcia.appnea.ui.theme.Acento

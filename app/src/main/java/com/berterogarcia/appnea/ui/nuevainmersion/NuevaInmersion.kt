@@ -1,5 +1,6 @@
 package com.berterogarcia.appnea.ui.nuevainmersion
 
+import com.berterogarcia.appnea.ui.components.texto
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -106,7 +107,7 @@ fun NuevaInmersionScreen(
             nombreInicial = uiState.lugar,
             onCancelar = { mapaAbierto = false },
             onConfirmar = { lat, lon, nombre ->
-                viewModel.onUbicacionElegida(lat, lon, nombre)
+                viewModel.onEvento(EventoFormulario.UbicacionElegida(lat, lon, nombre))
                 mapaAbierto = false
             },
             ubicacion = viewModel.ubicacionTelefono,
@@ -136,7 +137,7 @@ fun NuevaInmersionScreen(
     }
 
     // Botón atrás del sistema: vuelve a la etapa anterior en vez de salir
-    BackHandler(enabled = !esPrimera) { viewModel.anterior() }
+    BackHandler(enabled = !esPrimera) { viewModel.onEvento(EventoFormulario.Anterior) }
 
     Column(
         modifier = modifier
@@ -154,7 +155,7 @@ fun NuevaInmersionScreen(
                 total = etapas.size,
                 actual = uiState.etapa.ordinal,
                 conError = etapas.filter { e -> uiState.errores.keys.any { it in e.campos } }.map { it.ordinal }.toSet(),
-                onIrA = { viewModel.irA(etapas[it]) },
+                onIrA = { viewModel.onEvento(EventoFormulario.IrA(etapas[it])) },
                 descripcion = { stringResource(R.string.nueva_ir_a_paso, it + 1, etapas[it].nombre()) }
             )
             Text(
@@ -186,11 +187,11 @@ fun NuevaInmersionScreen(
                     .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
             ) {
                 when (etapa) {
-                    Etapa.GENERAL -> EtapaGeneral(uiState, viewModel, onAbrirMapa = { mapaAbierto = true })
-                    Etapa.INMERSION -> EtapaInmersion(uiState, viewModel)
-                    Etapa.CONDICIONES -> EtapaCondiciones(uiState, viewModel)
-                    Etapa.EQUIPO -> EtapaEquipo(uiState, viewModel, onCargarEquipo)
-                    Etapa.NOTAS -> EtapaNotas(uiState, viewModel)
+                    Etapa.GENERAL -> EtapaGeneral(uiState, viewModel::onEvento, onAbrirMapa = { mapaAbierto = true })
+                    Etapa.INMERSION -> EtapaInmersion(uiState, viewModel::onEvento)
+                    Etapa.CONDICIONES -> EtapaCondiciones(uiState, viewModel::onEvento)
+                    Etapa.EQUIPO -> EtapaEquipo(uiState, viewModel::onEvento, onCargarEquipo)
+                    Etapa.NOTAS -> EtapaNotas(uiState, viewModel::onEvento)
                 }
             }
         }
@@ -207,7 +208,7 @@ fun NuevaInmersionScreen(
             if (esPrimera) Spacer(Modifier.weight(1f))
             else BotonContorno(
                 texto = stringResource(R.string.nueva_anterior),
-                onClick = viewModel::anterior,
+                onClick = { viewModel.onEvento(EventoFormulario.Anterior) },
                 enabled = !uiState.guardando, // que no se pueda volver mientras guarda
                 modifier = Modifier.weight(1f)
             )
@@ -219,13 +220,13 @@ fun NuevaInmersionScreen(
                         else -> R.string.accion_guardar
                     }
                 ),
-                onClick = viewModel::guardar,
+                onClick = { viewModel.onEvento(EventoFormulario.Guardar) },
                 cargando = uiState.guardando,
                 modifier = Modifier.weight(1f)
             )
             else BotonPrincipal(
                 texto = stringResource(R.string.nueva_siguiente),
-                onClick = viewModel::siguiente,
+                onClick = { viewModel.onEvento(EventoFormulario.Siguiente) },
                 modifier = Modifier.weight(1f)
             )
         }

@@ -17,16 +17,16 @@ import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 // Paso 5: actividad y comentarios.
 
 @Composable
-internal fun EtapaNotas(uiState: NuevaInmersionUiState, viewModel: NuevaInmersionViewModel) {
+internal fun EtapaNotas(uiState: NuevaInmersionUiState, onEvento: (EventoFormulario) -> Unit) {
     CampoTexto(
         valor = uiState.actividad,
-        onValorChange = viewModel::onActividadChange,
+        onValorChange = { onEvento(EventoFormulario.Actividad(it)) },
         etiqueta = stringResource(R.string.nueva_actividad), minLines = 3,
         modifier = Modifier.fillMaxWidth()
     )
     CampoTexto(
         valor = uiState.comentarios,
-        onValorChange = viewModel::onComentariosChange,
+        onValorChange = { onEvento(EventoFormulario.Comentarios(it)) },
         etiqueta = stringResource(R.string.nueva_comentarios),
         minLines = 3,
         modifier = Modifier.fillMaxWidth().padding(top = 4.dp)

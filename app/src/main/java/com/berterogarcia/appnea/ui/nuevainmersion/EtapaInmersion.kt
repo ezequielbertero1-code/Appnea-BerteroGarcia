@@ -52,20 +52,20 @@ import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 // Paso 2: profundidad, tiempos y (apnea) registro de bajadas.
 
 @Composable
-internal fun EtapaInmersion(uiState: NuevaInmersionUiState, viewModel: NuevaInmersionViewModel) {
+internal fun EtapaInmersion(uiState: NuevaInmersionUiState, onEvento: (EventoFormulario) -> Unit) {
     if (uiState.tipo == TipoInmersion.APNEA) {
-        BloqueApnea(uiState, viewModel)
+        BloqueApnea(uiState, onEvento)
         return
     }
     CampoTexto(
-        valor = uiState.profundidadMetros, onValorChange = viewModel::onProfundidadChange,
+        valor = uiState.profundidadMetros, onValorChange = { onEvento(EventoFormulario.Profundidad(it)) },
         etiqueta = stringResource(R.string.nueva_profundidad),
         esError = uiState.errores.containsKey(Campo.PROFUNDIDAD), mensajeError = uiState.errores[Campo.PROFUNDIDAD]?.resolver() ?: "",
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
         modifier = Modifier.fillMaxWidth()
     )
     CampoTexto(
-        valor = uiState.tiempoFondo, onValorChange = viewModel::onTiempoFondoChange,
+        valor = uiState.tiempoFondo, onValorChange = { onEvento(EventoFormulario.TiempoFondo(it)) },
         etiqueta = stringResource(R.string.nueva_tiempo_fondo),
         visualTransformation = tiempoFondoVisualTransformation,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
@@ -73,7 +73,7 @@ internal fun EtapaInmersion(uiState: NuevaInmersionUiState, viewModel: NuevaInme
         modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
     )
     CampoTexto(
-        valor = uiState.paradaSeguridadMin, onValorChange = viewModel::onParadaChange,
+        valor = uiState.paradaSeguridadMin, onValorChange = { onEvento(EventoFormulario.Parada(it)) },
         etiqueta = stringResource(R.string.nueva_parada),
         esError = uiState.errores.containsKey(Campo.PARADA), mensajeError = uiState.errores[Campo.PARADA]?.resolver() ?: "",
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
@@ -87,9 +87,9 @@ internal fun EtapaInmersion(uiState: NuevaInmersionUiState, viewModel: NuevaInme
  * bajadas indicadas, y la profundidad máxima sale de ellas.
  */
 @Composable
-internal fun BloqueApnea(uiState: NuevaInmersionUiState, viewModel: NuevaInmersionViewModel) {
+internal fun BloqueApnea(uiState: NuevaInmersionUiState, onEvento: (EventoFormulario) -> Unit) {
     CampoTexto(
-        valor = uiState.cantidadBajadas, onValorChange = viewModel::onCantidadBajadasChange,
+        valor = uiState.cantidadBajadas, onValorChange = { onEvento(EventoFormulario.CantidadBajadas(it)) },
         etiqueta = stringResource(R.string.nueva_cantidad_bajadas),
         esError = uiState.errores.containsKey(Campo.CANTIDAD_BAJADAS),
         mensajeError = uiState.errores[Campo.CANTIDAD_BAJADAS]?.resolver() ?: "",
@@ -98,7 +98,7 @@ internal fun BloqueApnea(uiState: NuevaInmersionUiState, viewModel: NuevaInmersi
     )
     if (!uiState.cargarDetalleBajadas) {
         CampoTexto(
-            valor = uiState.profundidadMetros, onValorChange = viewModel::onProfundidadChange,
+            valor = uiState.profundidadMetros, onValorChange = { onEvento(EventoFormulario.Profundidad(it)) },
             etiqueta = stringResource(R.string.nueva_profundidad),
             esError = uiState.errores.containsKey(Campo.PROFUNDIDAD), mensajeError = uiState.errores[Campo.PROFUNDIDAD]?.resolver() ?: "",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
@@ -111,7 +111,7 @@ internal fun BloqueApnea(uiState: NuevaInmersionUiState, viewModel: NuevaInmersi
         Modifier.fillMaxWidth().padding(top = 12.dp)
             .toggleable(
                 value = uiState.cargarDetalleBajadas, role = Role.Switch,
-                onValueChange = viewModel::onCargarDetalleBajadasChange
+                onValueChange = { onEvento(EventoFormulario.DetalleBajadas(it)) }
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -152,7 +152,7 @@ internal fun BloqueApnea(uiState: NuevaInmersionUiState, viewModel: NuevaInmersi
                 }
                 CampoTexto(
                     valor = bajada.profundidad,
-                    onValorChange = { viewModel.onBajadaProfundidadChange(indice, it) },
+                    onValorChange = { onEvento(EventoFormulario.BajadaProfundidad(indice, it)) },
                     etiqueta = stringResource(R.string.nueva_bajada_profundidad),
                     esError = invalida,
                     tamanoTexto = 14.sp, conTextoApoyo = false,
@@ -161,7 +161,7 @@ internal fun BloqueApnea(uiState: NuevaInmersionUiState, viewModel: NuevaInmersi
                 )
                 CampoTexto(
                     valor = bajada.tiempo,
-                    onValorChange = { viewModel.onBajadaTiempoChange(indice, it) },
+                    onValorChange = { onEvento(EventoFormulario.BajadaTiempo(indice, it)) },
                     etiqueta = stringResource(R.string.nueva_bajada_tiempo),
                     visualTransformation = tiempoFondoVisualTransformation,
                     esError = invalida,
@@ -170,7 +170,7 @@ internal fun BloqueApnea(uiState: NuevaInmersionUiState, viewModel: NuevaInmersi
                     modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
                 )
                 IconButton(
-                    onClick = { viewModel.onQuitarBajada(indice) },
+                    onClick = { onEvento(EventoFormulario.QuitarBajada(indice)) },
                     enabled = activas.size > 1
                 ) {
                     Icon(
@@ -184,7 +184,7 @@ internal fun BloqueApnea(uiState: NuevaInmersionUiState, viewModel: NuevaInmersi
         uiState.errores[Campo.BAJADAS]?.let {
             Text(it.resolver(), color = ColorError, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 4.dp, top = 4.dp))
         }
-        TextButton(onClick = viewModel::onAgregarBajada, modifier = Modifier.padding(top = 4.dp)) {
+        TextButton(onClick = { onEvento(EventoFormulario.AgregarBajada) }, modifier = Modifier.padding(top = 4.dp)) {
             Icon(Icons.Rounded.Add, contentDescription = null, tint = Acento, modifier = Modifier.size(18.dp))
             Text(stringResource(R.string.nueva_agregar_bajada), color = Acento, modifier = Modifier.padding(start = 8.dp))
         }
@@ -197,7 +197,7 @@ internal fun BloqueApnea(uiState: NuevaInmersionUiState, viewModel: NuevaInmersi
         opciones = listOf(false, true),
         seleccionada = uiState.sincope,
         etiqueta = { if (it) si else no },
-        onSeleccion = { viewModel.onSincopeChange(it ?: false) },
+        onSeleccion = { onEvento(EventoFormulario.Sincope(it ?: false)) },
         modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
     )
 

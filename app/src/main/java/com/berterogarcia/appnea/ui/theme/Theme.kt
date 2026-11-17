@@ -48,7 +48,7 @@ private val EsquemaAppnea = darkColorScheme(
 
 /** La app es siempre oscura (fondo marino), así que hay un solo esquema. */
 @Composable
-fun MyApplicationTheme(content: @Composable () -> Unit) {
+fun AppneaTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = EsquemaAppnea,
         typography = Typography,

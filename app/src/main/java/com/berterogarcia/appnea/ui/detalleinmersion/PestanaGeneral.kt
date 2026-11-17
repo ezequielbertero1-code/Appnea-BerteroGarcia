@@ -45,12 +45,12 @@ import com.berterogarcia.appnea.ui.components.FilaLista
 import com.berterogarcia.appnea.ui.components.FilaMosaicos
 import com.berterogarcia.appnea.ui.components.GrupoLista
 import com.berterogarcia.appnea.ui.components.Insignia
-import com.berterogarcia.appnea.ui.components.MapaLibre
+import com.berterogarcia.appnea.ui.inmersion.MapaLibre
 import com.berterogarcia.appnea.ui.components.Mosaico
-import com.berterogarcia.appnea.ui.components.PinMapa
+import com.berterogarcia.appnea.ui.inmersion.PinMapa
 import com.berterogarcia.appnea.ui.components.TarjetaTonal
 import com.berterogarcia.appnea.ui.components.TipoInsignia
-import com.berterogarcia.appnea.ui.components.formatoCoordenadas
+import com.berterogarcia.appnea.ui.inmersion.formatoCoordenadas
 import com.berterogarcia.appnea.ui.components.nombre
 import com.berterogarcia.appnea.ui.condiciones.duracion
 import com.berterogarcia.appnea.ui.theme.Acento

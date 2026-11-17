@@ -45,14 +45,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.berterogarcia.appnea.AppDestinations
+import com.berterogarcia.appnea.navigation.AppDestinations
 import com.berterogarcia.appnea.R
 import com.berterogarcia.appnea.dominio.modelo.Aptitud
 import com.berterogarcia.appnea.ui.clima.ClimaViewModel
 import com.berterogarcia.appnea.ui.components.Avatar
 import com.berterogarcia.appnea.ui.components.BarraSuperior
 import com.berterogarcia.appnea.ui.components.EncabezadoGrupo
-import com.berterogarcia.appnea.ui.components.FilaInmersion
+import com.berterogarcia.appnea.ui.inmersion.FilaInmersion
 import com.berterogarcia.appnea.ui.components.GrupoLista
 import com.berterogarcia.appnea.ui.components.descripcionClima
 import com.berterogarcia.appnea.ui.components.nombre

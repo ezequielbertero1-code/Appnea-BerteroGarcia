@@ -101,4 +101,4 @@ class AppContainer(context: Context) {
 }
 
 /** Acceso al contenedor desde cualquier Context de la app. */
-fun Context.contenedor(): AppContainer = (applicationContext as MyApplication).container
+fun Context.contenedor(): AppContainer = (applicationContext as AppneaApp).container

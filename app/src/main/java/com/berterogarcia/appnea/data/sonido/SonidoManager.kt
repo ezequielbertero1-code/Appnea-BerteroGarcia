@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
  * - Cuenta regresiva final (últimos 3 segundos)
  * - Fin de la tabla completa
  *
- * Vive en MyApplication (dura toda la vida de la app), así que no hace
+ * Vive en AppneaApp (dura toda la vida de la app), así que no hace
  * falta liberar el SoundPool manualmente entre pantallas.
  */
 class SonidoManager(context: Context) {

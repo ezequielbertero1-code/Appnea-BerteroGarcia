@@ -1,5 +1,8 @@
-package com.berterogarcia.appnea.ui.components
+package com.berterogarcia.appnea.ui.inmersion
 
+import com.berterogarcia.appnea.ui.components.FechaEnCuadro
+import com.berterogarcia.appnea.ui.components.FilaLista
+import com.berterogarcia.appnea.ui.components.nombre
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

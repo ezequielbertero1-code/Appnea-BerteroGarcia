@@ -8,8 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -44,10 +42,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.berterogarcia.appnea.navigation.AppDestinations
 import com.berterogarcia.appnea.navigation.AppNavHost
-import com.berterogarcia.appnea.navigation.RUTAS_SIN_BARRA
-import com.berterogarcia.appnea.navigation.RUTA_LOGIN
-import com.berterogarcia.appnea.navigation.RUTA_REGISTRO
+import com.berterogarcia.appnea.navigation.Ruta
+import com.berterogarcia.appnea.navigation.esDeAcceso
+import com.berterogarcia.appnea.navigation.esFormulario
 import com.berterogarcia.appnea.navigation.irAPestania
 import com.berterogarcia.appnea.navigation.pestaniaAbierta
 import com.berterogarcia.appnea.ui.components.LocalOcultarBarra
@@ -55,13 +54,13 @@ import com.berterogarcia.appnea.ui.sesion.EstadoArranque
 import com.berterogarcia.appnea.ui.sesion.SesionViewModel
 import com.berterogarcia.appnea.ui.theme.Acento
 import com.berterogarcia.appnea.ui.theme.FondoBarraNavegacion
-import com.berterogarcia.appnea.ui.theme.MyApplicationTheme
+import com.berterogarcia.appnea.ui.theme.AppneaTheme
 import com.berterogarcia.appnea.ui.theme.TextoSuperficieVariante
 import com.berterogarcia.appnea.ui.theme.fondoApp
 
 class MainActivity : ComponentActivity() {
 
-    // [NUEVO] Decide si se arranca en Inicio (sesión válida) o en Login.
+    // Decide si se arranca en Inicio (sesión válida) o en Login.
     private val sesionViewModel: SesionViewModel by viewModels {
         viewModelFactory { initializer { SesionViewModel(contenedor().sesionRepository) } }
     }
@@ -78,18 +77,19 @@ class MainActivity : ComponentActivity() {
             // Legibilidad: como el fondo es siempre oscuro, usamos siempre el esquema oscuro
             // (si el teléfono está en modo claro, los textos quedaban oscuros sobre fondo oscuro)
             // y el color de texto por defecto pasa a ser blanco.
-            MyApplicationTheme {
+            AppneaTheme {
                 CompositionLocalProvider(LocalContentColor provides Color.White) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(fondoApp)
                     ) {
-                        // [CAMBIO] El NavHost se crea recién cuando se sabe el destino inicial.
+                        // El NavHost se crea recién cuando se sabe el destino inicial.
                         val estado by sesionViewModel.estado.collectAsStateWithLifecycle()
                         when (val e = estado) {
                             EstadoArranque.Verificando -> PantallaArranque()
-                            is EstadoArranque.Listo -> MyApplicationApp(destinoInicial = e.destinoInicial)
+                            is EstadoArranque.Listo ->
+                                AppneaRaiz(destinoInicial = if (e.haySesion) Ruta.Inicio else Ruta.Login)
                         }
                     }
                 }
@@ -108,18 +108,19 @@ private fun PantallaArranque() {
 
 @PreviewScreenSizes
 @Composable
-fun MyApplicationApp(destinoInicial: String = RUTA_LOGIN) { // [CAMBIO] recibe el destino inicial
+fun AppneaRaiz(destinoInicial: Ruta = Ruta.Login) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route ?: destinoInicial
+    val destino = backStackEntry?.destination
     // Pestaña a marcar en la barra: la de origen, aunque estés en un detalle o en Condiciones.
     // Se recalcula cada vez que cambia la pantalla (backStackEntry).
     val pestaniaSeleccionada = remember(backStackEntry) { navController.pestaniaAbierta() }
 
-    val mostrarMenu = currentRoute != RUTA_LOGIN && currentRoute?.startsWith(RUTA_REGISTRO) != true
+    // Sin barra en login/registro (también mientras arranca, si el destino inicial es el login)
+    val mostrarMenu = if (destino == null) destinoInicial != Ruta.Login else !destino.esDeAcceso()
     val ocultarBarra = remember { mutableStateOf(false) }
-    // Sin barra: formularios (RUTAS_SIN_BARRA) o una pantalla que la pidió ocultar
-    val esFormulario = currentRoute in RUTAS_SIN_BARRA || ocultarBarra.value
+    // Sin barra: formularios o una pantalla que la pidió ocultar
+    val esFormulario = destino?.esFormulario() == true || ocultarBarra.value
 
     // Las pantallas pueden ocultar la barra (ej. entrenamiento en curso): ver OcultarBarraNavegacion()
     CompositionLocalProvider(LocalOcultarBarra provides ocultarBarra) {
@@ -145,7 +146,7 @@ fun MyApplicationApp(destinoInicial: String = RUTA_LOGIN) { // [CAMBIO] recibe e
                 ),
                 navigationItems = {
                     AppDestinations.entries.forEach { destination ->
-                        // [CAMBIO] Las pantallas "perfil/..." cuentan como parte de Cuenta.
+                        // Las pantallas del perfil cuentan como parte de Cuenta (ver pestaniaAbierta).
                         val elegida = destination == pestaniaSeleccionada
                         NavigationSuiteItem(
                             selected = elegida,
@@ -188,21 +189,4 @@ fun MyApplicationApp(destinoInicial: String = RUTA_LOGIN) { // [CAMBIO] recibe e
             }
         }
     }
-}
-// Ambientes principales de la app (barra de navegación).
-// - INICIO: clima del día + explicación de cada ambiente.
-// - ENTRENAMIENTO: tablas de apnea y cronómetro libre (antes "Cronometro").
-// - INMERSION: bitácora unificada de buceo y apnea.
-// - APRENDER: contenido teórico de apnea y buceo (antes "Información").
-// - CUENTA: perfil del usuario.
-enum class AppDestinations(
-    @param:StringRes val etiqueta: Int,
-    @param:DrawableRes val icono: Int,
-    @param:DrawableRes val iconoElegido: Int,     // variante rellena (Material Symbols) de la pestaña abierta
-) {
-    INICIO(R.string.nav_inicio, R.drawable.ic_ms_home, R.drawable.ic_ms_home_relleno),
-    ENTRENAMIENTO(R.string.nav_entrenar, R.drawable.ic_ms_timer, R.drawable.ic_ms_timer_relleno),
-    INMERSION(R.string.nav_inmersion, R.drawable.ic_ms_scuba_diving, R.drawable.ic_ms_scuba_diving_relleno),
-    APRENDER(R.string.nav_aprender, R.drawable.ic_ms_menu_book, R.drawable.ic_ms_menu_book_relleno),
-    CUENTA(R.string.nav_cuenta, R.drawable.ic_ms_person, R.drawable.ic_ms_person_relleno),
 }

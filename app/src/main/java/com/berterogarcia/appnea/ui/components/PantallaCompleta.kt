@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalView
 
 /**
  * Estado compartido para que una pantalla pueda ocultar la barra de navegación.
- * Lo provee MyApplicationApp (MainActivity). Fuera de ella el valor por defecto no hace nada.
+ * Lo provee AppneaRaiz (MainActivity). Fuera de ella el valor por defecto no hace nada.
  */
 val LocalOcultarBarra = staticCompositionLocalOf<MutableState<Boolean>> { mutableStateOf(false) }
 
