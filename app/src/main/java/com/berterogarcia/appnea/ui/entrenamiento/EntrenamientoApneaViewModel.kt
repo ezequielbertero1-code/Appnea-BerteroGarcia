@@ -168,9 +168,11 @@ class EntrenamientoApneaViewModel(
     fun onSensacionesChange(v: String) = local.update { it.copy(sensaciones = v) }
 
     fun onGuardarSesion() {
-        val s = uiState.value
-        val tabla = s.tablaSeleccionada ?: return
+        // Se lee `local` (lo que se acaba de cambiar) y no uiState, que se recalcula un instante después:
+        // si no, un doble toque rápido guardaba dos veces y se podían perder las sensaciones recién escritas.
+        val s = local.value
         val resultado = motor.estado.value.resultado ?: return
+        val tabla = motor.estado.value.tabla ?: s.tablaSeleccionada ?: return
         if (s.guardando || s.guardadoOk) return // que un doble toque no guarde dos veces
         local.update { it.copy(guardando = true, errorGuardado = null) }
         viewModelScope.launch {

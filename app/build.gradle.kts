@@ -89,8 +89,11 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
     testImplementation(libs.org.json) // org.json real: el de android.jar en los tests de JVM es un stub
     androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.work.testing)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
     // Rutas tipadas. Va en 1.8.1 porque room-testing (MigrationTestHelper) lo necesita y el APK de
     // test usa la versión de la app; Navigation trae 1.7.3 y 1.8 es compatible hacia atrás.
     implementation(libs.kotlinx.serialization.core)

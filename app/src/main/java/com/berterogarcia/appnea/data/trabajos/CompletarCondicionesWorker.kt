@@ -1,5 +1,7 @@
 package com.berterogarcia.appnea.data.trabajos
 
+import com.berterogarcia.appnea.dominio.modelo.CondicionesRegistro
+import com.berterogarcia.appnea.dominio.FuenteCondiciones
 import android.content.Context
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -20,7 +22,21 @@ import java.util.concurrent.TimeUnit
  * Completa clima y mar de una inmersión ya guardada. WorkManager lo corre cuando hay internet
  * (aunque se haya cerrado la app) y lo reintenta con espera creciente si Open-Meteo no responde.
  */
-class CompletarCondicionesWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+class CompletarCondicionesWorker(
+    context: Context,
+    params: WorkerParameters,
+    private val condiciones: FuenteCondiciones,
+    /** Guarda el registro en la inmersión (en la app, el DAO; en los tests, una lista). */
+    private val guardar: suspend (idInmersion: Long, registro: CondicionesRegistro) -> Unit
+) : CoroutineWorker(context, params) {
+
+    /** El que usa WorkManager (lo crea por reflexión con estos dos parámetros). */
+    constructor(context: Context, params: WorkerParameters) : this(
+        context,
+        params,
+        context.contenedor().condiciones,
+        { id, registro -> context.contenedor().database.inmersionDao().actualizarCondiciones(id, registro) }
+    )
 
     override suspend fun doWork(): Result {
         val id = inputData.getLong(CLAVE_ID, -1L).takeIf { it > 0 } ?: return Result.failure()
@@ -29,14 +45,12 @@ class CompletarCondicionesWorker(context: Context, params: WorkerParameters) : C
         val lon = inputData.getDouble(CLAVE_LON, Double.NaN)
         if (lat.isNaN() || lon.isNaN()) return Result.failure()
 
-        val app = applicationContext.contenedor()
-        val registro = app.condiciones.registroPara(lat, lon, momento)
+        val registro = condiciones.registroPara(lat, lon, momento)
         if (!registro.conDatosOnline) {
             // Sin datos (red caída a mitad de camino, error del servidor...): se reintenta unas veces
             return if (runAttemptCount < MAX_INTENTOS) Result.retry() else Result.success()
         }
-        val dao = app.database.inmersionDao()
-        dao.actualizarCondiciones(id, registro)
+        guardar(id, registro)
         return Result.success()
     }
 
@@ -45,21 +59,23 @@ class CompletarCondicionesWorker(context: Context, params: WorkerParameters) : C
         private const val CLAVE_MOMENTO = "momento"
         private const val CLAVE_LAT = "lat"
         private const val CLAVE_LON = "lon"
-        private const val MAX_INTENTOS = 5
+        /** Reintentos si Open-Meteo no devuelve datos; después se deja como está. */
+        const val MAX_INTENTOS = 5
+
+        /** Datos de entrada del trabajo: qué inmersión completar, dónde y cuándo. */
+        fun datos(idInmersion: Long, ubicacion: Ubicacion, momento: LocalDateTime) = workDataOf(
+            CLAVE_ID to idInmersion,
+            CLAVE_MOMENTO to momento.toString(),
+            CLAVE_LAT to ubicacion.latitud,
+            CLAVE_LON to ubicacion.longitud
+        )
     }
 
     /** Implementación real de [ProgramadorCondiciones]: encola el trabajo (uno por inmersión). */
     class Programador(private val context: Context) : ProgramadorCondiciones {
         override fun programar(idInmersion: Long, ubicacion: Ubicacion, momento: LocalDateTime) {
             val pedido = OneTimeWorkRequestBuilder<CompletarCondicionesWorker>()
-                .setInputData(
-                    workDataOf(
-                        CLAVE_ID to idInmersion,
-                        CLAVE_MOMENTO to momento.toString(),
-                        CLAVE_LAT to ubicacion.latitud,
-                        CLAVE_LON to ubicacion.longitud
-                    )
-                )
+                .setInputData(datos(idInmersion, ubicacion, momento))
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
                 .build()

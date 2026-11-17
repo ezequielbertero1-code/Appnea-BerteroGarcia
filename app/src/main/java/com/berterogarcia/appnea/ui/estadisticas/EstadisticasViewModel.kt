@@ -13,6 +13,7 @@ import com.berterogarcia.appnea.dominio.repositorios.RepositorioInmersiones
 import com.berterogarcia.appnea.dominio.repositorios.RepositorioIntentos
 import com.berterogarcia.appnea.dominio.repositorios.RepositorioSesionesApnea
 import com.berterogarcia.appnea.dominio.modelo.FactorEntrenamiento
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -101,7 +102,9 @@ class EstadisticasViewModel(
     inmersionRepository: RepositorioInmersiones,
     sesionRepository: RepositorioSesionesApnea,
     intentoRepository: RepositorioIntentos,
-    private val reloj: Clock = Clock.systemDefaultZone()
+    private val reloj: Clock = Clock.systemDefaultZone(),
+    /** Dónde se calculan los resúmenes (en los tests, el dispatcher del test). */
+    calculo: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
     private val _periodo = MutableStateFlow(PeriodoEstadisticas.TRES_MESES)
@@ -126,7 +129,7 @@ class EstadisticasViewModel(
             entrenamiento = resumirEntrenamiento(sesiones, periodo, hoy, intentos)
         )
     }
-        .flowOn(Dispatchers.Default) // calcular fuera del hilo principal (no traba la pantalla)
+        .flowOn(calculo) // calcular fuera del hilo principal (no traba la pantalla)
         .catch { emit(EstadisticasUiState(cargando = false, error = true)) } // si falla la base: aviso, sin crashear
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EstadisticasUiState())
 
